@@ -408,7 +408,7 @@ create policy likes_all on public.memorial_message_likes
 create policy reports_insert on public.memorial_reports
   for insert with check (reporter_user_id = auth.uid());
 create policy reports_select on public.memorial_reports
-  for select using (public.is_tree_member(tree_id, 'owner'));
+  for select using (reporter_user_id = auth.uid());
 
 -- ---------- 免费额度限额（5.4.4：各 1 次/天，忌日 +1；服务端可配） ----------
 create or replace function public.check_act_quota()

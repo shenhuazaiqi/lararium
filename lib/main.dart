@@ -1,12 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'app.dart';
+import 'core/cloud_config.dart';
 import 'data/providers.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // 云初始化（免登录可用：本地 SQLite 仍是唯一真源，登录同步在阶段 3 接入）
+  await Supabase.initialize(
+    url: CloudConfig.supabaseUrl,
+    anonKey: CloudConfig.supabaseAnonKey,
+  );
 
   final prefs = await SharedPreferences.getInstance();
 

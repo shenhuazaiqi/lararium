@@ -31,6 +31,9 @@ dependencies:
 
   uuid: ^4.5.1
 
+  # --- 云同步（阶段 3 基础；本地 SQLite 仍是唯一真源） ---
+  supabase_flutter: ^2.8.4
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

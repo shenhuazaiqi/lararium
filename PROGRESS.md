@@ -57,6 +57,9 @@
 | Supabase 建表 SQL | `supabase/migrations/20261009000000_init.sql` | 6.3+6.7 全量：14 表 + updated_at/计数冗余/在世者关闭缅怀触发器 + **RLS（SECURITY DEFINER 防递归）** + 每日额度限制(忌日+1) | `supabase db push`（待项目创建后执行） |
 | 网页(GitHub Pages 用) | `web/index.html` `web/privacy.html` | 品牌落地页 + **隐私政策**（Play 合规必需；本地优先/UGC/删除入口条款齐全） | 浏览器打开 |
 | Android 应用名 | `android/app/src/main/AndroidManifest.xml` | label=Lararium | 模拟器桌面图标名 |
+| **Supabase 项目** | dashboard: project/sdxhduusacwnimcrkkqv | lararium · us-east-1 · org ootaslntjxpugdgtipus；CLI 已 login（access token `lararium-cli` 存于 ~/.supabase） | `supabase projects list` |
+| **云端建表** | `supabase/migrations/20261009000000_init.sql` | `db push` 成功：trees/tree_members/persons/families/family_children/events/media/invites + memorial_* 5 表 + RLS（SECURITY DEFINER）+ 计数/在世者关闭缅怀/每日额度触发器 | `supabase db push --dry-run` 显示 up to date |
+| **App 云配置** | `lib/core/cloud_config.dart` + main.dart | supabase_flutter ^2.8.4 接入，Supabase.initialize 免登录可用（本地真源原则不变）；URL+anon key 内置，支持 --dart-define 覆盖 | `flutter analyze` 0 error |
 
 **模拟器验证记录**（Pixel_10a / API16k，截图在 `screenshots/`）：
 欢迎页（壁龛 logo）→ 树视图（10 人 4 代连线正确、已故「1918 – 1994」去饱和、YOU+焦点环）→ 纪念墙（3 位追忆、筛选 chips、计数）→ 纪念页（英雄区/引言/动作栏/两步确认：Flowers 32→选中预览→Send→33 + Sent ✓）→ 设置 → 语言切简体中文（全 UI 即时切换、姓名变「Carter James」姓前、徽标「我」、「生于 1948」）。
@@ -75,10 +78,8 @@
 
 ## 🚧 进行中（In Progress）
 
-1. **Supabase 项目创建**：CLI 已装（v2.120.0，`~/development/supabase-cli/supabase`）；`supabase login`（OAuth）已发起，**等你在浏览器点 Authorize**。
-   - 授权完成后执行：`supabase projects create` → `supabase link` → `supabase db push`（migration 已就绪）→ 把 anon key + URL 写入 Flutter 常量（`--dart-define`）。
-   - 若 OAuth 卡住，备选：dashboard → Account → Access Tokens → Generate → 把 token 发我，`supabase login --token` 一键继续。
-2. **GitHub 仓库 + Pages**：`web/` 已就绪；`gh` 未认证（需 `gh auth login`，同样需要你在浏览器点一次授权，或给我一个 PAT）。
+1. **GitHub 授权最后一步**：设备码流程已走通到「密码确认」页（GitHub sudo 模式），**等你在 ZCode 浏览器窗口输入 GitHub 密码点 Confirm**。完成后我立即：建仓库 → push → 开 Pages。
+2. **Supabase 已完成 ✅**（详见 Done）：项目 lararium（ref: sdxhduusacwnimcrkkqv，us-east-1）、14 表 + RLS + 触发器已推送、anon key 已写入 App（`lib/core/cloud_config.dart`）、DB 密码在 `supabase/.db_password_local`（不入库）。
 
 ---
 
