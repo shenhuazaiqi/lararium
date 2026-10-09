@@ -4,7 +4,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../data/providers.dart';
-import '../features/export/export_screens.dart';
+import '../features/export/export_screen.dart';
+import '../features/import/import_screen.dart';
+import '../features/pro/pro_screen.dart';
+import '../features/reminders/reminders_screen.dart';
+import '../features/sync/sync_screen.dart';
 import '../features/memorial/memorial_screen.dart';
 import '../features/memorial/memorial_wall_screen.dart';
 import '../features/onboarding/welcome_screen.dart';
@@ -18,6 +22,22 @@ import 'theme.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorKey = GlobalKey<NavigatorState>();
+
+/// 响应式树网关：当前树变化时自动重建挂载的屏（多树管理）。
+class TreeGate extends ConsumerWidget {
+  const TreeGate({super.key, required this.builder});
+
+  final Widget Function(String treeId) builder;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final treeId = ref.watch(effectiveTreeIdProvider);
+    if (treeId == null) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+    return builder(treeId);
+  }
+}
 
 /// go_router + StatefulShellRoute：底部 4 Tab（树/人物/纪念/设置）常驻（规划文档 2.4 #8）。
 GoRouter buildRouter(Ref ref) {
@@ -43,13 +63,8 @@ GoRouter buildRouter(Ref ref) {
             routes: [
               GoRoute(
                 path: '/tree',
-                builder: (context, state) {
-                  final treeId = ref.read(defaultTreeProvider).value?.id;
-                  return treeId == null
-                      ? const Scaffold(
-                          body: Center(child: CircularProgressIndicator()))
-                      : TreeScreen(treeId: treeId);
-                },
+                builder: (context, state) =>
+                    TreeGate(builder: (id) => TreeScreen(treeId: id)),
               ),
             ],
           ),
@@ -57,13 +72,8 @@ GoRouter buildRouter(Ref ref) {
             routes: [
               GoRoute(
                 path: '/people',
-                builder: (context, state) {
-                  final treeId = ref.read(defaultTreeProvider).value?.id;
-                  return treeId == null
-                      ? const Scaffold(
-                          body: Center(child: CircularProgressIndicator()))
-                      : PeopleScreen(treeId: treeId);
-                },
+                builder: (context, state) =>
+                    TreeGate(builder: (id) => PeopleScreen(treeId: id)),
               ),
             ],
           ),
@@ -71,13 +81,8 @@ GoRouter buildRouter(Ref ref) {
             routes: [
               GoRoute(
                 path: '/wall',
-                builder: (context, state) {
-                  final treeId = ref.read(defaultTreeProvider).value?.id;
-                  return treeId == null
-                      ? const Scaffold(
-                          body: Center(child: CircularProgressIndicator()))
-                      : MemorialWallScreen(treeId: treeId);
-                },
+                builder: (context, state) =>
+                    TreeGate(builder: (id) => MemorialWallScreen(treeId: id)),
               ),
             ],
           ),
@@ -114,13 +119,23 @@ GoRouter buildRouter(Ref ref) {
       GoRoute(
         path: '/search',
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) {
-          final treeId = ref.read(defaultTreeProvider).value?.id;
-          return treeId == null
-              ? const Scaffold(
-                  body: Center(child: CircularProgressIndicator()))
-              : SearchScreen(treeId: treeId);
-        },
+        builder: (context, state) =>
+            TreeGate(builder: (id) => SearchScreen(treeId: id)),
+      ),
+      GoRoute(
+        path: '/sync',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const SyncScreen(),
+      ),
+      GoRoute(
+        path: '/reminders',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const RemindersScreen(),
+      ),
+      GoRoute(
+        path: '/pro',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const ProScreen(),
       ),
       GoRoute(
         path: '/export',

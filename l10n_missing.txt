@@ -1,1 +1,61 @@
-{}
+{
+  "de": [
+    "remUpcoming",
+    "remindersSection"
+  ],
+
+  "es": [
+    "remUpcoming",
+    "remindersSection"
+  ],
+
+  "fr": [
+    "remUpcoming",
+    "remindersSection"
+  ],
+
+  "it": [
+    "remUpcoming",
+    "remindersSection"
+  ],
+
+  "ja": [
+    "remUpcoming",
+    "remindersSection"
+  ],
+
+  "ko": [
+    "remUpcoming",
+    "remindersSection"
+  ],
+
+  "nl": [
+    "remUpcoming",
+    "remindersSection"
+  ],
+
+  "pt": [
+    "remUpcoming",
+    "remindersSection"
+  ],
+
+  "ru": [
+    "remUpcoming",
+    "remindersSection"
+  ],
+
+  "zh": [
+    "remUpcoming",
+    "remindersSection"
+  ],
+
+  "zh_Hans": [
+    "remUpcoming",
+    "remindersSection"
+  ],
+
+  "zh_Hant": [
+    "remUpcoming",
+    "remindersSection"
+  ]
+}

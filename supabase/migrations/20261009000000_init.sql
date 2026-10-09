@@ -46,6 +46,7 @@ create table public.persons (
   death_place text,
   burial_place text,
   is_living boolean not null default true,
+  is_self boolean not null default false,
   occupation text,
   note text,
   avatar_media_id uuid,

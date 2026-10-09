@@ -52,7 +52,7 @@ class _AddRelativeScreenState extends ConsumerState<AddRelativeScreen> {
     final colors = Theme.of(context).extension<LarariumColors>()!;
     final l10n = AppLocalizations.of(context);
     final service = ref.watch(familyServiceProvider);
-    final treeId = ref.watch(defaultTreeProvider).value?.id;
+    final treeId = ref.watch(effectiveTreeIdProvider);
 
     if (treeId == null) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));

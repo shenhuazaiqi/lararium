@@ -6,6 +6,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart' hide Family;
 import 'package:go_router/go_router.dart';
 
+import '../../core/capture.dart';
 import '../../core/theme.dart';
 import '../../data/db/app_database.dart';
 import '../../data/providers.dart';
@@ -140,7 +141,9 @@ class _TreeScreenState extends ConsumerState<TreeScreen> {
                       ),
                     ),
                     child: ClipRect(
-                      child: GestureDetector(
+                      child: RepaintBoundary(
+                        key: treeCaptureKey,
+                        child: GestureDetector(
                         behavior: HitTestBehavior.opaque,
                         onScaleStart: (d) {
                           _startFocal = d.localFocalPoint;
@@ -186,14 +189,15 @@ class _TreeScreenState extends ConsumerState<TreeScreen> {
                               );
                             }
                           },
-                          child: CustomPaint(
-                            size: Size.infinite,
-                            painter: TreePainter(
-                              result: result,
-                              visuals: visuals,
-                              viewport: _viewport,
-                              colors: colors,
-                              selfBadge: self == null ? null : l10n.selfBadge,
+                            child: CustomPaint(
+                              size: Size.infinite,
+                              painter: TreePainter(
+                                result: result,
+                                visuals: visuals,
+                                viewport: _viewport,
+                                colors: colors,
+                                selfBadge: self == null ? null : l10n.selfBadge,
+                              ),
                             ),
                           ),
                         ),

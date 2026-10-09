@@ -5,20 +5,29 @@
   "onbImportGedcom": "Import a GEDCOM file",
   "onbNoAccount": "No account needed · Works fully offline",
   "onbDataStays": "Your data stays here until you choose to sync.",
-
   "tabTree": "Tree",
   "tabPeople": "People",
   "tabMemorial": "Memorial",
   "tabSettings": "Settings",
-
   "treeTitle": "Family Tree",
   "treeHint": "Drag to pan · tap a person",
   "fitView": "Fit to screen",
   "peopleCount": "{count, plural, =1{1 person} other{{count} people}}",
-  "@peopleCount": {"placeholders": {"count": {"type": "int"}}},
+  "@peopleCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "generationsCount": "{count, plural, =1{1 generation} other{{count} generations}}",
-  "@generationsCount": {"placeholders": {"count": {"type": "int"}}},
-
+  "@generationsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "peopleTitle": "People",
   "searchAction": "Search",
   "groupLiving": "Living",
@@ -26,7 +35,6 @@
   "tagLiving": "Living",
   "tagRemembered": "Remembered",
   "selfBadge": "You",
-
   "born": "Born",
   "bornAbbr": "b.",
   "died": "Died",
@@ -39,7 +47,6 @@
   "deletePerson": "Delete person",
   "living": "Living",
   "deceased": "Deceased",
-
   "fFirst": "First name",
   "fLast": "Last name",
   "fGender": "Gender",
@@ -56,7 +63,6 @@
   "genderFemale": "Female",
   "genderOther": "Other",
   "genderUnknown": "Unknown",
-
   "addTitle": "Add relative",
   "addWho": "How are they related?",
   "relParent": "Parent",
@@ -69,30 +75,66 @@
   "relSiblingHint": "Brother or sister",
   "errEnterFirstName": "Enter a first name",
   "addedToTree": "{name} added",
-  "@addedToTree": {"placeholders": {"name": {"type": "String"}}},
+  "@addedToTree": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "personSaved": "Changes saved",
   "personDeleted": "Person removed",
-
   "searchHint": "People, places, dates…",
   "searchEmpty": "No matches found",
   "foundCount": "{count, plural, =1{1 found} other{{count} found}}",
-  "@foundCount": {"placeholders": {"count": {"type": "int"}}},
-
+  "@foundCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "wallTitle": "Memorial Wall",
   "wallSubtitle": "{remembered} remembered · {tributes} tributes",
-  "@wallSubtitle": {"placeholders": {"remembered": {"type": "int"}, "tributes": {"type": "int"}}},
+  "@wallSubtitle": {
+    "placeholders": {
+      "remembered": {
+        "type": "int"
+      },
+      "tributes": {
+        "type": "int"
+      }
+    }
+  },
   "wallChipAll": "All",
   "wallChipRecent": "Recent",
   "wallChipMonth": "This month",
   "wallChipAnniv": "Anniversaries",
   "visit": "Visit",
   "flowersCount": "{count, plural, =1{1 flower} other{{count} flowers}}",
-  "@flowersCount": {"placeholders": {"count": {"type": "int"}}},
+  "@flowersCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "candlesCount": "{count, plural, =1{1 candle} other{{count} candles}}",
-  "@candlesCount": {"placeholders": {"count": {"type": "int"}}},
+  "@candlesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "messagesCount": "{count, plural, =1{1 message} other{{count} messages}}",
-  "@messagesCount": {"placeholders": {"count": {"type": "int"}}},
-
+  "@messagesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "inLovingMemory": "In Loving Memory",
   "chooseTribute": "Choose a tribute",
   "tributeArmed": "Tap Send to offer this",
@@ -105,8 +147,13 @@
   "memorialLinkCopied": "Memorial link copied",
   "familyOnlyNote": "Visible to family members only.",
   "anniversaryNote": "Anniversary: {date} · a free tribute is included that day.",
-  "@anniversaryNote": {"placeholders": {"date": {"type": "String"}}},
-
+  "@anniversaryNote": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "actFlowers": "Flowers",
   "actCandle": "Candle",
   "actIncense": "Incense",
@@ -131,7 +178,6 @@
   "sendOfrenda": "Place an offering",
   "sendDonation": "Give in memory",
   "sendMemory": "Share a memory",
-
   "themeTitle": "Choose a memorial style",
   "themeSub": "We picked one based on your region. Each tradition has its own tributes — change anytime.",
   "recommended": "Recommended",
@@ -151,7 +197,6 @@
   "themeDescIslamic": "Prayer · charity · flowers",
   "themeDescSecular": "Flowers · candle · memories",
   "memorialStyleSet": "Memorial style set",
-
   "settingsTitle": "Settings",
   "generalSection": "General",
   "language": "Language",
@@ -164,8 +209,13 @@
   "livingPrivateSub": "Never shown to non-members",
   "deleteAccountData": "Delete my account & data",
   "versionLine": "Lararium {version} (1) · Built with Flutter",
-  "@versionLine": {"placeholders": {"version": {"type": "String"}}},
-
+  "@versionLine": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
   "exportTitle": "Export",
   "exportComingSoon": "PDF · PNG · GEDCOM exports arrive in the next milestone. Your data is already stored in an open, exportable format.",
   "importTitle": "Import GEDCOM",
@@ -174,5 +224,108 @@
   "photo": "Photo",
   "done": "Done",
   "close": "Close",
-  "save": "Save"
+  "save": "Save",
+  "exportPdfPoster": "PDF poster",
+  "exportPdfSub": "A4 / Letter / 2× poster",
+  "exportPng": "PNG image",
+  "exportPngSub": "High resolution, up to 4096 px",
+  "exportGedcom": "GEDCOM 5.5.1",
+  "exportGedcomSub": "Ancestry, Family Tree Maker…",
+  "exportJson": "Full backup (JSON)",
+  "exportJsonSub": "People, families, memorials",
+  "tagFree": "Free",
+  "styleSection": "Style",
+  "includeLiving": "Include living people",
+  "poster2x": "Poster size (2×)",
+  "btnExport": "Export",
+  "exportSuccess": "Exported · {name}",
+  "exportEmpty": "Nothing to export yet — open the tree first",
+  "impResult": "Result",
+  "impPeople": "{count, plural, one{1 individual} other{{count} individuals}}",
+  "impFamilies": "{count, plural, one{1 family} other{{count} families}} · {generations, plural, one{1 generation} other{{generations} generations}}",
+  "impSkippedTags": "{count} unsupported tags skipped",
+  "impOpenTree": "Open the tree",
+  "impNewTreePrefix": "Imported",
+  "treesSection": "Family trees",
+  "newTree": "New tree",
+  "duplicateTree": "Duplicate",
+  "renameTree": "Rename",
+  "deleteTree": "Delete tree",
+  "currentTag": "Current",
+  "treeSwitched": "Switched to {name}",
+  "treeCreated": "Tree created",
+  "treeDuplicated": "Tree duplicated",
+  "treeDeleted": "Tree deleted",
+  "errTreeName": "Enter a name",
+  "signIn": "Sign in",
+  "signUp": "Sign up",
+  "email": "Email",
+  "password": "Password",
+  "passwordHint": "At least 6 characters",
+  "signOut": "Sign out",
+  "authCardTitle": "Sync & sharing",
+  "authSignedInAs": "Signed in as {email}",
+  "authNeedAccount": "Create a free account to sync across devices. Your data always stays on this device too.",
+  "authSwitchToSignUp": "New here? Create an account",
+  "authSwitchToSignIn": "Already have an account? Sign in",
+  "syncNow": "Sync now",
+  "allSynced": "All synced",
+  "lastSync": "Last sync {time}",
+  "syncPushed": "{count} changes uploaded",
+  "syncPulled": "{count} updates received",
+  "syncError": "Sync failed · check your connection",
+  "membersSection": "Family members",
+  "copyInvite": "Copy invite link",
+  "offlineQueueNote": "Edits queue offline and send when you're back online.",
+  "proFeatSync": "Unlimited sync & collaborators",
+  "proFeatSyncSub": "Free plan: 1 synced tree",
+  "proFeatTribute": "Unlimited tributes",
+  "proFeatTributeSub": "Free plan: 1 of each per day",
+  "proFeatCandle": "Everlasting candle & premium bouquets",
+  "proFeatCandleSub": "Pinned at the top of the memorial",
+  "proFeatVoice": "Voice messages & memorial video",
+  "proFeatVoiceSub": "Photo slideshow with music",
+  "proFeatExport": "Watermark-free exports",
+  "proFeatExportSub": "PDF posters, GEDCOM, full backup",
+  "proFeatAds": "Remove ads",
+  "proFeatAdsSub": "Free plan shows a small banner",
+  "proNote": "Free plan always keeps flowers, candles, incense & messages available. Pro adds more ways to remember — never the ability to remember.",
+  "proCta": "Continue",
+  "proBillingNote": "Google Play Billing activates after store listing setup.",
+  "remUpcoming": "{count} upcoming",
+  "quotaExhaustedTitle": "Today's tribute is sent",
+  "quotaExhaustedBody": "You already offered one today. Tomorrow there will be more — and a written message is always free.",
+  "quotaMessageFree": "Messages are always free",
+  "quotaAnniversary": "Anniversary today · an extra tribute included",
+  "remindersSection": "Reminders",
+  "upcomingThisMonth": "Upcoming",
+  "noUpcoming": "No anniversaries or birthdays in the next 30 days",
+  "annivOf": "{name} · death anniversary",
+  "birthdayOf": "{name} · birthday",
+  "remSameDay": "Same day",
+  "rem1Day": "1 day",
+  "rem3Days": "3 days",
+  "rem7Days": "7 days",
+  "remFreeNote": "An anniversary reminder includes one free tribute that day.",
+  "proPriceSub": "Less than $1.67 a month · cancel anytime",
+  "remTitle": "Reminders",
+  "remAnniv": "Death anniversaries",
+  "remBirth": "Birthdays",
+  "remTime": "Remind me at",
+  "remDays": "Days ahead",
+  "proTitle": "Lararium Pro",
+  "syncTitle": "Sync & Share",
+  "impPick": "Choose a .ged file",
+  "impNote": "Parsed on this device — nothing is uploaded",
+  "impGo": "Start import",
+  "@impFamilies": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "generations": {
+        "type": "int"
+      }
+    }
+  }
 }

@@ -6,6 +6,8 @@ import 'db/app_database.dart';
 import 'db/tables.dart';
 import 'repositories/demo_seed.dart';
 import 'repositories/family_service.dart';
+import 'sync_service.dart';
+import 'tree_service.dart';
 
 /// SharedPreferences 在 main() 里 override 注入。
 final prefsProvider = Provider<SharedPreferences>(
@@ -20,6 +22,31 @@ final databaseProvider = Provider<AppDatabase>((ref) {
 
 final familyServiceProvider =
     Provider<FamilyService>((ref) => FamilyService(ref.watch(databaseProvider)));
+
+final treeServiceProvider =
+    Provider<TreeService>((ref) => TreeService(ref.watch(databaseProvider)));
+
+final syncServiceProvider =
+    Provider<SyncService>((ref) => SyncService(ref.watch(databaseProvider)));
+
+/// 同步状态流（同步屏与设置页共用）
+final syncStatusProvider = StateProvider<SyncStatus>((ref) => const SyncStatus());
+
+/// 当前登录邮箱（null = 未登录）
+final authEmailProvider = StateProvider<String?>((ref) => null);
+
+final treesListProvider = StreamProvider<List<Tree>>((ref) {
+  return ref.watch(treeServiceProvider).watchAll();
+});
+
+/// 当前选中的树（多树管理）。null = 未选择 → 回落到默认树。
+final currentTreeIdProvider = StateProvider<String?>((ref) => null);
+
+/// 各屏统一使用：显式选择优先，否则默认树。
+final effectiveTreeIdProvider = Provider<String?>((ref) {
+  return ref.watch(currentTreeIdProvider) ??
+      ref.watch(defaultTreeProvider).value?.id;
+});
 
 /// 确保存在默认树（空库时播种示例家谱），返回其 id。
 final defaultTreeProvider = FutureProvider<Tree>((ref) async {

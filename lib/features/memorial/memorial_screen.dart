@@ -9,6 +9,7 @@ import '../../core/theme.dart';
 import '../../data/db/app_database.dart';
 import '../../data/providers.dart';
 import 'fx_stage.dart';
+import 'memorial_quota.dart';
 import 'memorial_theme_defs.dart';
 import 'theme_picker_sheet.dart';
 
@@ -512,6 +513,60 @@ class _MemorialScreenState extends ConsumerState<MemorialScreen> {
   Future<void> _send() async {
     final act = _pendingAct;
     if (act == null) return;
+    // 免费额度（5.4.4）：各 1 次/天，忌日当天 +1；温和拒绝 + 免费出口
+    final prefs = ref.read(prefsProvider);
+    final person = ref.read(personProvider(widget.personId)).value;
+    final quota = MemorialQuota.check(
+      prefs,
+      widget.personId,
+      act,
+      person?.deathDate,
+    );
+    if (!quota.allowed) {
+      if (!mounted) return;
+      final sheetColors = Theme.of(context).extension<LarariumColors>()!;
+      showModalBottomSheet(
+        context: context,
+        builder: (ctx) => SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(22, 8, 22, 26),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.favorite_outline,
+                    size: 36, color: themeByKey(null).accent),
+                const SizedBox(height: 12),
+                Text(AppLocalizations.of(context).quotaExhaustedTitle,
+                    style: TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.w700,
+                        color: sheetColors.ink)),
+                const SizedBox(height: 8),
+                Text(
+                  AppLocalizations.of(context).quotaExhaustedBody,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                      fontSize: 13.5, height: 1.6, color: sheetColors.ink2),
+                ),
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  height: 46,
+                  child: FilledButton(
+                    style: FilledButton.styleFrom(
+                        backgroundColor: sheetColors.brand),
+                    onPressed: () => Navigator.of(ctx).pop(),
+                    child: Text(AppLocalizations.of(context).quotaMessageFree),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+      return;
+    }
+    await MemorialQuota.consume(prefs, widget.personId, act);
     final db = ref.read(databaseProvider);
     final field = _dbCountField(act);
     final p = ref.read(personProvider(widget.personId)).value;
@@ -706,6 +761,21 @@ class _MemorialScreenState extends ConsumerState<MemorialScreen> {
   Future<void> _send2(TextEditingController controller, Person p) async {
     final text = controller.text.trim();
     if (text.isEmpty) return;
+    // 留言额度：3 条/天（忌日 +1）
+    final prefs = ref.read(prefsProvider);
+    final mq = MemorialQuota.check(
+      prefs,
+      p.id,
+      'message',
+      p.deathDate,
+      limit: MemorialQuota.dailyMessageLimit,
+    );
+    if (!mq.allowed) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(AppLocalizations.of(context).quotaMessageFree)));
+      return;
+    }
+    await MemorialQuota.consume(prefs, p.id, 'message');
     final db = ref.read(databaseProvider);
     final treeId = ref.read(defaultTreeProvider).value?.id;
     await db.into(db.memorialMessages).insert(MemorialMessagesCompanion.insert(

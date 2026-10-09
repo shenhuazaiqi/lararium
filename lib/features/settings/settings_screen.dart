@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../core/theme.dart';
 import '../../data/providers.dart';
+import '../../core/fuzzy_date.dart';
 import '../memorial/memorial_theme_defs.dart';
+import '../memorial/memorial_wall_screen.dart' show personYears;
 import 'settings_sheets.dart';
 
 /// 04 设置。
@@ -20,6 +23,7 @@ class SettingsScreen extends ConsumerWidget {
     final localeOverride = ref.watch(localeOverrideProvider);
     final defaultTheme = ref.watch(memorialDefaultThemeProvider);
     final locale = Localizations.localeOf(context);
+    final email = ref.watch(authEmailProvider);
 
     String langLabel;
     if (localeOverride != null) {
@@ -42,9 +46,41 @@ class SettingsScreen extends ConsumerWidget {
         padding: const EdgeInsets.fromLTRB(20, 0, 20, 30),
         children: [
           const SizedBox(height: 4),
+          // --- Family trees（多树管理：切换/新建/复制，规划 5.2 P0） ---
+          _section(l10n.treesSection, colors),
+          _treesSection(context, ref, colors, l10n),
+          const SizedBox(height: 22),
+
           // --- General ---
           _section(l10n.generalSection, colors),
           _list(colors, [
+            _row(
+              context,
+              icon: Icons.sync,
+              iconColor: colors.brand,
+              title: l10n.authCardTitle,
+              subtitle: email == null ? l10n.followSystem : l10n.allSynced,
+              onTap: () => context.push('/sync'),
+            ),
+            _divider(colors),
+            _row(
+              context,
+              icon: Icons.picture_as_pdf_outlined,
+              iconColor: colors.ink2,
+              title: l10n.exportTitle,
+              subtitle: 'PDF · PNG · GEDCOM',
+              onTap: () => context.push('/export'),
+            ),
+            _divider(colors),
+            _row(
+              context,
+              icon: Icons.notifications_none,
+              iconColor: colors.ink2,
+              title: l10n.remTitle,
+              subtitle: l10n.remAnniv,
+              onTap: () => context.push('/reminders'),
+            ),
+            _divider(colors),
             _row(
               context,
               icon: Icons.language,
@@ -52,6 +88,15 @@ class SettingsScreen extends ConsumerWidget {
               title: l10n.language,
               subtitle: langLabel,
               onTap: () => showLanguageSheet(context),
+            ),
+            _divider(colors),
+            _row(
+              context,
+              icon: Icons.workspace_premium_outlined,
+              iconColor: colors.amber,
+              title: l10n.proTitle,
+              subtitle: l10n.proPriceSub,
+              onTap: () => context.push('/pro'),
             ),
             _divider(colors),
             _row(
@@ -130,6 +175,182 @@ class SettingsScreen extends ConsumerWidget {
       ),
     );
   }
+
+  Widget _treesSection(BuildContext context, WidgetRef ref,
+      LarariumColors colors, AppLocalizations l10n) {
+    final treesAsync = ref.watch(treesListProvider);
+    final currentId = ref.watch(effectiveTreeIdProvider);
+    final service = ref.watch(treeServiceProvider);
+    return treesAsync.when(
+      loading: () => const LinearProgressIndicator(minHeight: 2),
+      error: (e, _) => Text('$e'),
+      data: (trees) => _list(colors, [
+        for (final t in trees)
+          InkWell(
+            onTap: () async {
+              ref.read(currentTreeIdProvider.notifier).state = t.id;
+              await ref.read(prefsProvider).setString('current_tree_id', t.id);
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(l10n.treeSwitched(t.name))));
+              }
+            },
+            child: Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              child: Row(
+                children: [
+                  Icon(t.isDemo ? Icons.school_outlined : Icons.account_tree_outlined,
+                      size: 19,
+                      color: t.id == currentId ? colors.brand : colors.ink3),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(t.name,
+                            style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w500,
+                                color: colors.ink)),
+                        Text(personYearsFromTree(t),
+                            style: TextStyle(
+                                fontSize: 12.5, color: colors.ink3)),
+                      ],
+                    ),
+                  ),
+                  if (t.id == currentId)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: colors.brandSoft,
+                        borderRadius: BorderRadius.circular(7),
+                      ),
+                      child: Text(l10n.currentTag,
+                          style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                              color: colors.brand)),
+                    )
+                  else
+                    PopupMenuButton<String>(
+                      icon: Icon(Icons.more_horiz,
+                          size: 20, color: colors.ink3),
+                      onSelected: (action) async {
+                        if (action == 'dup') {
+                          final newId = await service.duplicate(
+                              t.id, '\${t.name} (copy)');
+                          ref.read(currentTreeIdProvider.notifier).state =
+                              newId;
+                          await ref
+                              .read(prefsProvider)
+                              .setString('current_tree_id', newId);
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                content: Text(l10n.treeDuplicated)));
+                          }
+                        } else if (action == 'rename') {
+                          _renameDialog(context, service, t.id, t.name, l10n);
+                        }
+                      },
+                      itemBuilder: (_) => [
+                        PopupMenuItem(
+                            value: 'dup', child: Text(l10n.duplicateTree)),
+                        PopupMenuItem(
+                            value: 'rename', child: Text(l10n.renameTree)),
+                      ],
+                    ),
+                ],
+              ),
+            ),
+          ),
+        if (trees.length < 6)
+          InkWell(
+            onTap: () => _newTreeDialog(context, ref, service, colors, l10n),
+            child: Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+              child: Row(
+                children: [
+                  Icon(Icons.add, size: 20, color: colors.brand),
+                  const SizedBox(width: 14),
+                  Text(l10n.newTree,
+                      style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                          color: colors.brand)),
+                ],
+              ),
+            ),
+          ),
+      ]),
+    );
+  }
+
+  Future<void> _newTreeDialog(
+      BuildContext context,
+      WidgetRef ref,
+      dynamic service,
+      LarariumColors colors,
+      AppLocalizations l10n) async {
+    final controller = TextEditingController();
+    final name = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.newTree),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          decoration: InputDecoration(hintText: l10n.errTreeName),
+        ),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: Text(l10n.cancel)),
+          FilledButton(
+              style: FilledButton.styleFrom(backgroundColor: colors.brand),
+              onPressed: () => Navigator.pop(ctx, controller.text.trim()),
+              child: Text(l10n.done)),
+        ],
+      ),
+    );
+    if (name == null || name.isEmpty) return;
+    final id = await service.create(name);
+    ref.read(currentTreeIdProvider.notifier).state = id;
+    await ref.read(prefsProvider).setString('current_tree_id', id);
+    if (context.mounted) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(l10n.treeCreated)));
+    }
+  }
+
+  Future<void> _renameDialog(BuildContext context, dynamic service,
+      String treeId, String oldName, AppLocalizations l10n) async {
+    final controller = TextEditingController(text: oldName);
+    final name = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.renameTree),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+        ),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: Text(l10n.cancel)),
+          FilledButton(
+              onPressed: () => Navigator.pop(ctx, controller.text.trim()),
+              child: Text(l10n.done)),
+        ],
+      ),
+    );
+    if (name == null || name.isEmpty) return;
+    await service.rename(treeId, name);
+  }
+
+  String personYearsFromTree(dynamic t) => t.description ?? '';
 
   String _langName(String tag) {
     const names = {

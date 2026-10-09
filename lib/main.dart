@@ -35,7 +35,10 @@ Future<void> main() async {
       prefs.getString('memorial_default_theme');
 
   // 预热默认树（空库 → 播种 Carter 演示家谱）
-  await container.read(defaultTreeProvider.future);
+  final defaultTree = await container.read(defaultTreeProvider.future);
+  // 恢复上次的当前树选择（多树管理）
+  container.read(currentTreeIdProvider.notifier).state =
+      prefs.getString('current_tree_id') ?? defaultTree.id;
 
   runApp(
     UncontrolledProviderScope(
