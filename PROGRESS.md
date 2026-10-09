@@ -60,6 +60,9 @@
 | **Supabase 项目** | dashboard: project/sdxhduusacwnimcrkkqv | lararium · us-east-1 · org ootaslntjxpugdgtipus；CLI 已 login（access token `lararium-cli` 存于 ~/.supabase） | `supabase projects list` |
 | **云端建表** | `supabase/migrations/20261009000000_init.sql` | `db push` 成功：trees/tree_members/persons/families/family_children/events/media/invites + memorial_* 5 表 + RLS（SECURITY DEFINER）+ 计数/在世者关闭缅怀/每日额度触发器 | `supabase db push --dry-run` 显示 up to date |
 | **App 云配置** | `lib/core/cloud_config.dart` + main.dart | supabase_flutter ^2.8.4 接入，Supabase.initialize 免登录可用（本地真源原则不变）；URL+anon key 内置，支持 --dart-define 覆盖 | `flutter analyze` 0 error |
+| **GitHub 公开仓库** | https://github.com/shenhuazaiqi/lararium | gh CLI 已登录（shenhuazaiqi），main + gh-pages 两分支已推送 | `gh repo view` |
+| **GitHub Pages 公网** | https://shenhuazaiqi.github.io/lararium/ | gh-pages 分支（web/ 子树）+ Pages 已启用，构建成功 | HTTP 200（首页 + privacy.html） |
+| 授权辅助脚本 | `scripts/auth-supabase.command` `scripts/auth-github.command` | 双击即用的 CLI 登录脚本（备用） | 双击运行 |
 
 **模拟器验证记录**（Pixel_10a / API16k，截图在 `screenshots/`）：
 欢迎页（壁龛 logo）→ 树视图（10 人 4 代连线正确、已故「1918 – 1994」去饱和、YOU+焦点环）→ 纪念墙（3 位追忆、筛选 chips、计数）→ 纪念页（英雄区/引言/动作栏/两步确认：Flowers 32→选中预览→Send→33 + Sent ✓）→ 设置 → 语言切简体中文（全 UI 即时切换、姓名变「Carter James」姓前、徽标「我」、「生于 1948」）。
@@ -78,8 +81,7 @@
 
 ## 🚧 进行中（In Progress）
 
-1. **GitHub 授权最后一步**：设备码流程已走通到「密码确认」页（GitHub sudo 模式），**等你在 ZCode 浏览器窗口输入 GitHub 密码点 Confirm**。完成后我立即：建仓库 → push → 开 Pages。
-2. **Supabase 已完成 ✅**（详见 Done）：项目 lararium（ref: sdxhduusacwnimcrkkqv，us-east-1）、14 表 + RLS + 触发器已推送、anon key 已写入 App（`lib/core/cloud_config.dart`）、DB 密码在 `supabase/.db_password_local`（不入库）。
+**（无）** —— Supabase 与 GitHub/Pages 均已完成。下一步等拍板：是否开始阶段 2（GEDCOM 解析器 + PDF 导出）。
 
 ---
 
@@ -108,4 +110,5 @@
 - Google Play **包名一经发布永久不可更改** → 尽早在 Play Console 建草稿实测 `com.ay1px.tree`。
 - 缅怀留言属 UGC → Play 必填「用户生成内容」问卷；App 内举报/屏蔽/管理员删除已在 schema 与规划中预留。
 - 🔴 **品牌名 Lararium 待权威核验**（USPTO TESS + Play Console + 域名/社交账号），未核验前不印实体物料。
-- Supabase CLI 交互式登录在无 TTY 环境需 `expect` 包装或直接用 access token。
+- Supabase CLI 交互式登录在无 TTY 环境需 `expect` 包装或直接用 access token；**charm 系 CLI（supabase/gh）会发光标位置查询（ESC[6n），expect 必须应答 `\033[1;1R` 否则假死**（本次排障核心结论）。
+- GitHub 设备码**一次性消耗**：填错一次即作废；设备码输入框 `user-code-4` 是隐藏的横杠占位（不可见），自动填码必须按 9 格映射（`36CD-4423` → 0..8 含横杠位），错位会 not_found。
