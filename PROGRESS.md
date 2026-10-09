@@ -79,6 +79,8 @@
 | **i18n 补齐** | `lib/l10n/*.arb`（12 语言 + zh 回退） | 本轮新增 **91 键 × 12 语言全部翻译**（含 ru 复数 4 形式），`l10n_missing.txt` 为空 | 中文实测：设置/同步/纪念页全中文（截图 17/18） |
 | 云端修正 | `supabase/migrations/…init.sql` | persons 补 `is_self` 列（已在线上 ALTER）；tree_members 改「先查后插」规避 upsert RETURNING 与 RLS 快照冲突 | curl 复测 201 |
 
+**UX 修正（2026-10-10）**：语言选择与缅怀方式选择从底部弹层改为**独立页面**（用户反馈：13 项内容把「完成」按钮顶出屏幕、无法返回）。新交互：带返回键 + 点选即生效即保存。路由 `/settings/language`、`/settings/memorial-style`（支持 `?person=` 人物级）。旧弹层代码已删除。
+
 **已知限制（下轮处理）**：① PDF 页面文字用内置拉丁字体（人名已走图像渲染不受影响）；② Google/Apple 登录、Realtime 到达提示、Web 纪念页（Edge Function）、照片上传未接；③ 留言作者名仍为占位；④ Google Play Billing 需商店配置后启用。
 
 **模拟器验证记录**（Pixel_10a / API16k，截图在 `screenshots/`）：
