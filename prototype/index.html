@@ -1,0 +1,1614 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lararium — Interactive Prototype</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F7F5F1; --surface:#FFFFFF; --surface2:#F2EFEA; --surface3:#EAE6DE;
+  --ink:#1A1917; --ink2:#5C574F; --ink3:#8B857C; --ink4:#B4AEA4;
+  --line:#E6E1D9; --line2:#D8D2C7;
+  --brand:#2E6B4F; --brand-soft:#E7F0EB;
+  --amber:#C87A1E; --amber-soft:#FBF0E1;
+  --plum:#5A4A5E; --plum-soft:#F1EBF0;
+  --danger:#B4433A; --danger-soft:#FAEAE8;
+  --shadow-sm:0 1px 2px rgba(24,20,14,.05);
+  --shadow-md:0 2px 6px rgba(24,20,14,.06),0 12px 28px rgba(24,20,14,.07);
+  --shadow-lg:0 8px 20px rgba(24,20,14,.10),0 28px 60px rgba(24,20,14,.14);
+  --r:16px;
+  --font:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+}
+html[data-theme="dark"]{
+  --bg:#111010; --surface:#1B1A18; --surface2:#232120; --surface3:#2C2A28;
+  --ink:#F5F2ED; --ink2:#B3ADA3; --ink3:#847E75; --ink4:#5F5A53;
+  --line:#302E2B; --line2:#3C3936;
+  --brand:#5FA583; --brand-soft:#1C2E26;
+  --amber:#E0A24E; --amber-soft:#2E2417;
+  --plum:#B69BC0; --plum-soft:#2A2330;
+  --danger:#E08378; --danger-soft:#33201E;
+  --shadow-md:0 2px 6px rgba(0,0,0,.4),0 12px 28px rgba(0,0,0,.35);
+  --shadow-lg:0 8px 20px rgba(0,0,0,.5),0 28px 60px rgba(0,0,0,.45);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{font-family:var(--font);background:#EDEAE4;color:var(--ink);-webkit-font-smoothing:antialiased}
+html[data-theme="dark"] body{background:#0A0A09}
+button{font-family:inherit;cursor:pointer;border:0;background:none;color:inherit}
+input,select{font-family:inherit}
+.ic{display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto}
+.ic svg{width:1em;height:1em;display:block}
+
+.stage{display:flex;gap:40px;align-items:flex-start;padding:32px;min-height:100vh}
+.sidebar{width:274px;flex:0 0 274px;position:sticky;top:32px}
+.brand{display:flex;align-items:center;gap:11px}
+.brand-mark{width:38px;height:38px;border-radius:11px;background:linear-gradient(150deg,var(--brand),#1E4C38);display:grid;place-items:center;color:#fff}
+.brand-mark svg{width:22px;height:22px}
+.brand h1{font-size:19px;margin:0;font-weight:700;letter-spacing:-.02em}
+.brand span{font-size:11px;color:var(--ink3);letter-spacing:.08em;text-transform:uppercase;font-weight:600}
+.side-note{font-size:12px;color:var(--ink3);line-height:1.55;margin:14px 0 22px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px;margin-bottom:14px}
+.panel h3{margin:0 0 10px;font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink3);font-weight:700}
+.screen-list{display:flex;flex-direction:column;gap:3px}
+.screen-btn{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:10px;font-size:13.5px;font-weight:500;color:var(--ink2);text-align:left;width:100%}
+.screen-btn:hover{background:var(--surface2);color:var(--ink)}
+.screen-btn.on{background:var(--brand-soft);color:var(--brand);font-weight:600}
+.screen-btn .num{font-size:10.5px;color:var(--ink4);width:16px}
+.screen-btn.on .num{color:var(--brand)}
+.row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+select.lang{width:100%;padding:9px 10px;border-radius:10px;border:1px solid var(--line2);background:var(--surface2);font-size:13px;color:var(--ink);outline:none}
+.switch{position:relative;width:44px;height:26px;border-radius:999px;background:var(--surface3);transition:.2s;flex:0 0 auto}
+.switch::after{content:'';position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:.2s}
+.switch.on{background:var(--brand)}
+.switch.on::after{transform:translateX(18px)}
+.lbl{font-size:13px;color:var(--ink2);font-weight:500}
+
+.phone-wrap{display:flex;flex-direction:column;align-items:center;gap:14px}
+.device{width:390px;height:844px;background:var(--bg);border-radius:52px;position:relative;flex:0 0 auto;overflow:hidden;
+  box-shadow:0 0 0 11px #121110,0 0 0 13px #2C2A28,var(--shadow-lg)}
+html[data-theme="dark"] .device{box-shadow:0 0 0 11px #0B0B0A,0 0 0 13px #33312E,var(--shadow-lg)}
+.island{position:absolute;top:11px;left:50%;transform:translateX(-50%);width:118px;height:33px;border-radius:20px;background:#0B0B0A;z-index:60;pointer-events:none}
+.statusbar{position:absolute;top:0;left:0;right:0;height:54px;z-index:55;display:flex;align-items:center;justify-content:space-between;padding:17px 26px 0;font-size:14px;font-weight:600;pointer-events:none}
+.statusbar .sb-r{display:flex;align-items:center;gap:5px}
+.statusbar svg{height:11px;width:auto}
+.navpad{height:24px;display:flex;align-items:center;justify-content:center;position:absolute;bottom:8px;left:0;right:0;z-index:60;pointer-events:none}
+.navpad i{width:134px;height:5px;border-radius:3px;background:var(--ink);opacity:.28;display:block}
+.app{position:absolute;inset:0;overflow:hidden}
+.screen{position:absolute;inset:0;display:none;flex-direction:column;background:var(--bg)}
+.screen.on{display:flex;animation:fadeIn .22s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+.appbar{padding:60px 20px 10px;display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex:0 0 auto}
+.appbar.lg{padding-top:62px}
+.lg-title{font-size:30px;font-weight:700;letter-spacing:-.028em;margin:0;line-height:1.15}
+.lg-sub{font-size:13.5px;color:var(--ink3);margin:3px 0 0;font-weight:500}
+.icon-btn{width:36px;height:36px;border-radius:50%;background:var(--surface);border:1px solid var(--line);display:grid;place-items:center;font-size:17px;color:var(--ink2)}
+.icon-btn:hover{background:var(--surface2);color:var(--ink)}
+.bar-actions{display:flex;gap:8px;align-items:center}
+.scroll{flex:1;overflow-y:auto;padding:0 20px 24px}
+.scroll::-webkit-scrollbar{width:0}
+.sect{margin-top:22px}
+.sect-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px}
+.sect-h h4{margin:0;font-size:12.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink3);font-weight:700}
+.sect-h .more{font-size:13px;color:var(--brand);font-weight:600}
+.tabbar{flex:0 0 auto;display:flex;background:rgba(255,255,255,.86);backdrop-filter:blur(20px);border-top:1px solid var(--line);padding:7px 6px 30px;z-index:40}
+html[data-theme="dark"] .tabbar{background:rgba(27,26,24,.86)}
+.tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:5px 0;font-size:10.5px;font-weight:600;color:var(--ink3)}
+.tab .ic{font-size:22px}
+.tab.on{color:var(--brand)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:50px;padding:0 20px;border-radius:14px;font-size:15.5px;font-weight:600;background:var(--brand);color:#fff}
+.btn:active{transform:scale(.975)}
+.btn.block{width:100%}
+.btn.ghost{background:var(--surface);color:var(--ink);border:1px solid var(--line2)}
+.btn.soft{background:var(--surface2);color:var(--ink)}
+.btn.amber{background:var(--amber);color:#fff}
+.btn.sm{height:38px;font-size:14px;padding:0 14px;border-radius:11px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:15px}
+.list{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.row-item{display:flex;align-items:center;gap:12px;padding:12px 14px;min-height:56px;border-bottom:1px solid var(--line);width:100%;text-align:left}
+.row-item:last-child{border-bottom:0}
+.row-item .grow{flex:1;min-width:0}
+.row-item .t{font-size:15px;font-weight:500;display:block}
+.row-item .s{font-size:12.5px;color:var(--ink3);margin-top:2px;display:block}
+.chev{font-size:15px;color:var(--ink4)}
+.kv{display:flex;gap:12px;padding:11px 0;border-bottom:1px solid var(--line)}
+.kv:last-child{border-bottom:0}
+.kv .k{width:104px;flex:0 0 104px;font-size:13px;color:var(--ink3);font-weight:500}
+.kv .v{flex:1;font-size:14.5px;font-weight:500}
+.tag{display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 9px;border-radius:8px;font-size:11.5px;font-weight:600;background:var(--surface2);color:var(--ink2)}
+.tag.green{background:var(--brand-soft);color:var(--brand)}
+.tag.amber{background:var(--amber-soft);color:var(--amber)}
+.tag.plum{background:var(--plum-soft);color:var(--plum)}
+.av{border-radius:50%;display:grid;place-items:center;font-weight:600;color:#fff;flex:0 0 auto}
+.av.dead{filter:grayscale(1) contrast(.92) brightness(1.04)}
+.tree-stage{flex:1;position:relative;overflow:hidden;background:radial-gradient(120% 90% at 50% 8%,var(--surface2),var(--bg) 62%)}
+.tree-canvas{position:absolute;inset:0;touch-action:none;cursor:grab}
+.tree-canvas.grabbing{cursor:grabbing}
+.tree-world{position:absolute;top:0;left:0;transform-origin:0 0;will-change:transform}
+.tree-wires{position:absolute;overflow:visible;pointer-events:none}
+.node{position:absolute;width:112px;height:68px;background:var(--surface);border:1.5px solid var(--line2);border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px}
+.node .nm{font-size:11.5px;font-weight:600;max-width:96px;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.2}
+.node .yr{font-size:9.5px;color:var(--ink3)}
+.node.dead{background:linear-gradient(178deg,var(--surface),var(--surface2))}
+.node.dead .nm{color:var(--ink2)}
+.node.focus{border-color:var(--brand);box-shadow:0 0 0 3.5px var(--brand-soft),var(--shadow-md)}
+.node.focus .nm{color:var(--brand)}
+.node .rel{position:absolute;top:-8px;left:50%;transform:translateX(-50%);font-size:8.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;background:var(--ink3);color:var(--bg);padding:2px 6px;border-radius:5px;white-space:nowrap}
+.node.focus .rel{background:var(--brand);color:#fff}
+.zoom{position:absolute;right:14px;bottom:14px;display:flex;flex-direction:column;gap:8px;z-index:20}
+.zoom button{width:40px;height:40px;border-radius:13px;background:var(--surface);border:1px solid var(--line);font-size:19px;color:var(--ink2);display:grid;place-items:center}
+.tree-hint{position:absolute;left:14px;bottom:14px;font-size:11.5px;color:var(--ink3);background:var(--surface);border:1px solid var(--line);padding:7px 11px;border-radius:10px;z-index:20}
+.toast{position:absolute;left:50%;transform:translateX(-50%);bottom:78px;background:rgba(26,25,23,.93);color:#fff;font-size:12.5px;font-weight:500;padding:9px 14px;border-radius:11px;z-index:70;opacity:0;transition:.25s;pointer-events:none;white-space:nowrap}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(-6px)}
+html[data-theme="dark"] .toast{background:rgba(245,242,237,.95);color:#111}
+.scrim{position:absolute;inset:0;background:rgba(20,17,13,.42);z-index:80;opacity:0;pointer-events:none;transition:.25s}
+.scrim.on{opacity:1;pointer-events:auto}
+.sheet{position:absolute;left:0;right:0;bottom:0;background:var(--surface);border-radius:26px 26px 0 0;z-index:85;transform:translateY(102%);transition:transform .32s cubic-bezier(.32,.72,0,1);max-height:88%;display:flex;flex-direction:column}
+.sheet.on{transform:none}
+.grabber{width:38px;height:4.5px;border-radius:3px;background:var(--line2);margin:9px auto 2px;flex:0 0 auto}
+.sheet-body{overflow-y:auto;padding:6px 20px 26px}
+.modal{position:absolute;left:16px;right:16px;top:50%;transform:translateY(-50%) scale(.94);z-index:90;opacity:0;pointer-events:none;transition:.26s cubic-bezier(.32,.72,0,1);max-height:78%;display:flex;flex-direction:column;background:var(--surface);border-radius:24px;box-shadow:var(--shadow-lg);overflow:hidden}
+.modal.on{opacity:1;transform:translateY(-50%) scale(1);pointer-events:auto}
+.modal-body{overflow-y:auto;padding:2px 18px 18px}
+.modal-foot{padding:12px 18px 20px;border-top:1px solid var(--line);display:flex;gap:10px}
+.sheet-head{display:flex;align-items:center;justify-content:space-between;padding:8px 20px 12px;flex:0 0 auto}
+.sheet-head h3{margin:0;font-size:18px;font-weight:700;letter-spacing:-.02em}
+.hero{height:214px;position:relative;overflow:hidden;flex:0 0 auto;background:linear-gradient(168deg,#211D28 0%,#3A3040 44%,#6B5568 100%)}
+.hero .vig{position:absolute;inset:0;z-index:0;background:radial-gradient(72% 58% at 50% 22%,rgba(255,214,160,.18),transparent 62%),radial-gradient(90% 78% at 50% 30%,transparent,rgba(0,0,0,.5))}
+.hero .arch{position:absolute;left:50%;top:8px;transform:translateX(-50%);width:104px;height:96px;border:1.5px solid rgba(255,236,206,.16);border-bottom:0;border-radius:52px 52px 0 0;z-index:2}
+.hero .arch::after{content:'';position:absolute;left:50%;bottom:6px;transform:translateX(-50%);width:30px;height:38px;border-radius:50%;background:radial-gradient(58% 66% at 50% 76%,rgba(255,205,138,.38),transparent 72%)}
+.hero .fade{position:absolute;left:0;right:0;bottom:0;height:106px;z-index:1;background:linear-gradient(180deg,transparent,var(--bg))}
+.hero .cap{position:absolute;left:20px;right:20px;bottom:48px;z-index:3;color:#fff}
+.hero .cap .n{font-size:25px;font-weight:700;letter-spacing:-.028em;line-height:1.14}
+.hero .cap .d{font-size:13px;opacity:.8;margin-top:4px}
+.hero .hero-back{position:absolute;top:12px;left:12px;z-index:4;background:rgba(18,14,12,.32);border-color:rgba(255,255,255,.22);color:#fff}
+.mem-actions{display:grid;grid-template-columns:repeat(var(--actn,3),1fr);gap:8px;margin-top:16px}
+.act{display:flex;flex-direction:column;align-items:center;gap:7px;padding:14px 2px 11px;border-radius:16px;background:var(--surface);border:1px solid var(--line);position:relative;transition:transform .16s,background .18s,border-color .18s}
+.act:active{transform:scale(.94)}
+.act .ic{font-size:22px;color:var(--ink2);transition:color .18s}
+.act .lb{font-size:10px;font-weight:600;color:var(--ink3);transition:color .18s}
+.act .cnt{position:absolute;top:5px;right:5px;min-width:17px;height:15px;padding:0 4px;border-radius:8px;background:var(--surface2);color:var(--ink2);font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;transition:.18s}
+/* 以下变量由 applyMemTheme() 按缅怀风格注入 */
+#s-memorial{--fx-a:#2C2620;--fx-b:#171412;--fx-acc:#E0A24E;--fx-soft:#FBEFD8;--fx-glow:rgba(242,169,59,.3);--fx-flame:#F2A93B;--fx-wick:#FFF3C4}
+.act.on{background:var(--fx-soft);border-color:var(--fx-acc)}
+.act.on .ic,.act.on .lb{color:var(--fx-acc)}
+.act.on .cnt{background:var(--fx-acc);color:#fff}
+.stage-fx{height:172px;margin-top:14px;border-radius:18px;position:relative;overflow:hidden;background:linear-gradient(180deg,var(--surface2),var(--surface3));border:1px solid var(--line)}
+.stage-fx.warm{background:linear-gradient(180deg,var(--fx-a),var(--fx-b))}
+.fx-hint{position:absolute;left:0;right:0;top:16px;text-align:center;font-size:12.5px;color:var(--ink3);line-height:1.5;padding:0 26px;transition:color .4s}
+.stage-fx.warm .fx-hint{color:rgba(255,255,255,.52)}
+.candle{position:absolute;left:50%;bottom:18px;transform:translateX(-50%);width:42px;height:74px;border-radius:7px;background:linear-gradient(180deg,#F7F2E9,#DCD1C0);opacity:0;transition:.4s}
+.candle.show{opacity:1}
+.candle.diya{border-radius:5px 5px 22px 22px;height:46px}
+.candle.diya .flame{top:-30px}
+.flame{position:absolute;left:50%;top:-32px;transform:translateX(-50%);width:20px;height:32px;border-radius:50% 50% 45% 45%;background:radial-gradient(60% 60% at 50% 72%,var(--fx-wick),var(--fx-flame) 55%,#D2662A);animation:flicker 1.1s ease-in-out infinite;box-shadow:0 0 26px 10px var(--fx-glow)}
+@keyframes flicker{0%,100%{transform:translateX(-50%) scale(1)}50%{transform:translateX(-50%) scale(1.1,.92) translateY(-1.5px)}}
+.glow{position:absolute;inset:0;background:radial-gradient(46% 60% at 50% 62%,var(--fx-glow),transparent 70%);opacity:0;transition:.5s}
+.glow.show{opacity:1}
+.inc{position:absolute;left:50%;bottom:0;transform:translateX(-50%);width:7px;height:104px;border-radius:3.5px;background:linear-gradient(180deg,#8B6B4A,#5C4530);opacity:0;transition:.4s}
+.inc.show{opacity:1}
+.inc::before{content:'';position:absolute;top:-7px;left:-0.5px;width:9px;height:9px;border-radius:50%;background:#E8663A;box-shadow:0 0 11px 3px rgba(232,102,58,.6)}
+.smoke{position:absolute;bottom:104px;left:43%;width:16px;height:16px;border-radius:50%;background:radial-gradient(circle,rgba(224,219,209,.62),rgba(224,219,209,0) 70%);opacity:0}
+.smoke.show{animation:rise 3.4s ease-out infinite}
+.smoke.s2.show{animation-delay:1.1s}
+.smoke.s3.show{animation-delay:2.2s}
+@keyframes rise{0%{opacity:0;transform:translate(0,0) scale(.5)}18%{opacity:.75}100%{opacity:0;transform:translate(6px,-88px) scale(2.6)}}
+.petal{position:absolute;top:-14px;width:9px;height:9px;border-radius:60% 10% 60% 10%;opacity:0}
+.petal.show{animation:fall 3.6s linear infinite}
+@keyframes fall{0%{opacity:0;transform:translateY(-8px) rotate(0)}12%{opacity:.95}100%{opacity:0;transform:translateY(194px) rotate(420deg)}}
+.bloom{position:absolute;left:50%;bottom:6px;transform:translateX(-50%);width:162px;height:126px;opacity:0;transition:opacity .5s}
+.bloom.ghost{opacity:.13}
+.bloom.show{opacity:1}
+.bloom svg{width:100%;height:100%;display:block;transform-origin:50% 96%}
+.bloom.show svg{animation:sway 4.4s ease-in-out infinite}
+@keyframes sway{0%,100%{transform:rotate(-1.7deg)}50%{transform:rotate(1.7deg)}}
+.send-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;height:46px;margin-top:10px;border:0;border-radius:14px;font-size:14.5px;font-weight:600;background:var(--fx-acc);color:#fff;transition:background .18s,color .18s}
+.send-btn:active{transform:scale(.985)}
+.send-btn .ic{font-size:16px}
+.send-btn[disabled]{background:var(--surface2);color:var(--ink4)}
+.send-btn.done{background:var(--fx-soft);color:var(--fx-acc)}
+.mem-style{display:flex;align-items:center;gap:8px;margin:12px auto 0;padding:6px 13px 6px 11px;border-radius:20px;background:var(--surface2);border:1px solid var(--line);font-size:11px;font-weight:700;color:var(--ink3)}
+.mem-style .dot{display:flex}
+.mem-style .dot i{width:10px;height:10px;border-radius:50%;margin-left:-3.5px;box-shadow:0 0 0 1.5px var(--surface2)}
+.mem-style .dot i:first-child{margin-left:0}
+.mem-style .nm{color:var(--fx-acc)}
+.mem-style .chev{font-size:11px;color:var(--ink4)}
+.pray{position:absolute;left:0;right:0;bottom:38px;text-align:center;font-size:60px;line-height:1;opacity:0;transition:opacity .5s}
+.pray.show{opacity:1}
+.pray.show span{display:inline-block;animation:breathe 3.8s ease-in-out infinite}
+@keyframes breathe{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-4px) scale(1.014)}}
+.spark{position:absolute;bottom:100px;width:12px;height:12px;border-radius:50%;background:radial-gradient(circle,rgba(255,228,170,.95),rgba(255,228,170,0) 70%);opacity:0}
+.spark.show{animation:spire 3s ease-out infinite}
+.spark.s2.show{animation-delay:.7s}
+.spark.s3.show{animation-delay:1.4s}
+.spark.s4.show{animation-delay:2.1s}
+.bow{position:absolute;left:50%;bottom:10px;transform:translateX(-50%);width:108px;height:134px;opacity:0;transition:opacity .5s}
+.bow.show{opacity:1}
+.bow svg{width:100%;height:100%;display:block;transform-origin:50% 94%}
+.bow.show svg{animation:bowing 3.6s ease-in-out infinite}
+@keyframes bowing{0%,42%{transform:rotate(0) translateY(0)}62%,78%{transform:rotate(9deg) translateY(5px)}100%{transform:rotate(0) translateY(0)}}
+.stone{position:absolute;left:50%;bottom:24px;transform:translateX(-50%);width:120px;height:78px;opacity:0;transition:opacity .35s}
+.stone.show{opacity:1}
+.stone svg{width:100%;height:100%;display:block}
+.stone.show .st1{animation:place .5s cubic-bezier(.3,1.5,.5,1) both}
+.stone.show .st2{animation:place .5s cubic-bezier(.3,1.5,.5,1) both .26s}
+.stone.show .st3{animation:place .5s cubic-bezier(.3,1.5,.5,1) both .52s}
+@keyframes place{0%{opacity:0;transform:translateY(-30px) scale(.88)}100%{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes spire{0%{opacity:0;transform:translate(0,0) scale(.4)}22%{opacity:.8}100%{opacity:0;transform:translate(0,-84px) scale(1.5)}}
+.msg{display:flex;gap:10px;padding:12px 0;border-bottom:1px solid var(--line)}
+.msg:last-child{border-bottom:0}
+.msg .b{flex:1;min-width:0}
+.msg .who{font-size:13.5px;font-weight:600;display:flex;align-items:center;gap:6px}
+.msg .when{font-size:11px;color:var(--ink4);font-weight:500}
+.msg .tx{font-size:14px;color:var(--ink2);line-height:1.5;margin-top:3px}
+.like{display:inline-flex;align-items:center;gap:4px;font-size:12px;color:var(--ink3);font-weight:600;margin-top:7px;cursor:pointer}
+.like.on{color:var(--danger)}
+.composer{display:flex;gap:9px;align-items:center;padding:11px 14px;border-top:1px solid var(--line);background:var(--surface);flex:0 0 auto}
+.composer input{flex:1;height:40px;border-radius:20px;border:1px solid var(--line2);background:var(--surface2);padding:0 15px;font-size:14px;color:var(--ink);outline:none}
+.composer .send{width:40px;height:40px;border-radius:50%;background:var(--brand);color:#fff;display:grid;place-items:center;font-size:17px}
+.th-item{display:flex;align-items:center;gap:12px;padding:12px;border-radius:14px;border:1.5px solid var(--line);margin-bottom:8px;cursor:pointer}
+.th-item.sel{border-color:var(--brand);background:var(--brand-soft)}
+.th-radio{width:20px;height:20px;border-radius:50%;border:1.5px solid var(--line2);flex:0 0 auto;display:grid;place-items:center;font-size:11px}
+.th-item.sel .th-radio{border-color:var(--brand);background:var(--brand);color:#fff}
+.th-item .tx{flex:1}
+.th-item .tx b{font-size:14.5px;font-weight:600;display:flex;align-items:center;gap:7px}
+.th-item .tx span{font-size:12px;color:var(--ink3);display:block;margin-top:2px}
+.th-sw{display:flex;gap:3px}
+.th-sw i{width:14px;height:14px;border-radius:50%;display:block}
+.fin{width:100%;height:42px;border-radius:11px;border:1px solid var(--line2);background:var(--surface2);padding:0 13px;font-size:14.5px;color:var(--ink);outline:none;font-family:inherit}
+.fin:focus{border-color:var(--brand)}
+.fkv{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}
+.fkv:last-child{border-bottom:0}
+.fkv .k{width:96px;flex:0 0 96px;font-size:13px;color:var(--ink3);font-weight:500}
+.fkv .v{flex:1}
+.seg{display:flex;gap:0;border:1px solid var(--line2);border-radius:11px;overflow:hidden;background:var(--surface2)}
+.seg button{flex:1;height:36px;font-size:13px;font-weight:600;color:var(--ink2)}
+.seg button.on{background:var(--brand);color:#fff}
+.empty{text-align:center;padding:44px 20px;color:var(--ink3);font-size:13.5px}
+.wall-card{display:flex;gap:13px;padding:14px;border-radius:18px;background:var(--surface);border:1px solid var(--line);margin-bottom:11px;align-items:center}
+.wall-card .wc-main{flex:1;min-width:0}
+.wall-card .wc-n{font-size:15.5px;font-weight:600}
+.wall-card .wc-d{font-size:12.5px;color:var(--ink3);margin-top:2px}
+.wall-card .wc-m{display:flex;gap:11px;margin-top:7px;font-size:11.5px;color:var(--ink3);font-weight:600}
+.chips{display:flex;gap:7px;overflow-x:auto;margin-bottom:12px}
+.chip{height:32px;padding:0 14px;border-radius:999px;background:var(--surface);border:1px solid var(--line);font-size:13px;font-weight:600;color:var(--ink2);white-space:nowrap}
+.chip.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.exp-opt{display:flex;gap:13px;align-items:center;padding:14px;border-radius:16px;border:1.5px solid var(--line);background:var(--surface);margin-bottom:10px}
+.exp-opt.on{border-color:var(--brand);background:var(--brand-soft)}
+.exp-ic{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;font-size:20px;background:var(--surface2);color:var(--brand);flex:0 0 auto}
+.prev{height:150px;border-radius:16px;border:1px solid var(--line);background:var(--surface);display:grid;place-items:center;margin-bottom:14px}
+.prev .mini{width:78%;height:78%;border-radius:6px;background:repeating-linear-gradient(90deg,var(--line) 0 1px,transparent 1px 13px),repeating-linear-gradient(0deg,var(--line) 0 1px,transparent 1px 13px),var(--surface2);display:grid;place-items:center;font-size:11px;color:var(--ink3);font-weight:600}
+.q-item{display:flex;align-items:center;gap:11px;padding:11px 0;border-bottom:1px solid var(--line)}
+.q-item:last-child{border-bottom:0}
+.st{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:11px;flex:0 0 auto}
+.st.ok{background:var(--brand-soft);color:var(--brand)}
+.st.pend{background:var(--amber-soft);color:var(--amber)}
+.st.err{background:var(--danger-soft);color:var(--danger)}
+.spin{animation:spin 1.4s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.pro-hero{padding:22px 20px;border-radius:20px;background:linear-gradient(150deg,#2E6B4F,#1B4433);color:#fff;margin-bottom:16px}
+.pro-hero .pr{font-size:26px;font-weight:700}
+.pro-hero .pr small{font-size:14px;font-weight:500;opacity:.75}
+.feat{display:flex;gap:12px;padding:11px 0;border-bottom:1px solid var(--line)}
+.feat:last-child{border-bottom:0}
+.feat .fi{width:32px;height:32px;border-radius:10px;background:var(--brand-soft);color:var(--brand);display:grid;place-items:center;font-size:16px;flex:0 0 auto}
+.feat .ft b{font-size:14.5px;font-weight:600;display:block}
+.feat .ft span{font-size:12.5px;color:var(--ink3)}
+.onb{flex:1;display:flex;flex-direction:column;padding:74px 26px 34px;text-align:center}
+.onb .logo{width:96px;height:96px;border-radius:28px;margin:0 auto 24px;background:linear-gradient(150deg,var(--brand),#1B4433);display:grid;place-items:center;color:#fff}
+.onb .logo svg{width:54px;height:54px}
+.onb h2{font-size:31px;font-weight:700;letter-spacing:-.032em;margin:0 0 10px}
+.onb p{font-size:15px;color:var(--ink2);line-height:1.6;margin:0 auto 30px;max-width:290px}
+.onb .spacer{flex:1}
+.onb .fine{font-size:12px;color:var(--ink4);margin-top:14px;line-height:1.6}
+</style>
+</head>
+<body>
+<div class="stage">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 21V11a7 7 0 0114 0v10"/><path d="M3 21h18"/><path d="M12 17.6c1.7 0 3-1.2 3-2.8S13.7 12.5 12 10s-3 2.2-3 4.8 1.3 2.8 3 2.8z"/></svg></div>
+      <div><h1>Lararium</h1><span>Prototype v2</span></div>
+    </div>
+    <p class="side-note">Clickable prototype — 15 screens, 12 languages, light &amp; dark. Pick a screen, then tap through the phone.</p>
+    <div class="panel">
+      <h3>Screens</h3>
+      <div class="screen-list" id="screenList"></div>
+    </div>
+    <div class="panel">
+      <h3>Language</h3>
+      <select class="lang" id="langSel"></select>
+      <div class="row" style="margin-top:12px">
+        <span class="lbl">Dark mode</span>
+        <div class="switch" id="darkSw"></div>
+      </div>
+    </div>
+    <div class="panel">
+      <h3>Legend</h3>
+      <div style="font-size:12px;color:var(--ink2);line-height:2">
+        <span class="tag green">Focus</span> centered person<br>
+        <span class="tag plum">Remembered</span> deceased<br>
+        Drag = pan · Tap = open
+      </div>
+    </div>
+  </aside>
+
+  <div class="phone-wrap">
+    <div class="device">
+      <div class="island"></div>
+      <div class="statusbar">
+        <span>9:41</span>
+        <span class="sb-r">
+          <svg viewBox="0 0 17 11" fill="currentColor"><rect x="0" y="7" width="3" height="4" rx="1"/><rect x="4.5" y="5" width="3" height="6" rx="1"/><rect x="9" y="2.5" width="3" height="8.5" rx="1"/><rect x="13.5" y="0" width="3" height="11" rx="1" opacity=".35"/></svg>
+          <svg viewBox="0 0 16 12" fill="currentColor"><path d="M8 9.6a1.4 1.4 0 110-2.8 1.4 1.4 0 010 2.8zm0-4.2c1.3 0 2.5.5 3.4 1.4l1-1A6.8 6.8 0 008 4.1 6.8 6.8 0 003.6 5.8l1 1A4.9 4.9 0 018 5.4zm0-4c2.3 0 4.4.9 6 2.4l1-1A9.8 9.8 0 008 .1 9.8 9.8 0 001 .6l1 1A8.4 8.4 0 018 1.4z"/></svg>
+          <svg viewBox="0 0 26 12" fill="none"><rect x=".6" y=".6" width="21" height="10.8" rx="3.2" stroke="currentColor" stroke-opacity=".45" stroke-width="1.1"/><rect x="2.2" y="2.2" width="15" height="7.6" rx="2" fill="currentColor"/><path d="M23.4 4.2v3.6c1-.3 1.6-.9 1.6-1.8s-.6-1.5-1.6-1.8z" fill="currentColor" fill-opacity=".45"/></svg>
+        </span>
+      </div>
+      <div class="app">
+      <section class="screen on" id="s-onboard">
+        <div class="onb">
+          <div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 21V11a7 7 0 0114 0v10"/><path d="M3 21h18"/><path d="M12 17.6c1.7 0 3-1.2 3-2.8S13.7 12.5 12 10s-3 2.2-3 4.8 1.3 2.8 3 2.8z"/></svg></div>
+          <h2>Lararium</h2>
+          <p data-i18n="tagline">The shrine your family keeps.</p>
+          <div class="spacer"></div>
+          <button class="btn block" data-i18n="onb_cta" data-go="tree">Start my family tree</button>
+          <button class="btn ghost block" style="margin-top:10px" data-go="import">Import a GEDCOM file</button>
+          <div class="fine">No account needed · Works fully offline<br>Your data stays here until you choose to sync.</div>
+        </div>
+      </section>
+
+      <section class="screen" id="s-tree">
+        <div class="appbar">
+          <div>
+            <h2 class="lg-title">Carter Family</h2>
+            <p class="lg-sub"><span data-i18n="tree_title">Family Tree</span> · 10 people · 3 generations</p>
+          </div>
+          <div class="bar-actions">
+            <button class="icon-btn" data-icon="search" data-go="search"></button>
+            <button class="icon-btn" data-icon="export" data-go="export"></button>
+          </div>
+        </div>
+        <div class="tree-stage">
+          <div class="tree-canvas" id="canvas">
+            <div class="tree-world" id="world"><svg class="tree-wires" id="wires"></svg></div>
+          </div>
+          <div class="zoom">
+            <button data-zoom="in">+</button>
+            <button data-zoom="out">−</button>
+            <button data-zoom="fit">⤢</button>
+          </div>
+          <div class="tree-hint">Drag to pan · tap a person</div>
+        </div>
+        <nav class="tabbar" data-tab="tree"></nav>
+      </section>
+
+      <section class="screen" id="s-people">
+        <div class="appbar lg">
+          <div><h2 class="lg-title" data-i18n="people_title">People</h2><p class="lg-sub">10 in this tree</p></div>
+          <div class="bar-actions"><button class="icon-btn" data-icon="plus"></button></div>
+        </div>
+        <div style="padding:0 20px 12px">
+          <div data-go="search" style="cursor:pointer;display:flex;align-items:center;gap:9px;height:42px;border-radius:12px;background:var(--surface);border:1px solid var(--line);padding:0 13px">
+            <span class="ic" data-icon="search" style="font-size:16px;color:var(--ink3)"></span>
+            <span style="font-size:14.5px;color:var(--ink3)" data-i18n="btn_search">Search</span>
+          </div>
+        </div>
+        <div class="scroll" id="peopleList"></div>
+        <nav class="tabbar" data-tab="people"></nav>
+      </section>
+
+      <section class="screen" id="s-wall">
+        <div class="appbar lg">
+          <div><h2 class="lg-title" data-i18n="wall_title">Memorial Wall</h2><p class="lg-sub">3 remembered · 84 tributes</p></div>
+          <div class="bar-actions"><button class="icon-btn" data-icon="plus"></button></div>
+        </div>
+        <div class="scroll">
+          <div class="chips">
+            <button class="chip on">All</button><button class="chip">Recent</button>
+            <button class="chip">This month</button><button class="chip">Anniversaries</button>
+          </div>
+          <div id="wallList"></div>
+        </div>
+        <nav class="tabbar" data-tab="wall"></nav>
+      </section>
+      <section class="screen" id="s-settings">
+        <div class="appbar lg"><div><h2 class="lg-title" data-i18n="set_title">Settings</h2></div></div>
+        <div class="scroll">
+          <div class="card" style="display:flex;align-items:center;gap:13px;margin-top:4px">
+            <div class="av" style="width:46px;height:46px;font-size:17px;background:linear-gradient(140deg,#4A90D9,#2A5F96)">MC</div>
+            <div style="flex:1">
+              <div style="font-size:16px;font-weight:600">Michael Carter</div>
+              <div style="font-size:12.5px;color:var(--ink3)">Free plan · 1 of 1 tree synced</div>
+            </div>
+            <button class="btn amber sm" data-go="pro">Upgrade</button>
+          </div>
+          <div class="sect"><div class="sect-h"><h4>General</h4></div>
+            <div class="list">
+              <button class="row-item" data-go="sync">
+                <span class="ic" data-icon="cloud" style="font-size:19px;color:var(--brand)"></span>
+                <span class="grow"><span class="t">Sync &amp; sharing</span><span class="s">All synced · 2 devices</span></span>
+                <span class="chev ic" data-icon="chev"></span>
+              </button>
+              <button class="row-item" data-open="theme">
+                <span class="ic" data-icon="candle" style="font-size:19px;color:var(--amber)"></span>
+                <span class="grow"><span class="t">Memorial style</span><span class="s" id="setThemeVal">Western</span></span>
+                <span class="chev ic" data-icon="chev"></span>
+              </button>
+              <button class="row-item" data-open="lang">
+                <span class="ic" data-icon="globe" style="font-size:19px;color:var(--ink2)"></span>
+                <span class="grow"><span class="t" data-i18n="set_language">Language</span><span class="s" id="setLangVal">English</span></span>
+                <span class="chev ic" data-icon="chev"></span>
+              </button>
+            </div>
+          </div>
+          <div class="sect"><div class="sect-h"><h4>Data</h4></div>
+            <div class="list">
+              <button class="row-item" data-go="export">
+                <span class="ic" data-icon="export" style="font-size:19px;color:var(--ink2)"></span>
+                <span class="grow"><span class="t">Export &amp; backup</span><span class="s">PDF · PNG · GEDCOM</span></span>
+                <span class="chev ic" data-icon="chev"></span>
+              </button>
+              <button class="row-item" data-go="reminder">
+                <span class="ic" data-icon="bell" style="font-size:19px;color:var(--ink2)"></span>
+                <span class="grow"><span class="t">Anniversary reminders</span><span class="s">On · 9:00 AM</span></span>
+                <span class="chev ic" data-icon="chev"></span>
+              </button>
+              <div class="row-item">
+                <span class="ic" data-icon="moon" style="font-size:19px;color:var(--ink2)"></span>
+                <span class="grow"><span class="t">Dark mode</span></span>
+                <div class="switch" id="darkSw2"></div>
+              </div>
+            </div>
+          </div>
+          <div class="sect"><div class="sect-h"><h4>Privacy</h4></div>
+            <div class="list">
+              <div class="row-item"><span class="ic" data-icon="lock" style="font-size:19px;color:var(--ink2)"></span>
+                <span class="grow"><span class="t">Living people are private</span><span class="s">Never shown to non-members</span></span></div>
+              <div class="row-item"><span class="ic" data-icon="trash" style="font-size:19px;color:var(--danger)"></span>
+                <span class="grow"><span class="t" style="color:var(--danger)">Delete my account &amp; data</span></span></div>
+            </div>
+          </div>
+          <p style="text-align:center;font-size:11.5px;color:var(--ink4);margin-top:22px">Lararium 1.0.0 (1) · Built with Flutter</p>
+        </div>
+        <nav class="tabbar" data-tab="settings"></nav>
+      </section>
+
+      <section class="screen" id="s-memorial">
+        <div class="hero">
+          <div class="vig"></div>
+          <div class="arch"></div>
+          <div class="fade"></div>
+          <button class="icon-btn hero-back" data-back><span class="ic" data-icon="back"></span></button>
+          <div class="cap">
+            <div class="n" id="memName">James Carter</div>
+            <div class="d" id="memDates">Mar 12, 1918 – Nov 4, 1994 · 76 years</div>
+          </div>
+        </div>
+        <div style="padding:0 20px;margin-top:-34px;position:relative;z-index:2">
+          <div class="card" style="text-align:center;padding:14px">
+            <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);font-weight:700" data-i18n="mem_loving">In Loving Memory</div>
+            <div id="memQuote" style="font-size:13.5px;color:var(--ink2);margin-top:7px;line-height:1.55;font-style:italic">&ldquo;A quiet man with a loud laugh. He never missed a Sunday.&rdquo;</div>
+          </div>
+        </div>
+        <div class="scroll" style="padding-top:14px">
+          <button class="mem-style" id="memStyle" data-open="theme">
+            <span class="dot" id="memStyleDot"></span>
+            <span class="nm" id="memStyleNm">Western</span>
+            <span class="chev ic" data-icon="chev"></span>
+          </button>
+          <div class="mem-actions" id="memActions"></div>
+          <div class="stage-fx" id="fxStage">
+            <div class="fx-hint" id="fxHint">Tap an action to light something</div>
+            <div class="glow" id="fxGlow"></div>
+            <div class="candle" id="fxCandle"><div class="flame"></div></div>
+            <div class="inc" id="fxInc"></div>
+            <div class="smoke" id="sm1"></div><div class="smoke s2" id="sm2"></div><div class="smoke s3" id="sm3"></div>
+            <div class="pray" id="fxPray"></div>
+            <div class="bow" id="fxBow"></div>
+            <div class="stone" id="fxStone"></div>
+            <div class="spark" id="sp1" style="left:41%"></div><div class="spark s2" id="sp2" style="left:57%"></div><div class="spark s3" id="sp3" style="left:48%"></div><div class="spark s4" id="sp4" style="left:53%"></div>
+            <div class="bloom" id="fxBloom"></div>
+            <div id="fxPetals"></div>
+          </div>
+          <button class="send-btn" id="fxSendBtn" disabled><span class="ic" data-icon="send"></span><span id="fxSendLabel">Choose a tribute</span></button>
+          <div class="sect">
+            <div class="sect-h"><h4>Messages · 16</h4><span class="more">Newest</span></div>
+            <div class="card" style="padding:2px 14px" id="msgList"></div>
+          </div>
+          <button class="btn ghost block" style="margin-top:16px" data-toast="Memorial link copied">
+            <span class="ic" data-icon="share"></span> Share memorial page</button>
+          <p style="text-align:center;font-size:11.5px;color:var(--ink4);margin:14px 0 0;line-height:1.6">
+            Visible to family members only.<br>Anniversary: <b id="memAnniv">Nov 4</b> · a free tribute is included that day.
+          </p>
+        </div>
+        <div class="composer">
+          <div class="av" style="width:32px;height:32px;font-size:12px;background:linear-gradient(140deg,#2E6B4F,#1B4433)">MC</div>
+          <input id="msgInput" placeholder="Write a message…">
+          <button class="send" id="msgSend"><span class="ic" data-icon="send"></span></button>
+        </div>
+      </section>
+      <section class="screen" id="s-export">
+        <div class="appbar lg" style="padding-bottom:4px">
+          <div style="display:flex;align-items:center;gap:10px">
+            <button class="icon-btn" data-back><span class="ic" data-icon="back"></span></button>
+            <h2 class="lg-title" data-i18n="exp_title">Export</h2>
+          </div>
+        </div>
+        <div class="scroll">
+          <div class="prev"><div class="mini">A4 · CARTER FAMILY TREE</div></div>
+          <div class="exp-opt on"><div class="exp-ic ic" data-icon="pdf"></div>
+            <div style="flex:1"><div style="font-size:15px;font-weight:600">PDF poster</div><div style="font-size:12.5px;color:var(--ink3)">A4 / Letter / 2× poster</div></div>
+            <span class="tag green">Free</span></div>
+          <div class="exp-opt"><div class="exp-ic ic" data-icon="img"></div>
+            <div style="flex:1"><div style="font-size:15px;font-weight:600">PNG image</div><div style="font-size:12.5px;color:var(--ink3)">Up to 4096 px</div></div>
+            <span class="tag green">Free</span></div>
+          <div class="exp-opt"><div class="exp-ic ic" data-icon="doc"></div>
+            <div style="flex:1"><div style="font-size:15px;font-weight:600">GEDCOM 5.5.1</div><div style="font-size:12.5px;color:var(--ink3)">Ancestry, Family Tree Maker…</div></div>
+            <span class="tag green">Free</span></div>
+          <div class="exp-opt"><div class="exp-ic ic" data-icon="db"></div>
+            <div style="flex:1"><div style="font-size:15px;font-weight:600">Full backup (JSON)</div><div style="font-size:12.5px;color:var(--ink3)">Photos, stories, memorials</div></div>
+            <span class="tag">Pro</span></div>
+          <div class="sect"><div class="sect-h"><h4>Style</h4></div>
+            <div class="list">
+              <div class="row-item"><span class="grow"><span class="t">Theme</span></span><span style="font-size:13.5px;color:var(--ink3)">Heritage · warm</span></div>
+              <div class="row-item"><span class="grow"><span class="t">Include living people</span></span><div class="switch on" data-toggle></div></div>
+              <div class="row-item"><span class="grow"><span class="t">Hide birth years of living</span></span><div class="switch" data-toggle></div></div>
+            </div>
+          </div>
+          <button class="btn block" style="margin-top:20px" data-toast="PDF saved to Files">Create PDF</button>
+        </div>
+      </section>
+
+      <section class="screen" id="s-sync">
+        <div class="appbar lg" style="padding-bottom:4px">
+          <div style="display:flex;align-items:center;gap:10px">
+            <button class="icon-btn" data-back><span class="ic" data-icon="back"></span></button>
+            <h2 class="lg-title" data-i18n="sync_title">Sync &amp; Share</h2>
+          </div>
+        </div>
+        <div class="scroll">
+          <div class="card" style="display:flex;gap:13px;align-items:center;background:var(--brand-soft);border-color:transparent">
+            <div class="st ok ic" data-icon="check" style="width:34px;height:34px;font-size:16px"></div>
+            <div style="flex:1"><div style="font-size:15.5px;font-weight:600;color:var(--brand)">All synced</div>
+              <div style="font-size:12.5px;color:var(--ink3)">Last sync 2 minutes ago</div></div>
+          </div>
+          <div class="sect"><div class="sect-h"><h4>Upload queue</h4><span class="more">3 pending</span></div>
+            <div class="card" style="padding:2px 14px">
+              <div class="q-item"><div class="st ok ic" data-icon="check"></div><div style="flex:1"><div style="font-size:14px;font-weight:500">Photo · James Carter (1954)</div><div style="font-size:11.5px;color:var(--ink3)">Uploaded</div></div></div>
+              <div class="q-item"><div class="st pend ic spin" data-icon="spin"></div><div style="flex:1"><div style="font-size:14px;font-weight:500">Edit · William Carter death place</div><div style="font-size:11.5px;color:var(--ink3)">Waiting for network</div></div></div>
+              <div class="q-item"><div class="st err ic" data-icon="alert"></div><div style="flex:1"><div style="font-size:14px;font-weight:500">Tribute · flowers for Mary Carter</div><div style="font-size:11.5px;color:var(--danger)">Failed · will retry</div></div>
+                <button class="btn sm soft">Retry</button></div>
+            </div>
+          </div>
+          <div class="sect"><div class="sect-h"><h4>Family members</h4></div>
+            <div class="list">
+              <div class="row-item"><div class="av" style="width:36px;height:36px;font-size:13px;background:linear-gradient(140deg,#4A90D9,#2A5F96)">MC</div>
+                <span class="grow"><span class="t">Michael Carter</span><span class="s">Owner · this device</span></span><span class="tag">You</span></div>
+              <div class="row-item"><div class="av" style="width:36px;height:36px;font-size:13px;background:linear-gradient(140deg,#8A6BB1,#5C4280)">EC</div>
+                <span class="grow"><span class="t">Emma Carter</span><span class="s">Editor · iPhone 15</span></span><span class="tag green">Synced</span></div>
+              <div class="row-item"><div class="av" style="width:36px;height:36px;font-size:13px;background:linear-gradient(140deg,#C8791A,#8A4E12)">SM</div>
+                <span class="grow"><span class="t">Sarah Miller</span><span class="s">Viewer · invited</span></span><span class="tag amber">Pending</span></div>
+            </div>
+          </div>
+          <button class="btn ghost block" style="margin-top:18px" data-toast="Invite link copied"><span class="ic" data-icon="link"></span> Copy invite link</button>
+          <p style="text-align:center;font-size:11.5px;color:var(--ink4);margin:14px 0 0;line-height:1.6">Edits queue offline and send when you&rsquo;re back online.</p>
+        </div>
+      </section>
+
+      <section class="screen" id="s-pro">
+        <div class="appbar lg" style="padding-bottom:4px">
+          <div style="display:flex;align-items:center;gap:10px">
+            <button class="icon-btn" data-back><span class="ic" data-icon="back"></span></button>
+            <h2 class="lg-title" data-i18n="pro_title">Lararium Pro</h2>
+          </div>
+        </div>
+        <div class="scroll">
+          <div class="pro-hero">
+            <div class="pr">$19.99 <small>/ year</small></div>
+            <div style="font-size:13.5px;opacity:.85;margin-top:5px">Less than $1.67 a month · cancel anytime</div>
+          </div>
+          <div class="card" style="padding:2px 14px">
+            <div class="feat"><div class="fi ic" data-icon="cloud"></div><div class="ft"><b>Unlimited sync &amp; collaborators</b><span>Free plan: 1 tree, 200 people</span></div></div>
+            <div class="feat"><div class="fi ic" data-icon="flower"></div><div class="ft"><b>Unlimited tributes</b><span>Free plan: 1 of each per day</span></div></div>
+            <div class="feat"><div class="fi ic" data-icon="candle"></div><div class="ft"><b>Everlasting candle &amp; premium bouquets</b><span>Pinned at the top of the memorial</span></div></div>
+            <div class="feat"><div class="fi ic" data-icon="mic"></div><div class="ft"><b>Voice messages &amp; memorial video</b><span>Photo slideshow with music</span></div></div>
+            <div class="feat"><div class="fi ic" data-icon="pdf"></div><div class="ft"><b>Watermark-free exports</b><span>PDF posters, GEDCOM, full backup</span></div></div>
+            <div class="feat"><div class="fi ic" data-icon="block"></div><div class="ft"><b>Remove ads</b><span>Free plan shows a small banner</span></div></div>
+          </div>
+          <button class="btn block" style="margin-top:20px" data-toast="Google Play Billing · demo only">Continue</button>
+          <p style="text-align:center;font-size:11.5px;color:var(--ink4);margin:14px 0 0;line-height:1.6">
+            Free plan always keeps flowers, candles, incense &amp; messages available.<br>Pro adds more ways to remember — never the ability to remember.
+          </p>
+        </div>
+      </section>
+
+      <section class="screen" id="s-edit">
+        <div class="appbar lg" style="padding-bottom:8px">
+          <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
+            <button class="icon-btn" data-back><span class="ic" data-icon="back"></span></button>
+            <h2 class="lg-title" style="font-size:22px" data-i18n="edit_title">Edit person</h2>
+          </div>
+        </div>
+        <div class="scroll">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:10px;margin:2px 0 18px">
+            <div class="av" id="editAv" style="width:80px;height:80px;font-size:27px">JC</div>
+            <button class="btn sm soft"><span class="ic" data-icon="img"></span> Photo</button>
+          </div>
+          <div class="card" style="padding:2px 14px" id="editForm"></div>
+          <button class="btn block" style="margin-top:18px" id="editSave"><span class="ic" data-icon="check"></span> <span data-i18n="btn_save">Save changes</span></button>
+          <button class="btn ghost block" style="margin-top:10px;color:var(--danger)" id="editDelete" data-i18n="btn_delete">Delete person</button>
+        </div>
+      </section>
+
+      <section class="screen" id="s-add">
+        <div class="appbar lg" style="padding-bottom:8px">
+          <div style="display:flex;align-items:center;gap:10px">
+            <button class="icon-btn" data-back><span class="ic" data-icon="back"></span></button>
+            <h2 class="lg-title" style="font-size:22px" data-i18n="add_title">Add relative</h2>
+          </div>
+        </div>
+        <div class="scroll">
+          <div class="card" style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+            <div class="av" id="addBaseAv" style="width:44px;height:44px;font-size:15px">MC</div>
+            <div style="flex:1;min-width:0">
+              <div id="addBaseName" style="font-size:15.5px;font-weight:600">Michael Carter</div>
+              <div style="font-size:12.5px;color:var(--ink3)" data-i18n="add_who">How are they related?</div>
+            </div>
+          </div>
+          <div id="addRelList"></div>
+          <div class="card" style="padding:2px 14px;margin-top:14px">
+            <div class="fkv"><div class="k" data-i18n="f_first">First name</div><div class="v"><input class="fin" id="addFirst" placeholder="—"></div></div>
+            <div class="fkv"><div class="k" data-i18n="f_last">Last name</div><div class="v"><input class="fin" id="addLast" placeholder="—"></div></div>
+          </div>
+          <button class="btn block" style="margin-top:18px" id="addSave"><span class="ic" data-icon="check"></span> <span data-i18n="btn_save">Save changes</span></button>
+        </div>
+      </section>
+
+      <section class="screen" id="s-search">
+        <div class="appbar lg" style="padding-bottom:10px">
+          <div style="display:flex;align-items:center;gap:10px;width:100%">
+            <button class="icon-btn" data-back><span class="ic" data-icon="back"></span></button>
+            <input class="fin" id="searchInput" style="flex:1" placeholder="People, places, dates…">
+          </div>
+        </div>
+        <div class="scroll" id="searchResults"></div>
+      </section>
+
+      <section class="screen" id="s-import">
+        <div class="appbar lg" style="padding-bottom:8px">
+          <div style="display:flex;align-items:center;gap:10px">
+            <button class="icon-btn" data-back><span class="ic" data-icon="back"></span></button>
+            <h2 class="lg-title" style="font-size:22px" data-i18n="imp_title">Import GEDCOM</h2>
+          </div>
+        </div>
+        <div class="scroll">
+          <div class="card" style="text-align:center;padding:30px 18px;border:1.5px dashed var(--line2);background:var(--surface2)">
+            <div class="ic" data-icon="doc" style="font-size:40px;color:var(--ink3);margin:0 auto 12px"></div>
+            <div style="font-size:15.5px;font-weight:600" data-i18n="imp_pick">Choose a .ged file</div>
+            <div style="font-size:12.5px;color:var(--ink3);margin-top:7px;line-height:1.55" data-i18n="imp_note">Parsed on this device — nothing is uploaded</div>
+            <button class="btn block" style="margin-top:18px" id="impGo"><span class="ic" data-icon="export"></span> <span data-i18n="imp_go">Start import</span></button>
+          </div>
+          <div class="sect" id="impResult" style="display:none">
+            <div class="sect-h"><h4>Result</h4></div>
+            <div class="card" style="padding:2px 14px">
+              <div class="q-item"><div class="st ok ic" data-icon="check"></div><div style="flex:1"><div style="font-size:14px;font-weight:500">10 individuals</div><div style="font-size:11.5px;color:var(--ink3)">Parsed</div></div></div>
+              <div class="q-item"><div class="st ok ic" data-icon="check"></div><div style="flex:1"><div style="font-size:14px;font-weight:500">4 families · 3 generations</div><div style="font-size:11.5px;color:var(--ink3)">Linked</div></div></div>
+              <div class="q-item"><div class="st pend ic" data-icon="alert"></div><div style="flex:1"><div style="font-size:14px;font-weight:500">2 unsupported tags</div><div style="font-size:11.5px;color:var(--ink3)">Skipped · _UID, _MILT</div></div></div>
+            </div>
+            <button class="btn block" style="margin-top:16px" data-go="tree">Open the tree</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen" id="s-reminder">
+        <div class="appbar lg" style="padding-bottom:8px">
+          <div style="display:flex;align-items:center;gap:10px">
+            <button class="icon-btn" data-back><span class="ic" data-icon="back"></span></button>
+            <h2 class="lg-title" style="font-size:22px" data-i18n="rem_title">Reminders</h2>
+          </div>
+        </div>
+        <div class="scroll">
+          <div class="list">
+            <div class="row-item"><span class="ic" data-icon="candle" style="font-size:19px;color:var(--amber)"></span>
+              <span class="grow"><span class="t" data-i18n="rem_anniv">Death anniversaries</span><span class="s">3 upcoming</span></span>
+              <div class="switch on" data-toggle></div></div>
+            <div class="row-item"><span class="ic" data-icon="bell" style="font-size:19px;color:var(--ink2)"></span>
+              <span class="grow"><span class="t" data-i18n="rem_birth">Birthdays</span></span>
+              <div class="switch" data-toggle></div></div>
+          </div>
+          <div class="sect"><div class="sect-h"><h4>Timing</h4></div>
+            <div class="list">
+              <div class="row-item"><span class="grow"><span class="t" data-i18n="rem_time">Remind me at</span></span><span style="font-size:14px;color:var(--ink3)">9:00 AM</span></div>
+              <div class="row-item"><span class="grow"><span class="t" data-i18n="rem_days">Days ahead</span></span><span style="font-size:14px;color:var(--ink3)">Same day</span></div>
+            </div>
+          </div>
+          <p style="text-align:center;font-size:11.5px;color:var(--ink4);margin-top:18px;line-height:1.6">An anniversary reminder includes one free tribute that day.</p>
+        </div>
+      </section>
+
+      <div class="toast" id="toast"></div>
+      <div class="scrim" id="scrim"></div>
+      <div class="sheet" id="personSheet">
+        <div class="grabber"></div>
+        <div class="sheet-head">
+          <h3 id="psName">&mdash;</h3>
+          <div style="display:flex;gap:8px">
+            <button class="icon-btn" id="psEdit" data-icon="edit"></button>
+            <button class="icon-btn" data-close><span class="ic" data-icon="x"></span></button>
+          </div>
+        </div>
+        <div class="sheet-body" id="psBody"></div>
+      </div>
+      <div class="modal" id="themeModal">
+        <div style="padding:20px 18px 6px">
+          <h3 style="margin:0;font-size:18px;font-weight:700" data-i18n="theme_title">Choose a memorial style</h3>
+          <p style="margin:6px 0 0;font-size:13px;color:var(--ink3);line-height:1.5" data-i18n="theme_sub">We picked one based on your region. Each tradition has its own tributes — change anytime.</p>
+        </div>
+        <div class="modal-body" id="themeList"></div>
+        <div class="modal-foot">
+          <button class="btn ghost" style="flex:1" data-close id="themeCancel" data-i18n="btn_cancel">Cancel</button>
+          <button class="btn" style="flex:1.4" data-close id="themeUse" data-i18n="theme_use">Use recommended</button>
+        </div>
+      </div>
+      <div class="modal" id="langModal">
+        <div style="padding:20px 18px 6px">
+          <h3 style="margin:0;font-size:18px;font-weight:700" data-i18n="set_language">Language</h3>
+          <p style="margin:6px 0 0;font-size:13px;color:var(--ink3)">Detected from your device. Override anytime.</p>
+        </div>
+        <div class="modal-body" id="langList"></div>
+        <div class="modal-foot"><button class="btn block" data-close data-i18n="btn_done">Done</button></div>
+      </div>
+      <script>
+const ICONS={
+ search:'<circle cx="11" cy="11" r="7"/><path d="M20 20l-3.6-3.6"/>',
+ export:'<path d="M12 16V4"/><path d="M8 8l4-4 4 4"/><path d="M4 15v3a2 2 0 002 2h12a2 2 0 002-2v-3"/>',
+ plus:'<path d="M12 5v14"/><path d="M5 12h14"/>',
+ chev:'<path d="M9 5l7 7-7 7"/>',
+ back:'<path d="M15 5l-7 7 7 7"/>',
+ x:'<path d="M6 6l12 12"/><path d="M18 6L6 18"/>',
+ check:'<path d="M4 12.5l5 5L20 6.5"/>',
+ flower:'<path d="M12 11.3c-1.9 0-3.4-1.5-3.4-3.4 0-1.2.6-2.3 1.6-2.9L12 3l1.8 2c1 .6 1.6 1.7 1.6 2.9 0 1.9-1.5 3.4-3.4 3.4z"/><circle cx="12" cy="7.7" r="1.4"/><path d="M12 11.3V21"/><path d="M12 16.3c2.6 0 4.4-1.6 4.6-4.2"/><path d="M12 18.7c-2.4 0-4-1.4-4.2-3.8"/>',
+ candle:'<path d="M12 8.5V7.3"/><path d="M12 7.3c1.5 0 2.7-1.1 2.7-2.5S12 1.7 12 1.7s-2.7 1.6-2.7 3.1S10.5 7.3 12 7.3z"/><rect x="9.4" y="8.5" width="5.2" height="9.3" rx="1.3"/><path d="M7.4 21h9.2"/>',
+ incense:'<path d="M5 20.6h14l-1.2-4.3a2.1 2.1 0 00-2-1.5H8.2a2.1 2.1 0 00-2 1.5L5 20.6z"/><path d="M12 14.8V8.4"/><path d="M9.4 14.8v-4.2"/><path d="M14.6 14.8v-4.2"/><path d="M12 8.4c0-1 .8-1.4.8-2.4S12 4.7 12 3.7"/>',
+ prayer:'<rect x="8.1" y="3.4" width="7.8" height="17.2" rx="3.9"/><path d="M12 3.4v17.2"/><path d="M10.4 4.2v3.2"/><path d="M13.6 4.2v3.2"/>',
+ marigold:'<circle cx="12" cy="10.8" r="2.3"/><circle cx="12" cy="6.3" r="2.1"/><circle cx="15.2" cy="7.6" r="2.1"/><circle cx="16.5" cy="10.8" r="2.1"/><circle cx="15.2" cy="14" r="2.1"/><circle cx="12" cy="15.3" r="2.1"/><circle cx="8.8" cy="14" r="2.1"/><circle cx="7.5" cy="10.8" r="2.1"/><circle cx="8.8" cy="7.6" r="2.1"/><path d="M12 17.4V21"/>',
+ garland:'<path d="M12 3.8a8.2 8.2 0 100 16.4 8.2 8.2 0 000-16.4z"/><circle cx="12" cy="3.8" r="1.7"/><circle cx="18.1" cy="8" r="1.7"/><circle cx="18.1" cy="16" r="1.7"/><circle cx="12" cy="20.2" r="1.7"/><circle cx="5.9" cy="16" r="1.7"/><circle cx="5.9" cy="8" r="1.7"/>',
+ diya:'<path d="M12 2.9c1.4 1.4 2.1 2.9 2.1 4.2 0 1.2-.7 2-2.1 3.1-1.4-1.1-2.1-1.9-2.1-3.1 0-1.3.7-2.8 2.1-4.2z"/><path d="M4.4 13h15.2c0 3.6-3.4 6.4-7.6 6.4S4.4 16.6 4.4 13z"/><path d="M2.4 21.2h19.2"/>',
+ bow:'<circle cx="16" cy="6" r="2.5"/><path d="M15 8.3L9 14.6"/><path d="M9 14.6v6"/><path d="M15 8.3c1.7 1.5 2.1 3.9 1 5.9"/><path d="M5.6 20.6h12.8"/>',
+ stone:'<ellipse cx="12" cy="18.2" rx="6.8" ry="3.6"/><ellipse cx="8.9" cy="13.4" rx="4.5" ry="2.8"/><ellipse cx="14.6" cy="10.2" rx="3.7" ry="2.3"/><path d="M3.6 21.8h16.8"/>',
+ ofrenda:'<path d="M4.6 20.6V12a7.4 7.4 0 0114.8 0v8.6z"/><path d="M2.6 20.6h18.8"/><path d="M9.4 20.6v-4.4h5.2v4.4"/><circle cx="12" cy="9.6" r="1.7"/>',
+ charity:'<path d="M12 17.4c-3.6-2.5-6.8-4.9-6.8-8.1a3.7 3.7 0 017-1.6 3.7 3.7 0 017 1.6c0 3.2-3.2 5.6-6.8 8.1z"/><path d="M4.6 20.8c1-1.6 2.6-2.6 4.4-2.9"/><path d="M19.4 20.8c-1-1.6-2.6-2.6-4.4-2.9"/>',
+ memory:'<rect x="3.4" y="5.2" width="17.2" height="13.6" rx="2.4"/><circle cx="8.6" cy="10" r="1.6"/><path d="M3.4 16.4l4.6-4 3.6 3 2.8-2.4 5.6 4.6"/>',
+ msg:'<rect x="3.5" y="4.6" width="17" height="12.4" rx="3.4"/><path d="M8.3 17v3.6L12.5 17"/>',
+ send:'<path d="M4 12l16-8-6 8 6 8-16-8z"/>',
+ share:'<path d="M12 16V4"/><path d="M8 8l4-4 4 4"/><path d="M5 14v4a2 2 0 002 2h10a2 2 0 002-2v-4"/>',
+ cloud:'<path d="M7 18a4 4 0 01-.4-8A6 6 0 0118 9.5a3.5 3.5 0 01-.5 7H7z"/>',
+ link:'<path d="M10 13a5 5 0 007 0l3-3a5 5 0 00-7-7l-1 1"/><path d="M14 11a5 5 0 00-7 0l-3 3a5 5 0 007 7l1-1"/>',
+ lock:'<rect x="4" y="10" width="16" height="11" rx="2.5"/><path d="M8 10V7a4 4 0 018 0v3"/>',
+ globe:'<circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.5 2.6 3.8 5.6 3.8 9S14.5 18.4 12 21c-2.5-2.6-3.8-5.6-3.8-9S9.5 5.6 12 3z"/>',
+ bell:'<path d="M18 9a6 6 0 10-12 0c0 5-2 6-2 6h16s-2-1-2-6"/><path d="M10.5 20a2 2 0 003 0"/>',
+ moon:'<path d="M20 14.5A8.5 8.5 0 019.5 4 8.5 8.5 0 1020 14.5z"/>',
+ trash:'<path d="M4 7h16"/><path d="M9 7V5h6v2"/><path d="M6 7l1 13h10l1-13"/>',
+ edit:'<path d="M4 20h4l10-10-4-4L4 16v4z"/><path d="M14 6l4 4"/>',
+ pdf:'<path d="M14 3H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V8l-5-5z"/><path d="M14 3v5h5"/><path d="M8 15h8"/><path d="M8 18h5"/>',
+ img:'<rect x="3" y="4" width="18" height="16" rx="2.5"/><circle cx="9" cy="10" r="1.6"/><path d="M21 16l-5-5-6 6"/>',
+ doc:'<path d="M14 3H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V8l-5-5z"/><path d="M14 3v5h5"/><path d="M9 13h6"/><path d="M9 17h4"/>',
+ db:'<ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v6c0 1.7 3.6 3 8 3s8-1.3 8-3V6"/><path d="M4 12v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/>',
+ block:'<circle cx="12" cy="12" r="9"/><path d="M6 6l12 12"/>',
+ mic:'<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0014 0"/><path d="M12 18v3"/>',
+ alert:'<path d="M12 4l9 16H3l9-16z"/><path d="M12 10v4"/><path d="M12 17h.01"/>',
+ spin:'<path d="M12 3a9 9 0 019 9"/><path d="M21 12a9 9 0 01-9 9" opacity=".35"/><path d="M12 21a9 9 0 01-9-9" opacity=".2"/>',
+ tree:'<path d="M12 21v-7"/><path d="M12 14c0-3 2.5-5 5-5s5 2 5 5-2.5 5-5 5"/><path d="M12 16c0-3.3-2.7-6-6-6S0 12.7 0 16s2.7 6 6 6"/>',
+ cog:'<circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.2 5.2l2.1 2.1M16.7 16.7l2.1 2.1M18.8 5.2l-2.1 2.1M7.3 16.7l-2.1 2.1"/>',
+ people:'<circle cx="9" cy="8" r="3.4"/><path d="M2.5 20a6.5 6.5 0 0113 0"/><path d="M16.5 5.2a3.4 3.4 0 010 6.6"/><path d="M18 14.2a6.5 6.5 0 013.5 5.8"/>'
+};
+function svg(n){return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'+ICONS[n]+'</svg>';}
+/* Memorial bouquet — three 5-petal blooms over paper wrap */
+function bouquetSVG(fl){
+  var PAL=fl||[['#EE8FA6','#F7D06B'],['#F0B84E','#E08A2E'],['#B892D6','#E9C6F2']];
+  var POS=[[46,38],[67,24],[88,38]];
+  var blooms='';
+  PAL.forEach(function(f,fi){
+    var petals='';
+    for(var i=0;i<5;i++){
+      petals+='<ellipse cx="0" cy="-6.6" rx="4.6" ry="6.6" transform="rotate('+(i*72)+')"/>';
+    }
+    blooms+='<g transform="translate('+POS[fi][0]+','+POS[fi][1]+')"><g fill="'+f[0]+'">'+petals+
+      '</g><circle r="3" fill="'+f[1]+'"/></g>';
+  });
+  return '<svg viewBox="0 0 134 104" fill="none">'+
+    '<g stroke="#5E8A63" stroke-width="2.3" stroke-linecap="round">'+
+      '<path d="M46 38C46 48 54 58 62 64"/><path d="M67 24V64"/><path d="M88 38C88 48 80 58 72 64"/>'+
+    '</g>'+
+    '<g fill="#6E9B72">'+
+      '<path d="M58 55C47 51 38 57 40 68c11 0 18-5 18-13z"/>'+
+      '<path d="M76 51c11-4 20 2 18 13-11 0-18-5-18-13z"/>'+
+    '</g>'+
+    '<ellipse cx="67" cy="99.5" rx="29" ry="3.8" fill="#0F0B06" opacity=".08"/>'+
+    '<path d="M38 64h58l-9 32c-8 5-32 5-40 0z" fill="#E6D4B5"/>'+
+    '<path d="M38 64h58l-9 32c-8 5-32 5-40 0z" stroke="#C7AF8B" stroke-width="1.3"/>'+
+    '<path d="M40 70.5h54" stroke="#C7AF8B" stroke-width="1.3" opacity=".8"/>'+
+    blooms+
+    '</svg>';
+}
+/* Memorial prayer — two palms pressed together */
+function praySVG(){
+  return '<span>🙏</span>';
+}
+/* East Asian — a bowing figure */
+function bowSVG(c){
+  return '<svg viewBox="0 0 96 104" fill="none" stroke="'+c+'" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">'+
+    '<circle cx="64" cy="23" r="11" fill="'+c+'" fill-opacity=".16"/>'+
+    '<path d="M59 34c-8 7-17 18-21 32"/>'+
+    '<path d="M38 66v19"/><path d="M38 85l-8 6"/>'+
+    '<path d="M54 40c8 8 9 21 4 31"/>'+
+    '<path d="M14 91h68" opacity=".3"/>'+
+    '<ellipse cx="38" cy="92" rx="21" ry="3.2" fill="#0F0B06" opacity=".1" stroke="none"/>'+
+    '</svg>';
+}
+/* Jewish — stones placed on the memorial */
+function stoneSVG(){
+  var s='<svg viewBox="0 0 120 80" fill="none">';
+  s+='<ellipse cx="60" cy="76" rx="43" ry="3.6" fill="#0F0B06" opacity=".12"/>';
+  s+='<g class="st1"><ellipse cx="60" cy="65" rx="35" ry="14" fill="#8C857A"/>'+
+     '<ellipse cx="60" cy="60" rx="30" ry="9" fill="#A79F93" opacity=".55"/></g>';
+  s+='<g class="st2"><ellipse cx="45" cy="49" rx="25" ry="12" fill="#A29A8E"/>'+
+     '<ellipse cx="45" cy="45" rx="20" ry="7" fill="#BCB4A7" opacity=".55"/></g>';
+  s+='<g class="st3"><ellipse cx="71" cy="37" rx="19" ry="10" fill="#B7AFA2"/>'+
+     '<ellipse cx="71" cy="33" rx="14" ry="6" fill="#D2CBBE" opacity=".6"/></g>';
+  return s+'</svg>';
+}
+function fillIcons(root){
+  (root||document).querySelectorAll('[data-icon]').forEach(function(el){
+    var n=el.getAttribute('data-icon');
+    if(ICONS[n]) el.innerHTML=svg(n);
+  });
+}
+const LANGS=[['en','English'],['es','Español'],['pt','Português'],['fr','Français'],['de','Deutsch'],
+['it','Italiano'],['ja','日本語'],['ko','한국어'],['zh-Hans','简体中文'],['zh-Hant','繁體中文'],['ru','Русский'],['nl','Nederlands']];
+const T={
+en:{tagline:'The shrine your family keeps.',tab_tree:'Tree',tab_people:'People',tab_wall:'Memorial',tab_settings:'Settings',
+btn_done:'Done',btn_cancel:'Cancel',btn_search:'Search',tree_title:'Family Tree',people_title:'People',wall_title:'Memorial Wall',set_title:'Settings',exp_title:'Export',sync_title:'Sync & Share',pro_title:'Lararium Pro',
+mem_loving:'In Loving Memory',mem_flower:'Flowers',mem_candle:'Candle',mem_incense:'Incense',mem_prayer:'Prayer',mem_choose:'Choose a tribute',mem_send_flower:'Send flowers',mem_send_candle:'Light the candle',mem_send_incense:'Light incense',mem_send_prayer:'Offer a prayer',mem_marigold:'Marigolds',mem_garland:'Garland',mem_diya:'Oil lamp',mem_bow:'Bow',mem_stone:'Stone',mem_ofrenda:'Offering',mem_charity:'Donation',mem_memory:'Memory',mem_send_marigold:'Lay marigolds',mem_send_garland:'Offer a garland',mem_send_diya:'Light the lamp',mem_send_bow:'Offer a bow',mem_send_stone:'Place a stone',mem_send_ofrenda:'Place an offering',mem_send_charity:'Give in memory',mem_send_memory:'Share a memory',mem_sent:'Sent ✓',mem_arm:'Tap Send to offer this',
+theme_sub:'We picked one based on your region. Each tradition has its own tributes — change anytime.',theme_title:'Choose a memorial style',theme_rec:'Recommended',theme_use:'Use recommended',
+th_western:'Western',th_east_asian:'East Asian',th_latin:'Latin American',th_jewish:'Jewish',th_hindu:'Hindu',th_islamic:'Islamic',th_secular:'Secular',set_language:'Language',onb_cta:'Start my family tree',
+edit_title:'Edit person',f_first:'First name',f_last:'Last name',f_gender:'Gender',f_born:'Born',f_died:'Died',f_place:'Place',f_occ:'Occupation',btn_save:'Save changes',btn_delete:'Delete person',
+add_title:'Add relative',add_who:'How are they related?',rel_parent:'Parent',rel_spouse:'Spouse',rel_child:'Child',rel_sibling:'Sibling',add_next:'Continue',
+search_title:'Search',search_hint:'People, places, dates…',search_empty:'No matches found',
+imp_title:'Import GEDCOM',imp_pick:'Choose a .ged file',imp_note:'Parsed on this device — nothing is uploaded',imp_go:'Start import',
+rem_title:'Reminders',rem_anniv:'Death anniversaries',rem_birth:'Birthdays',rem_time:'Remind me at',rem_days:'Days ahead'},
+es:{tagline:'El larario que guarda tu familia.',tab_tree:'Árbol',tab_people:'Personas',tab_wall:'Memorial',tab_settings:'Ajustes',
+btn_done:'Hecho',btn_cancel:'Cancelar',btn_search:'Buscar',tree_title:'Árbol familiar',people_title:'Personas',wall_title:'Muro memorial',set_title:'Ajustes',exp_title:'Exportar',sync_title:'Sincronizar',pro_title:'Lararium Pro',
+mem_loving:'En memoria',mem_flower:'Flores',mem_candle:'Vela',mem_incense:'Incienso',mem_prayer:'Oración',mem_choose:'Elige un homenaje',mem_send_flower:'Enviar flores',mem_send_candle:'Encender la vela',mem_send_incense:'Encender incienso',mem_send_prayer:'Ofrecer una oración',mem_marigold:'Cempasúchil',mem_garland:'Guirnalda',mem_diya:'Lámpara',mem_bow:'Reverencia',mem_stone:'Piedra',mem_ofrenda:'Ofrenda',mem_charity:'Donación',mem_memory:'Recuerdo',mem_send_marigold:'Colocar cempasúchil',mem_send_garland:'Ofrecer una guirnalda',mem_send_diya:'Encender la lámpara',mem_send_bow:'Hacer una reverencia',mem_send_stone:'Colocar una piedra',mem_send_ofrenda:'Colocar una ofrenda',mem_send_charity:'Donar en memoria',mem_send_memory:'Compartir un recuerdo',mem_sent:'Enviado ✓',mem_arm:'Pulsa Enviar para ofrecerlo',
+theme_sub:'Elegimos uno según tu región. Cada tradición tiene sus propios homenajes — cámbialo cuando quieras.',theme_title:'Elige un estilo de homenaje',theme_rec:'Recomendado',theme_use:'Usar recomendado',
+th_western:'Occidental',th_east_asian:'Asiático oriental',th_latin:'Latinoamericano',th_jewish:'Judío',th_hindu:'Hindú',th_islamic:'Islámico',th_secular:'Secular',set_language:'Idioma',onb_cta:'Crear mi árbol familiar',
+edit_title:'Editar persona',f_first:'Nombre',f_last:'Apellido',f_gender:'Género',f_born:'Nacimiento',f_died:'Fallecimiento',f_place:'Lugar',f_occ:'Ocupación',btn_save:'Guardar',btn_delete:'Eliminar persona',
+add_title:'Añadir pariente',add_who:'¿Qué relación tiene?',rel_parent:'Padre/Madre',rel_spouse:'Cónyuge',rel_child:'Hijo/a',rel_sibling:'Hermano/a',add_next:'Continuar',
+search_title:'Buscar',search_hint:'Personas, lugares, fechas…',search_empty:'Sin resultados',
+imp_title:'Importar GEDCOM',imp_pick:'Elegir un archivo .ged',imp_note:'Se procesa en este dispositivo',imp_go:'Iniciar importación',
+rem_title:'Recordatorios',rem_anniv:'Aniversarios de fallecimiento',rem_birth:'Cumpleaños',rem_time:'Recordar a las',rem_days:'Días de antelación'},
+pt:{tagline:'O larário que sua família guarda.',tab_tree:'Árvore',tab_people:'Pessoas',tab_wall:'Memorial',tab_settings:'Ajustes',
+btn_done:'Concluído',btn_cancel:'Cancelar',btn_search:'Buscar',tree_title:'Árvore familiar',people_title:'Pessoas',wall_title:'Muro memorial',set_title:'Ajustes',exp_title:'Exportar',sync_title:'Sincronizar',pro_title:'Lararium Pro',
+mem_loving:'Em memória',mem_flower:'Flores',mem_candle:'Vela',mem_incense:'Incenso',mem_prayer:'Oração',mem_choose:'Escolha uma homenagem',mem_send_flower:'Enviar flores',mem_send_candle:'Acender a vela',mem_send_incense:'Acender o incenso',mem_send_prayer:'Oferecer uma oração',mem_marigold:'Cravos-de-defunto',mem_garland:'Guirlanda',mem_diya:'Lâmpada',mem_bow:'Reverência',mem_stone:'Pedra',mem_ofrenda:'Ofrenda',mem_charity:'Doação',mem_memory:'Memória',mem_send_marigold:'Colocar cravos-de-defunto',mem_send_garland:'Oferecer uma guirlanda',mem_send_diya:'Acender a lâmpada',mem_send_bow:'Fazer uma reverência',mem_send_stone:'Colocar uma pedra',mem_send_ofrenda:'Colocar uma ofrenda',mem_send_charity:'Doar em memória',mem_send_memory:'Partilhar uma memória',mem_sent:'Enviado ✓',mem_arm:'Toque Enviar para oferecer',
+theme_sub:'Escolhemos um com base na sua região. Cada tradição tem suas próprias homenagens — mude quando quiser.',theme_title:'Escolha um estilo de homenagem',theme_rec:'Recomendado',theme_use:'Usar recomendado',
+th_western:'Ocidental',th_east_asian:'Asiático oriental',th_latin:'Latino-americano',th_jewish:'Judaico',th_hindu:'Hindu',th_islamic:'Islâmico',th_secular:'Secular',set_language:'Idioma',onb_cta:'Criar minha árvore familiar',
+edit_title:'Editar pessoa',f_first:'Nome',f_last:'Sobrenome',f_gender:'Gênero',f_born:'Nascimento',f_died:'Falecimento',f_place:'Local',f_occ:'Ocupação',btn_save:'Salvar',btn_delete:'Excluir pessoa',
+add_title:'Adicionar parente',add_who:'Qual é a relação?',rel_parent:'Pai/Mãe',rel_spouse:'Cônjuge',rel_child:'Filho/a',rel_sibling:'Irmão/ã',add_next:'Continuar',
+search_title:'Buscar',search_hint:'Pessoas, lugares, datas…',search_empty:'Sem resultados',
+imp_title:'Importar GEDCOM',imp_pick:'Escolher um arquivo .ged',imp_note:'Processado neste dispositivo',imp_go:'Iniciar importação',
+rem_title:'Lembretes',rem_anniv:'Aniversários de falecimento',rem_birth:'Aniversários',rem_time:'Lembrar às',rem_days:'Dias de antecedência'},
+fr:{tagline:'Le sanctuaire que garde votre famille.',tab_tree:'Arbre',tab_people:'Personnes',tab_wall:'Mémorial',tab_settings:'Réglages',
+btn_done:'Terminé',btn_cancel:'Annuler',btn_search:'Rechercher',tree_title:'Arbre généalogique',people_title:'Personnes',wall_title:'Mur mémorial',set_title:'Réglages',exp_title:'Exporter',sync_title:'Synchronisation',pro_title:'Lararium Pro',
+mem_loving:'En mémoire',mem_flower:'Fleurs',mem_candle:'Bougie',mem_incense:'Encens',mem_prayer:'Prière',mem_choose:'Choisissez un hommage',mem_send_flower:'Envoyer des fleurs',mem_send_candle:'Allumer la bougie',mem_send_incense:'Allumer l\'encens',mem_send_prayer:'Offrir une prière',mem_marigold:'Souci',mem_garland:'Guirlande',mem_diya:'Lampe',mem_bow:'Salut',mem_stone:'Pierre',mem_ofrenda:'Offrande',mem_charity:'Don',mem_memory:'Souvenir',mem_send_marigold:'Déposer des soucis',mem_send_garland:'Offrir une guirlande',mem_send_diya:'Allumer la lampe',mem_send_bow:'Saluer',mem_send_stone:'Déposer une pierre',mem_send_ofrenda:'Déposer une offrande',mem_send_charity:'Donner en mémoire',mem_send_memory:'Partager un souvenir',mem_sent:'Envoyé ✓',mem_arm:'Appuyez sur Envoyer pour l\'offrir',
+theme_sub:'Nous en avons choisi un selon votre région. Chaque tradition a ses propres hommages — changez à tout moment.',theme_title:'Choisissez un style de recueillement',theme_rec:'Recommandé',theme_use:'Utiliser',
+th_western:'Occidental',th_east_asian:'Asiatique',th_latin:'Latino-américain',th_jewish:'Juif',th_hindu:'Hindou',th_islamic:'Islamique',th_secular:'Laïque',set_language:'Langue',onb_cta:'Créer mon arbre familial',
+edit_title:'Modifier la personne',f_first:'Prénom',f_last:'Nom',f_gender:'Genre',f_born:'Naissance',f_died:'Décès',f_place:'Lieu',f_occ:'Profession',btn_save:'Enregistrer',btn_delete:'Supprimer la personne',
+add_title:'Ajouter un proche',add_who:'Quel est le lien ?',rel_parent:'Parent',rel_spouse:'Conjoint',rel_child:'Enfant',rel_sibling:'Frère/Sœur',add_next:'Continuer',
+search_title:'Rechercher',search_hint:'Personnes, lieux, dates…',search_empty:'Aucun résultat',
+imp_title:'Importer GEDCOM',imp_pick:'Choisir un fichier .ged',imp_note:'Traitement sur cet appareil',imp_go:'Lancer l’import',
+rem_title:'Rappels',rem_anniv:'Anniversaires de décès',rem_birth:'Anniversaires',rem_time:'Rappeler à',rem_days:'Jours à l’avance'},
+de:{tagline:'Der Schrein, den deine Familie bewahrt.',tab_tree:'Baum',tab_people:'Personen',tab_wall:'Gedenken',tab_settings:'Einstellungen',
+btn_done:'Fertig',btn_cancel:'Abbrechen',btn_search:'Suchen',tree_title:'Stammbaum',people_title:'Personen',wall_title:'Gedenkwand',set_title:'Einstellungen',exp_title:'Exportieren',sync_title:'Sync & Teilen',pro_title:'Lararium Pro',
+mem_loving:'In liebevoller Erinnerung',mem_flower:'Blumen',mem_candle:'Kerze',mem_incense:'Weihrauch',mem_prayer:'Gebet',mem_choose:'Wähle eine Gabe',mem_send_flower:'Blumen senden',mem_send_candle:'Kerze anzünden',mem_send_incense:'Weihrauch anzünden',mem_send_prayer:'Ein Gebet sprechen',mem_marigold:'Ringelblumen',mem_garland:'Girlande',mem_diya:'Öllampe',mem_bow:'Verbeugung',mem_stone:'Stein',mem_ofrenda:'Opfergabe',mem_charity:'Spende',mem_memory:'Erinnerung',mem_send_marigold:'Ringelblumen legen',mem_send_garland:'Eine Girlande widmen',mem_send_diya:'Die Lampe anzünden',mem_send_bow:'Eine Verbeugung machen',mem_send_stone:'Einen Stein legen',mem_send_ofrenda:'Eine Opfergabe platzieren',mem_send_charity:'In Gedenken spenden',mem_send_memory:'Eine Erinnerung teilen',mem_sent:'Gesendet ✓',mem_arm:'Tippe auf Senden, um es zu geben',
+theme_sub:'Wir haben einen nach Ihrer Region gewählt. Jede Tradition hat ihre eigenen Ehrungen — jederzeit änderbar.',theme_title:'Wähle eine Gedenkform',theme_rec:'Empfohlen',theme_use:'Empfehlung nutzen',
+th_western:'Westlich',th_east_asian:'Ostasiatisch',th_latin:'Lateinamerikanisch',th_jewish:'Jüdisch',th_hindu:'Hinduistisch',th_islamic:'Islamisch',th_secular:'Säkular',set_language:'Sprache',onb_cta:'Meinen Stammbaum beginnen',
+edit_title:'Person bearbeiten',f_first:'Vorname',f_last:'Nachname',f_gender:'Geschlecht',f_born:'Geboren',f_died:'Gestorben',f_place:'Ort',f_occ:'Beruf',btn_save:'Speichern',btn_delete:'Person löschen',
+add_title:'Verwandten hinzufügen',add_who:'Wie sind sie verwandt?',rel_parent:'Elternteil',rel_spouse:'Ehepartner',rel_child:'Kind',rel_sibling:'Geschwister',add_next:'Weiter',
+search_title:'Suchen',search_hint:'Personen, Orte, Daten…',search_empty:'Keine Treffer',
+imp_title:'GEDCOM importieren',imp_pick:'.ged-Datei wählen',imp_note:'Verarbeitung auf diesem Gerät',imp_go:'Import starten',
+rem_title:'Erinnerungen',rem_anniv:'Todestage',rem_birth:'Geburtstage',rem_time:'Erinnern um',rem_days:'Tage vorher'},
+it:{tagline:'Il larario che la tua famiglia custodisce.',tab_tree:'Albero',tab_people:'Persone',tab_wall:'Memoria',tab_settings:'Impostazioni',
+btn_done:'Fatto',btn_cancel:'Annulla',btn_search:'Cerca',tree_title:'Albero genealogico',people_title:'Persone',wall_title:'Muro della memoria',set_title:'Impostazioni',exp_title:'Esporta',sync_title:'Sincronizza',pro_title:'Lararium Pro',
+mem_loving:'In memoria',mem_flower:'Fiori',mem_candle:'Candele',mem_incense:'Incenso',mem_prayer:'Preghiera',mem_choose:'Scegli un omaggio',mem_send_flower:'Invia fiori',mem_send_candle:'Accendi la candela',mem_send_incense:'Accendi l\'incenso',mem_send_prayer:'Offri una preghiera',mem_marigold:'Tagete',mem_garland:'Ghirlanda',mem_diya:'Lampada',mem_bow:'Inchino',mem_stone:'Pietra',mem_ofrenda:'Offerta',mem_charity:'Donazione',mem_memory:'Ricordo',mem_send_marigold:'Deporre tagete',mem_send_garland:'Offrire una ghirlanda',mem_send_diya:'Accendere la lampada',mem_send_bow:'Fare un inchino',mem_send_stone:'Deporre una pietra',mem_send_ofrenda:'Deporre una offerta',mem_send_charity:'Donare in memoria',mem_send_memory:'Condividere un ricordo',mem_sent:'Inviato ✓',mem_arm:'Tocca Invia per offrirlo',
+theme_sub:'Ne abbiamo scelto uno in base alla tua regione. Ogni tradizione ha i suoi omaggi — cambia quando vuoi.',theme_title:'Scegli uno stile commemorativo',theme_rec:'Consigliato',theme_use:'Usa consigliato',
+th_western:'Occidentale',th_east_asian:'Est-asiatico',th_latin:'Latinoamericano',th_jewish:'Ebraico',th_hindu:'Indù',th_islamic:'Islamico',th_secular:'Secolare',set_language:'Lingua',onb_cta:'Crea il mio albero familiare',
+edit_title:'Modifica persona',f_first:'Nome',f_last:'Cognome',f_gender:'Sesso',f_born:'Nato/a',f_died:'Deceduto/a',f_place:'Luogo',f_occ:'Professione',btn_save:'Salva',btn_delete:'Elimina persona',
+add_title:'Aggiungi parente',add_who:'Che legame ha?',rel_parent:'Genitore',rel_spouse:'Coniuge',rel_child:'Figlio/a',rel_sibling:'Fratello/Sorella',add_next:'Continua',
+search_title:'Cerca',search_hint:'Persone, luoghi, date…',search_empty:'Nessun risultato',
+imp_title:'Importa GEDCOM',imp_pick:'Scegli un file .ged',imp_note:'Elaborato su questo dispositivo',imp_go:'Avvia importazione',
+rem_title:'Promemoria',rem_anniv:'Anniversari di morte',rem_birth:'Compleanni',rem_time:'Ricorda alle',rem_days:'Giorni prima'}};
+T.ja={tagline:'家族が守りつづける小さな聖域。',tab_tree:'ツリー',tab_people:'人物',tab_wall:'追悼',tab_settings:'設定',
+btn_done:'完了',btn_cancel:'キャンセル',btn_search:'検索',tree_title:'家系図',people_title:'人物',wall_title:'追悼の壁',set_title:'設定',exp_title:'書き出し',sync_title:'同期と共有',pro_title:'Lararium Pro',
+mem_loving:'追悼',mem_flower:'献花',mem_candle:'ろうそく',mem_incense:'線香',mem_prayer:'祈り',mem_choose:'供物を選ぶ',mem_send_flower:'花を供える',mem_send_candle:'ろうそくを灯す',mem_send_incense:'線香を灯す',mem_send_prayer:'祈りを捧げる',mem_marigold:'マリーゴールド',mem_garland:'花輪',mem_diya:'ランプ',mem_bow:'礼拝',mem_stone:'石',mem_ofrenda:'供物',mem_charity:'喜捨',mem_memory:'思い出',mem_send_marigold:'マリーゴールドを供える',mem_send_garland:'花輪を捧げる',mem_send_diya:'ランプに火をともす',mem_send_bow:'礼拝する',mem_send_stone:'石を置く',mem_send_ofrenda:'供物を置く',mem_send_charity:'追悼の寄付をする',mem_send_memory:'思い出を共有する',mem_sent:'送信済み ✓',mem_arm:'「送る」をタップして捧げる',
+theme_sub:'地域に合わせて選びました。伝統ごとに供え方が異なります。いつでも変更できます。',theme_title:'追悼のスタイルを選択',theme_rec:'おすすめ',theme_use:'おすすめを使う',
+th_western:'洋風',th_east_asian:'東アジア',th_latin:'中南米',th_jewish:'ユダヤ',th_hindu:'ヒンドゥー',th_islamic:'イスラム',th_secular:'宗教色なし',set_language:'言語',onb_cta:'家系図を作る',
+edit_title:'人物を編集',f_first:'名',f_last:'姓',f_gender:'性別',f_born:'生年月日',f_died:'没年月日',f_place:'場所',f_occ:'職業',btn_save:'保存',btn_delete:'人物を削除',
+add_title:'親族を追加',add_who:'続柄を選んでください',rel_parent:'親',rel_spouse:'配偶者',rel_child:'子',rel_sibling:'兄弟姉妹',add_next:'次へ',
+search_title:'検索',search_hint:'人物・場所・日付…',search_empty:'該当なし',
+imp_title:'GEDCOM読み込み',imp_pick:'.gedファイルを選択',imp_note:'端末内で処理します',imp_go:'読み込み開始',
+rem_title:'リマインダー',rem_anniv:'命日',rem_birth:'誕生日',rem_time:'通知時刻',rem_days:'日前に通知'};
+T.ko={tagline:'가족이 지켜 온 작은 성소.',tab_tree:'트리',tab_people:'인물',tab_wall:'추모',tab_settings:'설정',
+btn_done:'완료',btn_cancel:'취소',btn_search:'검색',tree_title:'가족 트리',people_title:'인물',wall_title:'추모 벽',set_title:'설정',exp_title:'내보내기',sync_title:'동기화 및 공유',pro_title:'Lararium Pro',
+mem_loving:'삼가 고인의 명복을 빕니다',mem_flower:'꽃',mem_candle:'촛불',mem_incense:'향',mem_prayer:'기도',mem_choose:'헌화를 선택하세요',mem_send_flower:'꽃 보내기',mem_send_candle:'촛불 켜기',mem_send_incense:'향 피우기',mem_send_prayer:'기도 올리기',mem_marigold:'메리골드',mem_garland:'화환',mem_diya:'등불',mem_bow:'절',mem_stone:'돌',mem_ofrenda:'제물',mem_charity:'기부',mem_memory:'추억',mem_send_marigold:'메리골드 놓기',mem_send_garland:'화환 바치기',mem_send_diya:'등불 켜기',mem_send_bow:'절 올리기',mem_send_stone:'돌 놓기',mem_send_ofrenda:'제물 올리기',mem_send_charity:'추모 기부하기',mem_send_memory:'추억 공유하기',mem_sent:'보냄 ✓',mem_arm:'보내기를 눌러 올리기',
+theme_sub:'지역에 맞춰 선택했습니다. 전통마다 추모 방식이 다릅니다. 언제든 바꿀 수 있습니다.',theme_title:'추모 방식 선택',theme_rec:'추천',theme_use:'추천 사용',
+th_western:'서양',th_east_asian:'동아시아',th_latin:'중남미',th_jewish:'유대교',th_hindu:'힌두교',th_islamic:'이슬람교',th_secular:'종교 없음',set_language:'언어',onb_cta:'가족 트리 만들기',
+edit_title:'인물 편집',f_first:'이름',f_last:'성',f_gender:'성별',f_born:'출생',f_died:'사망',f_place:'장소',f_occ:'직업',btn_save:'저장',btn_delete:'인물 삭제',
+add_title:'가족 추가',add_who:'어떤 관계인가요?',rel_parent:'부모',rel_spouse:'배우자',rel_child:'자녀',rel_sibling:'형제자매',add_next:'계속',
+search_title:'검색',search_hint:'인물·장소·날짜…',search_empty:'결과 없음',
+imp_title:'GEDCOM 가져오기',imp_pick:'.ged 파일 선택',imp_note:'기기에서 처리됩니다',imp_go:'가져오기 시작',
+rem_title:'알림',rem_anniv:'기일',rem_birth:'생일',rem_time:'알림 시간',rem_days:'일 전'};
+T['zh-Hans']={tagline:'家族世代守护的圣龛。',tab_tree:'树',tab_people:'人物',tab_wall:'纪念',tab_settings:'设置',
+btn_done:'完成',btn_cancel:'取消',btn_search:'搜索',tree_title:'家族树',people_title:'人物',wall_title:'纪念墙',set_title:'设置',exp_title:'导出',sync_title:'同步与共享',pro_title:'Lararium Pro',
+mem_loving:'谨以此纪念',mem_flower:'献花',mem_candle:'点烛',mem_incense:'上香',mem_prayer:'祈福',mem_choose:'选择一份心意',mem_send_flower:'献上鲜花',mem_send_candle:'点亮蜡烛',mem_send_incense:'点燃线香',mem_send_prayer:'送上祈福',mem_marigold:'万寿菊',mem_garland:'花环',mem_diya:'油灯',mem_bow:'鞠躬',mem_stone:'放石头',mem_ofrenda:'祭坛供奉',mem_charity:'捐赠',mem_memory:'回忆',mem_send_marigold:'献上万寿菊',mem_send_garland:'献上花环',mem_send_diya:'点亮油灯',mem_send_bow:'行鞠躬礼',mem_send_stone:'放一块石头',mem_send_ofrenda:'放置祭品',mem_send_charity:'以纪念之名捐赠',mem_send_memory:'分享一段回忆',mem_sent:'已送出 ✓',mem_arm:'点「送出」以表达心意',
+theme_sub:'已根据你的地区选择。每种传统都有各自的缅怀方式，可随时更改。',theme_title:'选择缅怀方式',theme_rec:'推荐',theme_use:'使用推荐',
+th_western:'西式',th_east_asian:'东亚',th_latin:'拉美',th_jewish:'犹太',th_hindu:'印度',th_islamic:'伊斯兰',th_secular:'中性',set_language:'语言',onb_cta:'开始创建我的家族树',
+edit_title:'编辑人物',f_first:'名',f_last:'姓',f_gender:'性别',f_born:'出生',f_died:'逝世',f_place:'地点',f_occ:'职业',btn_save:'保存',btn_delete:'删除人物',
+add_title:'添加亲属',add_who:'选择关系',rel_parent:'父母',rel_spouse:'配偶',rel_child:'子女',rel_sibling:'兄弟姐妹',add_next:'继续',
+search_title:'搜索',search_hint:'人物、地点、日期…',search_empty:'没有匹配结果',
+imp_title:'导入 GEDCOM',imp_pick:'选择 .ged 文件',imp_note:'在本机解析，不会上传',imp_go:'开始导入',
+rem_title:'提醒',rem_anniv:'忌日',rem_birth:'生日',rem_time:'提醒时间',rem_days:'提前天数'};
+T['zh-Hant']={tagline:'家族世代守護的聖龕。',tab_tree:'樹',tab_people:'人物',tab_wall:'紀念',tab_settings:'設定',
+btn_done:'完成',btn_cancel:'取消',btn_search:'搜尋',tree_title:'家族樹',people_title:'人物',wall_title:'紀念牆',set_title:'設定',exp_title:'匯出',sync_title:'同步與分享',pro_title:'Lararium Pro',
+mem_loving:'謹以此紀念',mem_flower:'獻花',mem_candle:'點燭',mem_incense:'上香',mem_prayer:'祈福',mem_choose:'選擇一份心意',mem_send_flower:'獻上鮮花',mem_send_candle:'點亮蠟燭',mem_send_incense:'點燃線香',mem_send_prayer:'送上祈福',mem_marigold:'萬壽菊',mem_garland:'花環',mem_diya:'油燈',mem_bow:'鞠躬',mem_stone:'放石頭',mem_ofrenda:'祭壇供奉',mem_charity:'捐贈',mem_memory:'回憶',mem_send_marigold:'獻上萬壽菊',mem_send_garland:'獻上花環',mem_send_diya:'點亮油燈',mem_send_bow:'行鞠躬禮',mem_send_stone:'放一塊石頭',mem_send_ofrenda:'放置祭品',mem_send_charity:'以紀念之名捐贈',mem_send_memory:'分享一段回憶',mem_sent:'已送出 ✓',mem_arm:'點「送出」以表達心意',
+theme_sub:'已依據你的地區選擇。每種傳統都有各自的緬懷方式，可隨時更改。',theme_title:'選擇緬懷方式',theme_rec:'推薦',theme_use:'使用推薦',
+th_western:'西式',th_east_asian:'東亞',th_latin:'拉美',th_jewish:'猶太',th_hindu:'印度',th_islamic:'伊斯蘭',th_secular:'中性',set_language:'語言',onb_cta:'開始建立我的家族樹',
+edit_title:'編輯人物',f_first:'名',f_last:'姓',f_gender:'性別',f_born:'出生',f_died:'逝世',f_place:'地點',f_occ:'職業',btn_save:'儲存',btn_delete:'刪除人物',
+add_title:'新增親屬',add_who:'選擇關係',rel_parent:'父母',rel_spouse:'配偶',rel_child:'子女',rel_sibling:'兄弟姐妹',add_next:'繼續',
+search_title:'搜尋',search_hint:'人物、地點、日期…',search_empty:'沒有符合的結果',
+imp_title:'匯入 GEDCOM',imp_pick:'選擇 .ged 檔案',imp_note:'在本機解析，不會上傳',imp_go:'開始匯入',
+rem_title:'提醒',rem_anniv:'忌日',rem_birth:'生日',rem_time:'提醒時間',rem_days:'提前天數'};
+T.ru={tagline:'Святыня, которую хранит ваша семья.',tab_tree:'Древо',tab_people:'Люди',tab_wall:'Память',tab_settings:'Настройки',
+btn_done:'Готово',btn_cancel:'Отмена',btn_search:'Поиск',tree_title:'Семейное древо',people_title:'Люди',wall_title:'Стена памяти',set_title:'Настройки',exp_title:'Экспорт',sync_title:'Синхронизация',pro_title:'Lararium Pro',
+mem_loving:'Вечная память',mem_flower:'Цветы',mem_candle:'Свеча',mem_incense:'Благовония',mem_prayer:'Молитва',mem_choose:'Выберите дар',mem_send_flower:'Отправить цветы',mem_send_candle:'Зажечь свечу',mem_send_incense:'Зажечь благовония',mem_send_prayer:'Вознести молитву',mem_marigold:'Бархатцы',mem_garland:'Гирлянда',mem_diya:'Лампада',mem_bow:'Поклон',mem_stone:'Камень',mem_ofrenda:'Подношение',mem_charity:'Пожертвование',mem_memory:'Воспоминание',mem_send_marigold:'Возложить бархатцы',mem_send_garland:'Возложить гирлянду',mem_send_diya:'Зажечь лампаду',mem_send_bow:'Совершить поклон',mem_send_stone:'Положить камень',mem_send_ofrenda:'Возложить подношение',mem_send_charity:'Пожертвовать в память',mem_send_memory:'Поделиться воспоминанием',mem_sent:'Отправлено ✓',mem_arm:'Нажмите «Отправить», чтобы поднести',
+theme_sub:'Мы выбрали стиль по вашему региону. У каждой традиции свои знаки памяти — меняйте в любое время.',theme_title:'Выберите стиль поминовения',theme_rec:'Рекомендуем',theme_use:'Использовать',
+th_western:'Западный',th_east_asian:'Восточноазиатский',th_latin:'Латиноамериканский',th_jewish:'Иудейский',th_hindu:'Индуистский',th_islamic:'Исламский',th_secular:'Светский',set_language:'Язык',onb_cta:'Создать семейное древо',
+edit_title:'Редактировать',f_first:'Имя',f_last:'Фамилия',f_gender:'Пол',f_born:'Родился',f_died:'Умер',f_place:'Место',f_occ:'Профессия',btn_save:'Сохранить',btn_delete:'Удалить',
+add_title:'Добавить родственника',add_who:'Кем он(а) приходится?',rel_parent:'Родитель',rel_spouse:'Супруг',rel_child:'Ребёнок',rel_sibling:'Брат/Сестра',add_next:'Продолжить',
+search_title:'Поиск',search_hint:'Люди, места, даты…',search_empty:'Ничего не найдено',
+imp_title:'Импорт GEDCOM',imp_pick:'Выберите файл .ged',imp_note:'Обрабатывается на устройстве',imp_go:'Начать импорт',
+rem_title:'Напоминания',rem_anniv:'Годовщины смерти',rem_birth:'Дни рождения',rem_time:'Напомнить в',rem_days:'За дней'};
+T.nl={tagline:'Het schrijn dat je familie bewaart.',tab_tree:'Boom',tab_people:'Personen',tab_wall:'Herdenking',tab_settings:'Instellingen',
+btn_done:'Klaar',btn_cancel:'Annuleren',btn_search:'Zoeken',tree_title:'Stamboom',people_title:'Personen',wall_title:'Herdenkingsmuur',set_title:'Instellingen',exp_title:'Exporteren',sync_title:'Synchroniseren',pro_title:'Lararium Pro',
+mem_loving:'In liefdevolle herinnering',mem_flower:'Bloemen',mem_candle:'Kaars',mem_incense:'Wierook',mem_prayer:'Gebed',mem_choose:'Kies een eerbetoon',mem_send_flower:'Bloemen sturen',mem_send_candle:'Kaars aansteken',mem_send_incense:'Wierook aansteken',mem_send_prayer:'Een gebed uitspreken',mem_marigold:'Goudsbloemen',mem_garland:'Krans',mem_diya:'Olielamp',mem_bow:'Buiging',mem_stone:'Steen',mem_ofrenda:'Offer',mem_charity:'Donatie',mem_memory:'Herinnering',mem_send_marigold:'Goudsbloemen leggen',mem_send_garland:'Een krans aanbieden',mem_send_diya:'De lamp aansteken',mem_send_bow:'Een buiging maken',mem_send_stone:'Een steen leggen',mem_send_ofrenda:'Een offer plaatsen',mem_send_charity:'Doneren ter nagedachtenis',mem_send_memory:'Een herinnering delen',mem_sent:'Verzonden ✓',mem_arm:'Tik op Verstuur om te geven',
+theme_sub:'We kozen er een op basis van uw regio. Elke traditie heeft haar eigen eerbetoon — altijd aanpasbaar.',theme_title:'Kies een herdenkingsstijl',theme_rec:'Aanbevolen',theme_use:'Gebruik aanbevolen',
+th_western:'Westers',th_east_asian:'Oost-Aziatisch',th_latin:'Latijns-Amerikaans',th_jewish:'Joods',th_hindu:'Hindoeïstisch',th_islamic:'Islamitisch',th_secular:'Seculier',set_language:'Taal',onb_cta:'Mijn stamboom beginnen',
+edit_title:'Persoon bewerken',f_first:'Voornaam',f_last:'Achternaam',f_gender:'Geslacht',f_born:'Geboren',f_died:'Overleden',f_place:'Plaats',f_occ:'Beroep',btn_save:'Opslaan',btn_delete:'Persoon verwijderen',
+add_title:'Familielid toevoegen',add_who:'Hoe zijn ze verwant?',rel_parent:'Ouder',rel_spouse:'Partner',rel_child:'Kind',rel_sibling:'Broer/Zus',add_next:'Doorgaan',
+search_title:'Zoeken',search_hint:'Personen, plaatsen, data…',search_empty:'Geen resultaten',
+imp_title:'GEDCOM importeren',imp_pick:'Kies een .ged-bestand',imp_note:'Verwerkt op dit apparaat',imp_go:'Importeren starten',
+rem_title:'Herinneringen',rem_anniv:'Sterfdagen',rem_birth:'Verjaardagen',rem_time:'Herinner om',rem_days:'Dagen vooraf'};
+let LANG='en';
+const t=function(k){return (T[LANG]&&T[LANG][k])||T.en[k];};
+
+const NW=112,NH=68;
+const NODES=[
+{id:'gp1',x:-210,y:-260,first:'James',last:'Carter',sub:'1918 – 1994',dead:1,rel:'Grandfather',init:'JC',c1:'#6B7F8F',c2:'#3E4E5C'},
+{id:'gp2',x:-70,y:-260,first:'Mary',last:'Carter',sub:'1921 – 2003',dead:1,rel:'Grandmother',init:'MC',c1:'#B98BD6',c2:'#7E5596'},
+{id:'fa',x:-210,y:-130,first:'Robert',last:'Carter',sub:'b. 1948',rel:'Father',init:'RC',c1:'#5FA583',c2:'#2E6B4F'},
+{id:'mo',x:-70,y:-130,first:'Linda',last:'Carter',sub:'b. 1951',rel:'Mother',init:'LC',c1:'#E0A24E',c2:'#B0742A'},
+{id:'un',x:70,y:-130,first:'William',last:'Carter',sub:'1954 – 2011',dead:1,rel:'Uncle',init:'WC',c1:'#8B857C',c2:'#5C574F'},
+{id:'si',x:-350,y:0,first:'Sarah',last:'Miller',sub:'b. 1979',rel:'Sister',init:'SM',c1:'#E4798F',c2:'#B84E68'},
+{id:'me',x:-210,y:0,first:'Michael',last:'Carter',sub:'b. 1976',rel:'You',init:'MC',c1:'#4A90D9',c2:'#2A5F96',focus:1},
+{id:'sp',x:-70,y:0,first:'Emma',last:'Carter',sub:'b. 1978',rel:'Spouse',init:'EC',c1:'#8A6BB1',c2:'#5C4280'},
+{id:'so',x:-210,y:130,first:'Noah',last:'Carter',sub:'b. 2005',rel:'Son',init:'NC',c1:'#5FA583',c2:'#357A5B'},
+{id:'da',x:-70,y:130,first:'Ava',last:'Carter',sub:'b. 2009',rel:'Daughter',init:'AC',c1:'#E4798F',c2:'#C05A72'}];
+const COUPLES=[['gp1','gp2'],['fa','mo'],['me','sp']];
+const FAMILIES=[{parents:['gp1','gp2'],children:['fa','un']},{parents:['fa','mo'],children:['si','me']},{parents:['me','sp'],children:['so','da']}];
+const MSGS_BY={
+gp1:[
+{who:'Emma Carter',init:'EC',c1:'#8A6BB1',c2:'#5C4280',when:'2d',tx:'Thinking of Grandpa today. He would have loved to see Noah graduate.',likes:12,me:0},
+{who:'Robert Carter',init:'RC',c1:'#5FA583',c2:'#2E6B4F',when:'1w',tx:'Lit a candle for Dad. Still miss our Sunday walks.',likes:9,me:1},
+{who:'Sarah Miller',init:'SM',c1:'#E4798F',c2:'#B84E68',when:'2w',tx:'Grandma’s recipe book is still in my kitchen. Every Sunday.',likes:7,me:0},
+{who:'Anonymous',init:'?',c1:'#8B857C',c2:'#5C574F',when:'3w',tx:'A quiet man with a loud laugh — that’s how I’ll remember him.',likes:4,me:0}],
+gp2:[
+{who:'Michael Carter',init:'MC',c1:'#4A90D9',c2:'#2A5F96',when:'6h',tx:'Made her bread recipe this morning. It finally tasted right.',likes:15,me:1},
+{who:'Sarah Miller',init:'SM',c1:'#E4798F',c2:'#B84E68',when:'3d',tx:'She kept every birthday card I ever made. Every single one.',likes:11,me:0},
+{who:'Emma Carter',init:'EC',c1:'#8A6BB1',c2:'#5C4280',when:'2w',tx:'Ava wears her cardigan now. It smells like her.',likes:8,me:0}],
+un:[
+{who:'Robert Carter',init:'RC',c1:'#5FA583',c2:'#2E6B4F',when:'3w',tx:'Taught me to fish, and to be quiet while doing it. Miss you, Bill.',likes:6,me:1},
+{who:'Michael Carter',init:'MC',c1:'#4A90D9',c2:'#2A5F96',when:'1m',tx:'Still have his tackle box in the garage.',likes:3,me:0}]};
+let MSGS=MSGS_BY.gp1;
+const MEM={
+gp1:{q:'A quiet man with a loud laugh. He never missed a Sunday.',anniv:'Nov 4',c:{flower:32,candle:18,incense:7,prayer:11,message:16}},
+gp2:{q:'Her kitchen smelled like bread every Saturday morning.',anniv:'Mar 30',c:{flower:41,candle:26,incense:12,prayer:14,message:22}},
+un:{q:'Taught me to fish — and to be quiet while doing it.',anniv:'Aug 19',c:{flower:11,candle:7,incense:5,prayer:4,message:5}}};
+let memId='gp1';
+/* 每种传统：配色（a/b 舞台底色、acc 强调、soft 浅底、glow 光晕）+
+   fl 花束三朵配色 + acts 该传统可用的致敬动作 */
+const THEMES=[
+{k:'western',n:'th_western',d:'Flowers · candles · prayer',sw:['#F3EDE2','#E0A24E','#2E6B4F'],
+ a:'#2C2620',b:'#171412',acc:'#E0A24E',soft:'#FBEFD8',glow:'rgba(242,169,59,.3)',
+ fl:[['#EE8FA6','#F7D06B'],['#F0B84E','#E08A2E'],['#B892D6','#E9C6F2']],acts:['flower','candle','prayer']},
+{k:'east_asian',n:'th_east_asian',d:'Incense · flowers · bowing',sw:['#F5F2ED','#8B6B4A','#B4433A'],
+ a:'#2A211C',b:'#151110',acc:'#B4433A',soft:'#F7E4E2',glow:'rgba(180,67,58,.28)',
+ fl:[['#F7F2ED','#E8C56A'],['#E9DCC6','#C9A063'],['#DCC6B4','#B4433A']],acts:['incense','flower','bow']},
+{k:'latin',n:'th_latin',d:'Marigolds · candles · ofrenda',sw:['#F2A93B','#D2662A','#8A4E12'],
+ a:'#33200F',b:'#180E06',acc:'#F2A93B',soft:'#FCEBD2',glow:'rgba(242,169,59,.34)',
+ fl:[['#F2A93B','#FFD98A'],['#E8862B','#F2A93B'],['#D2662A','#F7C46B']],acts:['marigold','candle','ofrenda']},
+{k:'jewish',n:'th_jewish',d:'Stone placing · candle · psalm',sw:['#B7BFC4','#6B7F8F','#3E4E5C'],
+ a:'#1E2429',b:'#0E1215',acc:'#8FA6B5',soft:'#E7EDEF',glow:'rgba(180,200,215,.26)',
+ fl:[['#DDE4E8','#A9BDC9'],['#C6D2D9','#8FA6B5'],['#E8EDEF','#B7BFC4']],acts:['stone','candle','prayer']},
+{k:'hindu',n:'th_hindu',d:'Garlands · oil lamp · incense',sw:['#E0A24E','#C87A1E','#7E5596'],
+ a:'#2B1E12',b:'#140D07',acc:'#C87A1E',soft:'#FBE9D2',glow:'rgba(240,180,80,.32)',
+ fl:[['#F2A93B','#FFE0A0'],['#E4798F','#F7D06B'],['#B892D6','#FFE9B8']],acts:['garland','diya','incense']},
+{k:'islamic',n:'th_islamic',d:'Prayer · charity · flowers',sw:['#2E6B4F','#5FA583','#CFE3D8'],
+ a:'#12241C',b:'#08120E',acc:'#5FA583',soft:'#E1F0E8',glow:'rgba(120,200,160,.28)',
+ fl:[['#CFE3D8','#5FA583'],['#E8F1EC','#8CBFA6'],['#B7D6C6','#2E6B4F']],acts:['prayer','charity','flower']},
+{k:'secular',n:'th_secular',d:'Flowers · candle · memories',sw:['#E6E1D9','#8B857C','#5C574F'],
+ a:'#232120',b:'#121110',acc:'#8B857C',soft:'#EDEAE4',glow:'rgba(200,196,188,.24)',
+ fl:[['#F0EDE8','#C9C3B8'],['#E6E1D9','#8B857C'],['#D8D3CA','#A9A298']],acts:['flower','candle','memory']}];
+/* 全部致敬动作：ic 图标 / n 名称 i18n / fx 舞台效果 / sk 发送按钮 i18n */
+const ACT={
+ flower:{ic:'flower',n:'mem_flower',fx:'bloom',sk:'mem_send_flower'},
+ marigold:{ic:'marigold',n:'mem_marigold',fx:'bloom',sk:'mem_send_marigold'},
+ garland:{ic:'garland',n:'mem_garland',fx:'bloom',sk:'mem_send_garland'},
+ candle:{ic:'candle',n:'mem_candle',fx:'candle',sk:'mem_send_candle'},
+ diya:{ic:'diya',n:'mem_diya',fx:'diya',sk:'mem_send_diya'},
+ incense:{ic:'incense',n:'mem_incense',fx:'incense',sk:'mem_send_incense'},
+ prayer:{ic:'prayer',n:'mem_prayer',fx:'pray',sk:'mem_send_prayer'},
+ bow:{ic:'bow',n:'mem_bow',fx:'bow',sk:'mem_send_bow'},
+ stone:{ic:'stone',n:'mem_stone',fx:'stone',sk:'mem_send_stone'},
+ ofrenda:{ic:'ofrenda',n:'mem_ofrenda',fx:'ofrenda',sk:'mem_send_ofrenda'},
+ charity:{ic:'charity',n:'mem_charity',fx:'pray',sk:'mem_send_charity'},
+ memory:{ic:'memory',n:'mem_memory',fx:'spark',sk:'mem_send_memory'}};
+const ACT_ORDER=['flower','marigold','garland','candle','diya','incense','prayer','bow','stone','ofrenda','charity','memory'];
+const REGION_THEME={es:'latin',pt:'western',ja:'east_asian',ko:'east_asian','zh-Hans':'east_asian','zh-Hant':'east_asian',ru:'western',nl:'western',fr:'western',de:'western',it:'western',en:'western'};
+let themeKey='western',themeAuto=true,themeSnap=null;
+const SCREENS=[['onboard','Welcome'],['tree','Tree view'],['people','People list'],['wall','Memorial wall'],
+['settings','Settings'],['memorial','Memorial page'],['theme','Memorial style'],['export','Export'],['sync','Sync & share'],['pro','Pro paywall'],
+['edit','Edit person'],['add','Add relative'],['search','Search'],['import','GEDCOM import'],['reminder','Reminders']];
+let cur='onboard',hist=[];
+const $=function(id){return document.getElementById(id);};
+function closeAll(){
+  $('scrim').classList.remove('on');
+  ['personSheet','themeModal','langModal'].forEach(function(i){$(i).classList.remove('on');});
+}
+function openModal(id){$('scrim').classList.add('on');$(id).classList.add('on');}
+function goBack(){
+  var p=hist.length?hist.pop():'tree';
+  show(p,{back:1});
+}
+function show(name,opts){
+  opts=opts||{};
+  if(name==='theme'){themeSnap=[themeKey,themeAuto];openModal('themeModal');return;}
+  if(name==='lang'){openModal('langModal');return;}
+  if(!opts.back&&name!==cur){hist.push(cur);if(hist.length>24)hist.shift();}
+  cur=name;
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('on');});
+  var el=$('s-'+name); if(el) el.classList.add('on');
+  closeAll();
+  document.querySelectorAll('.screen-btn').forEach(function(b){b.classList.toggle('on',b.getAttribute('data-sc')===name);});
+  if(name==='tree') fitTree();
+  if(name==='memorial'){ loadMemorial(opts.id||memId); if(opts.firstTime) setTimeout(function(){openModal('themeModal');},420); }
+  if(name==='edit') loadEdit(opts.id||editId||'me');
+  if(name==='add') loadAdd(opts.id||addId,opts.rel);
+  if(name==='search'){ $('searchInput').value=''; renderSearch(''); setTimeout(function(){$('searchInput').focus();},80); }
+}
+let toastTimer;
+function toast(msg){
+  var el=$('toast'); el.innerHTML=msg; el.classList.add('on');
+  clearTimeout(toastTimer); toastTimer=setTimeout(function(){el.classList.remove('on');},1800);
+}
+$('screenList').innerHTML=SCREENS.map(function(s,i){
+  return '<button class="screen-btn'+(s[0]==='onboard'?' on':'')+'" data-sc="'+s[0]+'"><span class="num">'+
+    String(i).padStart(2,'0')+'</span>'+s[1]+'</button>';}).join('');
+document.querySelectorAll('.screen-btn').forEach(function(b){
+  b.onclick=function(){show(b.getAttribute('data-sc'));};
+});
+document.addEventListener('click',function(e){
+  var g=e.target.closest('[data-go]'); if(g){show(g.getAttribute('data-go'),{firstTime:g.getAttribute('data-go')==='memorial'});return;}
+  var bk=e.target.closest('[data-back]'); if(bk){goBack();return;}
+  var op=e.target.closest('[data-open]'); if(op){show(op.getAttribute('data-open'));return;}
+  var cl=e.target.closest('[data-close]');
+  if(cl){
+    if(cl.id==='themeCancel'&&themeSnap){
+      themeKey=themeSnap[0];themeAuto=themeSnap[1];
+      renderThemeList();applyMemTheme();syncThemeVal();
+    }
+    closeAll();return;
+  }
+  var ts=e.target.closest('[data-toast]'); if(ts){toast(ts.getAttribute('data-toast'));return;}
+  var sw=e.target.closest('[data-toggle]'); if(sw){sw.classList.toggle('on');return;}
+});
+$('scrim').onclick=closeAll;
+
+function renderPeople(){
+  var living=NODES.filter(function(n){return !n.dead;}),dead=NODES.filter(function(n){return n.dead;});
+  var row=function(n){return '<div class="row-item" data-sp="'+n.id+'" style="cursor:pointer"><div class="av '+(n.dead?'dead':'')+'" style="width:40px;height:40px;font-size:14px;background:linear-gradient(140deg,'+
+    n.c1+','+n.c2+')">'+n.init+'</div><span class="grow"><span class="t">'+n.first+' '+n.last+'</span><span class="s">'+
+    n.sub+' · '+n.rel+'</span></span>'+(n.dead?'<span class="tag plum">Remembered</span>':'')+
+    '<span class="chev ic" data-icon="chev"></span></div>';};
+  $('peopleList').innerHTML='<div class="sect" style="margin-top:4px"><div class="sect-h"><h4>Living · '+living.length+
+    '</h4></div><div class="list">'+living.map(row).join('')+'</div></div><div class="sect"><div class="sect-h"><h4>Remembered · '+
+    dead.length+'</h4></div><div class="list">'+dead.map(row).join('')+'</div></div>';
+  fillIcons($('peopleList'));
+  $('peopleList').querySelectorAll('[data-sp]').forEach(function(el){
+    el.onclick=function(){openPerson(el.getAttribute('data-sp'));};
+  });
+}
+function renderWall(){
+  var dead=NODES.filter(function(n){return n.dead;});
+  var counts={gp1:[32,18,16],gp2:[41,26,22],un:[11,7,5]};
+  var last={gp1:'2 days ago',gp2:'6 hours ago',un:'3 weeks ago'};
+  $('wallList').innerHTML=dead.map(function(n){
+    var c=counts[n.id]||[0,0,0];
+    return '<div class="wall-card"><div class="av dead" style="width:48px;height:48px;font-size:16px;background:linear-gradient(140deg,'+
+      n.c1+','+n.c2+')">'+n.init+'</div><div class="wc-main"><div class="wc-n">'+n.first+' '+n.last+'</div><div class="wc-d">'+
+      n.sub+' · '+n.rel+'</div><div class="wc-m"><span>'+c[0]+' flowers</span><span>'+c[1]+' candles</span><span>'+c[2]+
+      ' messages</span><span>· '+last[n.id]+'</span></div></div><button class="btn sm soft" data-gomem="'+n.id+'">Visit</button></div>';
+  }).join('');
+  $('wallList').querySelectorAll('[data-gomem]').forEach(function(b){
+    b.onclick=function(){show('memorial',{id:b.getAttribute('data-gomem')});};
+  });
+}
+function renderMsgs(){
+  $('msgList').innerHTML=MSGS.map(function(m){
+    return '<div class="msg"><div class="av" style="width:34px;height:34px;font-size:12px;background:linear-gradient(140deg,'+
+      m.c1+','+m.c2+')">'+m.init+'</div><div class="b"><div class="who">'+m.who+'<span class="when">'+m.when+
+      '</span></div><div class="tx">'+m.tx+'</div><span class="like'+(m.me?' on':'')+'">♥ '+m.likes+'</span></div></div>';
+  }).join('');
+  $('msgList').querySelectorAll('.like').forEach(function(b){
+    b.onclick=function(){b.classList.toggle('on');var v=parseInt(b.textContent.replace(/[^0-9]/g,''),10);
+      b.innerHTML='♥ '+(b.classList.contains('on')?v+1:v-1);};
+  });
+}
+const world=$('world'),wires=$('wires'),canvas=$('canvas');
+const byId=function(id){return NODES.filter(function(n){return n.id===id;})[0];};
+const cx=function(n){return n.x+NW/2;},cy=function(n){return n.y+NH/2;};
+function drawNodes(){
+  world.querySelectorAll('.node').forEach(function(n){n.remove();});
+  NODES.forEach(function(n){
+    var d=document.createElement('div');
+    d.className='node'+(n.dead?' dead':'')+(n.focus?' focus':'');
+    d.style.left=n.x+'px'; d.style.top=n.y+'px'; d.setAttribute('data-id',n.id);
+    d.innerHTML='<div class="av" style="width:26px;height:26px;font-size:10px;background:linear-gradient(140deg,'+
+      n.c1+','+n.c2+')">'+n.init+'</div><div class="nm">'+n.first+' '+n.last+'</div><div class="yr">'+
+      n.sub+'</div><div class="rel">'+n.rel+'</div>';
+    world.appendChild(d);
+  });
+}
+function bounds(){
+  var b={x0:1e9,y0:1e9,x1:-1e9,y1:-1e9};
+  NODES.forEach(function(n){
+    b.x0=Math.min(b.x0,n.x);b.y0=Math.min(b.y0,n.y);
+    b.x1=Math.max(b.x1,n.x+NW);b.y1=Math.max(b.y1,n.y+NH);});
+  return b;
+}
+function drawWires(){
+  var b=bounds(),pad=40,W=b.x1-b.x0+pad*2,H=b.y1-b.y0+pad*2;
+  wires.setAttribute('width',W); wires.setAttribute('height',H);
+  wires.style.left=(b.x0-pad)+'px'; wires.style.top=(b.y0-pad)+'px';
+  var X=function(x){return x-(b.x0-pad);},Y=function(y){return y-(b.y0-pad);};
+  var p='';
+  COUPLES.forEach(function(c){
+    var A=byId(c[0]),B=byId(c[1]),y=Y(cy(A));
+    p+='<path d="M'+X(cx(A))+','+y+' H'+X(cx(B))+'"/>';
+  });
+  FAMILIES.forEach(function(f){
+    var P0=byId(f.parents[0]),P1=byId(f.parents[1]);
+    var px=(cx(P0)+cx(P1))/2,py=cy(P0);
+    var kids=f.children.map(byId),ky=py+(kids[0].y-py)*0.45;
+    var xs=kids.map(cx),x0=Math.min.apply(null,xs),x1=Math.max.apply(null,xs);
+    p+='<path d="M'+X(px)+','+Y(py)+' V'+Y(ky)+' H'+X(x0)+'"/>';
+    p+='<path d="M'+X(x0)+','+Y(ky)+' H'+X(x1)+'"/>';
+    kids.forEach(function(c){p+='<path d="M'+X(cx(c))+','+Y(ky)+' V'+Y(c.y)+'"/>';});
+  });
+  wires.innerHTML='<g stroke="var(--line2)" stroke-width="1.6" fill="none" stroke-linecap="round">'+p+'</g>';
+}
+let scale=.62,tx=0,ty=0;
+function applyT(){world.style.transform='translate('+tx+'px,'+ty+'px) scale('+scale+')';}
+function fitTree(){
+  var r=canvas.getBoundingClientRect(),b=bounds();
+  var s=Math.min((r.width-52)/(b.x1-b.x0),(r.height-52)/(b.y1-b.y0));
+  scale=Math.max(.4,Math.min(1.05,s));
+  tx=(r.width-(b.x1-b.x0)*scale)/2-b.x0*scale;
+  ty=(r.height-(b.y1-b.y0)*scale)/2-b.y0*scale-6;
+  applyT();
+}
+drawNodes();drawWires();fitTree();
+let drag=null;
+canvas.addEventListener('pointerdown',function(e){
+  drag={x:e.clientX,y:e.clientY,tx:tx,ty:ty,moved:0};
+  canvas.setPointerCapture(e.pointerId); canvas.classList.add('grabbing');
+});
+canvas.addEventListener('pointermove',function(e){
+  if(!drag)return;
+  var dx=e.clientX-drag.x,dy=e.clientY-drag.y;
+  drag.moved=Math.max(drag.moved,Math.sqrt(dx*dx+dy*dy));
+  if(drag.moved>6){tx=drag.tx+dx;ty=drag.ty+dy;applyT();}
+});
+canvas.addEventListener('pointerup',function(e){
+  canvas.classList.remove('grabbing');
+  var el=document.elementFromPoint(e.clientX,e.clientY);
+  var node=el&&el.closest?el.closest('.node'):null;
+  if(drag&&drag.moved<=6&&node) openPerson(node.getAttribute('data-id'));
+  drag=null;
+});
+canvas.addEventListener('wheel',function(e){
+  e.preventDefault();
+  var r=canvas.getBoundingClientRect(),mx=e.clientX-r.left,my=e.clientY-r.top;
+  var ns=Math.max(.3,Math.min(2.2,scale*(e.deltaY<0?1.12:1/1.12)));
+  tx=mx-(mx-tx)*(ns/scale); ty=my-(my-ty)*(ns/scale); scale=ns; applyT();
+},{passive:false});
+document.querySelectorAll('[data-zoom]').forEach(function(btn){
+  btn.onclick=function(){
+    var z=btn.getAttribute('data-zoom');
+    if(z==='fit'){fitTree();return;}
+    var r=canvas.getBoundingClientRect(),mx=r.width/2,my=r.height/2;
+    var ns=z==='in'?Math.min(2.2,scale*1.22):Math.max(.3,scale/1.22);
+    tx=mx-(mx-tx)*(ns/scale); ty=my-(my-ty)*(ns/scale); scale=ns; applyT();
+  };
+});
+const PROFILE={
+gp1:{born:'Mar 12, 1918 · Dublin, Ireland',died:'Nov 4, 1994 · Boston, MA',place:'Oakwood Cemetery',occ:'Shipwright'},
+gp2:{born:'Jun 2, 1921 · Cork, Ireland',died:'Mar 30, 2003 · Boston, MA',place:'Oakwood Cemetery',occ:'Baker'},
+un:{born:'Jan 30, 1954 · Boston, MA',died:'Aug 19, 2011 · Denver, CO',place:'Fairmount Cemetery',occ:'Mechanic'},
+fa:{born:'Apr 9, 1948 · Boston, MA',place:'Portland, OR',occ:'Architect'},
+mo:{born:'Nov 21, 1951 · Providence, RI',place:'Portland, OR',occ:'Nurse'},
+si:{born:'Jul 14, 1979 · Boston, MA',place:'Austin, TX',occ:'Teacher'},
+me:{born:'Feb 3, 1976 · Boston, MA',place:'Portland, OR',occ:'Architect'},
+sp:{born:'Sep 18, 1978 · Chicago, IL',place:'Portland, OR',occ:'Designer'},
+so:{born:'May 6, 2005 · Portland, OR',place:'Portland, OR',occ:'Student'},
+da:{born:'Dec 11, 2009 · Portland, OR',place:'Portland, OR',occ:'Student'}};
+function openPerson(id){
+  var n=byId(id); if(!n)return;
+  var pr=PROFILE[id]||{};
+  var mm=MEM[id]||{c:{flower:0,candle:0,message:0}};
+  var mc=[mm.c.flower,mm.c.candle,mm.c.message];
+  $('psName').textContent=n.first+' '+n.last;
+  var facts=[[t('f_born'),pr.born||'—']];
+  if(n.dead&&pr.died) facts.push([t('f_died'),pr.died]);
+  if(n.dead&&pr.place) facts.push(['Buried',pr.place]);
+  if(!n.dead&&pr.place) facts.push(['Residence',pr.place]);
+  facts.push([t('f_occ'),pr.occ||'—']);
+  $('psBody').innerHTML='<div style="display:flex;gap:14px;align-items:center;padding:6px 0 14px">'+
+    '<div class="av '+(n.dead?'dead':'')+'" style="width:62px;height:62px;font-size:21px;background:linear-gradient(140deg,'+
+    n.c1+','+n.c2+')">'+n.init+'</div><div style="flex:1"><div style="font-size:19px;font-weight:700">'+n.first+' '+n.last+
+    '</div><div style="font-size:13.5px;color:var(--ink3);margin-top:2px">'+n.sub+' · '+n.rel+'</div></div>'+
+    (n.dead?'<span class="tag plum ic" data-icon="candle"></span>':'<span class="tag green">Living</span>')+'</div>'+
+    (n.dead?'<div class="card" style="border-color:transparent;background:var(--plum-soft);cursor:pointer" data-gomem>'+
+      '<div style="display:flex;align-items:center;gap:12px"><div class="ic" data-icon="candle" style="font-size:22px;color:var(--plum)"></div>'+
+      '<div style="flex:1"><div style="font-size:14.5px;font-weight:600">'+t('mem_loving')+
+      '</div><div style="font-size:12.5px;color:var(--ink3);margin-top:2px">'+mc[0]+' flowers · '+mc[1]+' candles · '+mc[2]+' messages</div></div>'+
+      '<span class="chev ic" data-icon="chev"></span></div></div>':'')+
+    '<div class="sect"><div class="sect-h"><h4>Facts</h4></div><div class="card" style="padding:2px 14px">'+
+    facts.map(function(f){return '<div class="kv"><div class="k">'+f[0]+'</div><div class="v">'+f[1]+'</div></div>';}).join('')+
+    '</div></div><div class="sect"><div class="sect-h"><h4>'+t('add_title')+'</h4></div><div style="display:flex;gap:8px">'+
+    [['Parent','rel_parent'],['Spouse','rel_spouse'],['Child','rel_child'],['Sibling','rel_sibling']].map(function(r){
+      return '<button class="btn soft sm" style="flex:1" data-addrel="'+r[0].toLowerCase()+'" data-pid="'+n.id+'">'+t(r[1])+'</button>';}).join('')+
+    '</div></div>';
+  fillIcons($('psBody'));
+  var gm=$('psBody').querySelector('[data-gomem]');
+  if(gm) gm.onclick=function(){closeAll();show('memorial',{id:n.id});};
+  $('psBody').querySelectorAll('[data-addrel]').forEach(function(b){
+    b.onclick=function(){closeAll();show('add',{id:n.id,rel:b.getAttribute('data-addrel')});};
+  });
+  var eb=$('psEdit');
+  if(eb) eb.onclick=function(){closeAll();show('edit',{id:n.id});};
+  $('scrim').classList.add('on'); $('personSheet').classList.add('on');
+}
+function renderThemeList(){
+  $('themeList').innerHTML=THEMES.map(function(th){
+    return '<div class="th-item'+(th.k===themeKey?' sel':'')+'" data-th="'+th.k+'">'+
+      '<div class="th-radio">✓</div><div class="tx"><b>'+t(th.n)+
+      (th.k===themeKey&&themeAuto?'<span class="tag green" style="height:19px;font-size:10px">'+t('theme_rec')+'</span>':'')+
+      '</b><span>'+th.d+'</span></div><div class="th-sw">'+
+      th.sw.map(function(c){return '<i style="background:'+c+'"></i>';}).join('')+'</div></div>';
+  }).join('');
+  $('themeList').querySelectorAll('[data-th]').forEach(function(el){
+    el.onclick=function(){
+      themeKey=el.getAttribute('data-th'); themeAuto=false;
+      renderThemeList(); applyMemTheme(); syncThemeVal();
+    };
+  });
+}
+function renderLangList(){
+  $('langList').innerHTML=LANGS.map(function(l){
+    return '<div class="th-item'+(l[0]===LANG?' sel':'')+'" data-lg="'+l[0]+'">'+
+      '<div class="th-radio">✓</div><div class="tx"><b>'+l[1]+'</b><span>'+l[0]+'</span></div></div>';
+  }).join('');
+  $('langList').querySelectorAll('[data-lg]').forEach(function(el){
+    el.onclick=function(){setLang(el.getAttribute('data-lg'));};
+  });
+}
+function applyI18n(){
+  document.querySelectorAll('[data-i18n]').forEach(function(el){
+    var k=el.getAttribute('data-i18n'); if(T[LANG]&&T[LANG][k]) el.textContent=T[LANG][k];
+  });
+  document.querySelectorAll('nav[data-tab]').forEach(function(nav){
+    var map=[['tree','tree','tab_tree'],['people','people','tab_people'],['wall','candle','tab_wall'],['settings','cog','tab_settings']];
+    nav.innerHTML=map.map(function(m){
+      return '<button class="tab'+(nav.getAttribute('data-tab')===m[0]?' on':'')+'" data-tabgo="'+m[0]+'">'+
+        '<span class="ic" data-icon="'+m[1]+'"></span>'+t(m[2])+'</button>';}).join('');
+    fillIcons(nav);
+    nav.querySelectorAll('[data-tabgo]').forEach(function(b){
+      b.onclick=function(){show(b.getAttribute('data-tabgo'));};
+    });
+  });
+  renderThemeList(); renderLangList();
+  var ln=LANGS.filter(function(l){return l[0]===LANG;})[0];
+  $('setLangVal').textContent=ln?ln[1]:'English';
+  syncThemeVal();
+  $('langSel').value=LANG;
+  if($('memStyleNm')) $('memStyleNm').textContent=t(theme().n);
+  refreshSend();
+}
+function setLang(code){
+  LANG=code;
+  themeKey=REGION_THEME[code]||'western'; themeAuto=true;
+  applyMemTheme(); applyI18n();
+}
+$('langSel').innerHTML=LANGS.map(function(l){return '<option value="'+l[0]+'">'+l[1]+'</option>';}).join('');
+$('langSel').onchange=function(){setLang(this.value);};
+function setDark(on){
+  document.documentElement.setAttribute('data-theme',on?'dark':'light');
+  $('darkSw').classList.toggle('on',on); $('darkSw2').classList.toggle('on',on);
+}
+$('darkSw').onclick=function(){setDark(!$('darkSw').classList.contains('on'));};
+$('darkSw2').onclick=function(){setDark(!$('darkSw2').classList.contains('on'));};
+function theme(){return THEMES.filter(function(x){return x.k===themeKey;})[0]||THEMES[0];}
+function syncThemeVal(){
+  var th=theme();
+  $('setThemeVal').textContent=t(th.n)+(themeAuto?' · '+t('theme_rec').toLowerCase():'');
+}
+/* 每套传统的烛焰／焰心色 */
+const FLAME={western:['#F2A93B','#FFF3C4'],east_asian:['#E8663A','#FFE2CB'],latin:['#F2A93B','#FFE9B8'],
+ jewish:['#BFD4E0','#F5FAFC'],hindu:['#F0B44A','#FFE9B8'],islamic:['#7FCBA6','#E4F5EC'],secular:['#C9C3B8','#F6F4F0']};
+function resetFx(){
+  ['fxCandle','fxInc','fxGlow','fxPray','fxBow','fxStone','sm1','sm2','sm3','sp1','sp2','sp3','sp4']
+    .forEach(function(i){$(i).classList.remove('show');});
+  $('fxCandle').classList.remove('diya');
+  $('fxBloom').classList.remove('show');
+  $('fxBloom').classList.add('ghost');
+  $('fxStage').classList.remove('warm');
+  $('fxPetals').innerHTML='';
+}
+/* 选择 = 预览；只有点 Send 才真正计入（避免误触） */
+let pendingFx=null, sentFx=null;
+/* 数据里没有计数的新动作按同族派生，避免显示 0 */
+function actCount(k){
+  var c=(MEM[memId]||{}).c||{};
+  if(c[k]!==undefined) return c[k];
+  var d={marigold:c.flower||0,garland:Math.round((c.flower||0)*.8),diya:c.candle||0,
+    bow:c.prayer||0,stone:Math.round((c.candle||0)*.5),ofrenda:Math.round((c.candle||0)*.4),
+    charity:Math.round((c.prayer||0)*.6),memory:c.flower||0};
+  return d[k]||0;
+}
+/* 按动作点亮舞台 */
+function runFx(k){
+  var a=ACT[k]; if(!a) return;
+  var f=a.fx,pal=theme().fl,html='',i;
+  if(f==='bloom'||f==='ofrenda'){
+    var n=f==='ofrenda'?10:8,step=f==='ofrenda'?8:9,start=f==='ofrenda'?12:18;
+    for(i=0;i<n;i++){
+      html+='<div class="petal show" style="left:'+(start+i*step)+'%;background:'+
+        [pal[0][0],pal[1][0],pal[2][0]][i%3]+';animation-delay:'+(i*0.28).toFixed(2)+'s"></div>';
+    }
+    $('fxPetals').innerHTML=html; $('fxBloom').classList.add('show');
+  }
+  if(f==='candle'||f==='diya'||f==='ofrenda'){
+    $('fxStage').classList.add('warm'); $('fxCandle').classList.add('show'); $('fxGlow').classList.add('show');
+    if(f==='diya') $('fxCandle').classList.add('diya');
+  }
+  if(f==='incense'){
+    $('fxStage').classList.add('warm'); $('fxInc').classList.add('show');
+    $('sm1').classList.add('show'); $('sm2').classList.add('show'); $('sm3').classList.add('show');
+  }
+  if(f==='pray'){
+    $('fxStage').classList.add('warm'); $('fxPray').classList.add('show'); $('fxGlow').classList.add('show');
+    $('sp1').classList.add('show'); $('sp2').classList.add('show'); $('sp3').classList.add('show'); $('sp4').classList.add('show');
+  }
+  if(f==='bow'){
+    $('fxStage').classList.add('warm'); $('fxBow').classList.add('show'); $('fxGlow').classList.add('show');
+  }
+  if(f==='stone'){
+    $('fxStage').classList.add('warm'); $('fxStone').classList.add('show'); $('fxGlow').classList.add('show');
+  }
+  if(f==='spark'){
+    $('fxStage').classList.add('warm'); $('fxGlow').classList.add('show');
+    $('sp1').classList.add('show'); $('sp2').classList.add('show'); $('sp3').classList.add('show'); $('sp4').classList.add('show');
+  }
+}
+function sentHint(k){
+  var n=byId(memId)?byId(memId).first:'them';
+  var base={flower:'A bouquet for '+n+' · 1 free flower left today',
+    marigold:'Marigolds for '+n+' · laid on the ofrenda',
+    garland:'A garland for '+n+' · 1 free today',
+    candle:'The candle burns for 24 hours',diya:'The lamp burns for 24 hours',
+    incense:'Incense lit · 1 free today',
+    prayer:'A prayer was offered · visible to family',
+    bow:'A bow was offered · visible to family',
+    stone:'A stone was placed on the memorial',
+    ofrenda:'An offering was placed on the ofrenda',
+    charity:'A donation was made in memory of '+n,
+    memory:'A memory was shared with the family'};
+  return base[k]||('Offered in memory of '+n);
+}
+function refreshSend(){
+  var b=$('fxSendBtn'),l=$('fxSendLabel');
+  if(!b||!l) return;
+  if(sentFx){ l.textContent=t('mem_sent'); b.disabled=true; b.classList.add('done'); }
+  else if(pendingFx){ l.textContent=t(ACT[pendingFx].sk); b.disabled=false; b.classList.remove('done'); }
+  else { l.textContent=t('mem_choose'); b.disabled=true; b.classList.remove('done'); }
+}
+/* 按当前风格渲染动作栏 */
+function renderActs(){
+  var th=theme(),box=$('memActions');
+  box.innerHTML=th.acts.map(function(k){
+    var a=ACT[k];
+    return '<button class="act" data-fx="'+k+'"><span class="cnt">'+actCount(k)+'</span>'+
+      '<span class="ic" data-icon="'+a.ic+'"></span>'+
+      '<span class="lb" data-i18n="'+a.n+'">'+t(a.n)+'</span></button>';
+  }).join('');
+  box.style.setProperty('--actn',th.acts.length);
+  fillIcons(box);
+  box.querySelectorAll('.act').forEach(function(a){
+    a.onclick=function(){
+      var k=a.getAttribute('data-fx');
+      box.querySelectorAll('.act').forEach(function(b){b.classList.remove('on');});
+      a.classList.add('on');
+      resetFx();
+      pendingFx=k; sentFx=null;
+      $('fxBloom').classList.remove('ghost');
+      runFx(k);
+      $('fxHint').textContent=t('mem_arm');
+      refreshSend();
+    };
+  });
+}
+/* 把当前风格的配色注入页面并重建舞台 */
+function applyMemTheme(){
+  var th=theme(),s=$('s-memorial'),f=FLAME[th.k]||FLAME.western;
+  s.style.setProperty('--fx-a',th.a);
+  s.style.setProperty('--fx-b',th.b);
+  s.style.setProperty('--fx-acc',th.acc);
+  s.style.setProperty('--fx-soft',th.soft);
+  s.style.setProperty('--fx-glow',th.glow);
+  s.style.setProperty('--fx-flame',f[0]);
+  s.style.setProperty('--fx-wick',f[1]);
+  $('fxBloom').innerHTML=bouquetSVG(th.fl);
+  $('fxBow').innerHTML=bowSVG(th.acc);
+  $('fxStone').innerHTML=stoneSVG();
+  $('memStyleDot').innerHTML=th.sw.map(function(c){return '<i style="background:'+c+'"></i>';}).join('');
+  $('memStyleNm').textContent=t(th.n);
+  renderActs();
+  resetFx();
+  pendingFx=null; sentFx=null; refreshSend();
+  $('fxHint').textContent='Tap an action to light something';
+}
+$('fxSendBtn').onclick=function(){
+  if(!pendingFx||sentFx) return;
+  var n=actCount(pendingFx)+1;
+  var a=document.querySelector('.act[data-fx="'+pendingFx+'"]');
+  var c=a?a.querySelector('.cnt'):null;
+  if(c) c.textContent=n;
+  if(MEM[memId]) MEM[memId].c[pendingFx]=n;
+  sentFx=pendingFx;
+  $('fxHint').textContent=sentHint(sentFx);
+  refreshSend();
+  toast(t('mem_sent'));
+};
+$('msgSend').onclick=function(){
+  var v=$('msgInput').value.trim(); if(!v)return;
+  MSGS.unshift({who:'Michael Carter',init:'MC',c1:'#4A90D9',c2:'#2A5F96',when:'now',tx:v,likes:0,me:0});
+  $('msgInput').value=''; renderMsgs();
+};
+$('msgInput').addEventListener('keydown',function(e){if(e.key==='Enter')$('msgSend').click();});
+$('themeUse').onclick=function(){
+  themeAuto=true; themeKey=REGION_THEME[LANG]||'western';
+  renderThemeList(); applyMemTheme(); syncThemeVal(); applyI18n();
+  toast('Memorial style set');
+};
+
+/* ---------- 05 Memorial page · per-person ---------- */
+function loadMemorial(id){
+  memId=(id&&MSGS_BY[id])?id:'gp1';
+  var n=byId(memId),m=MEM[memId];
+  MSGS=MSGS_BY[memId];
+  $('memName').textContent=n.first+' '+n.last;
+  var prd=PROFILE[memId]||{},yrs=(n.sub.match(/\d{4}/g)||[]);
+  var dA=prd.born?prd.born.split(' · ')[0]:(yrs[0]||'');
+  var dB=(n.dead&&prd.died)?prd.died.split(' · ')[0]:(yrs[1]||'');
+  $('memDates').textContent=(dA?(dA+(dB?' – '+dB:'')):n.sub)+' · '+n.rel;
+  $('memQuote').innerHTML='&ldquo;'+m.q+'&rdquo;';
+  $('memAnniv').textContent=m.anniv;
+  renderActs();
+  var h=document.querySelector('#s-memorial .sect-h h4');
+  if(h) h.textContent='Messages · '+MSGS.length;
+  renderMsgs();
+}
+
+/* ---------- 10 Edit person ---------- */
+let editId=null;
+function loadEdit(id){
+  editId=id;
+  var n=byId(id); if(!n)return;
+  var av=$('editAv');
+  av.className='av'+(n.dead?' dead':'');
+  av.textContent=n.init;
+  av.style.background='linear-gradient(140deg,'+n.c1+','+n.c2+')';
+  var pr=PROFILE[id]||{},yrs=(n.sub.match(/\d{4}/g)||[]);
+  var vals=[['first',n.first],['last',n.last],['born',yrs[0]||''],['died',n.dead&&yrs[1]?yrs[1]:''],['place',pr.place||''],['occ',pr.occ||'']];
+  $('editForm').innerHTML=vals.filter(function(f){return !(f[0]==='died'&&!n.dead);}).map(function(f){
+    return '<div class="fkv"><div class="k">'+t('f_'+f[0])+'</div><div class="v"><input class="fin" data-f="'+f[0]+'" value="'+f[1]+'"></div></div>';
+  }).join('');
+}
+$('editSave').onclick=function(){toast('Saved · queued for sync');goBack();};
+$('editDelete').onclick=function(){toast('Person removed');goBack();};
+
+/* ---------- 11 Add relative ---------- */
+let addId='me',addRel='parent';
+const RELS=[['parent','rel_parent','Mother or father'],['spouse','rel_spouse','Husband, wife or partner'],
+['child','rel_child','Son or daughter'],['sibling','rel_sibling','Brother or sister']];
+function loadAdd(id,rel){
+  addId=(id&&byId(id))?id:'me'; addRel=rel||addRel||'parent';
+  var n=byId(addId);
+  var av=$('addBaseAv');
+  av.textContent=n.init; av.style.background='linear-gradient(140deg,'+n.c1+','+n.c2+')';
+  $('addBaseName').textContent=n.first+' '+n.last;
+  $('addRelList').innerHTML='<div class="sect" style="margin-top:2px"><div class="sect-h"><h4>'+t('add_who')+'</h4></div>'+
+    RELS.map(function(r){return '<div class="th-item'+(r[0]===addRel?' sel':'')+'" data-rel="'+r[0]+'"><div class="th-radio">✓</div>'+
+      '<div class="tx"><b>'+t(r[1])+'</b><span>'+r[2]+'</span></div></div>';}).join('')+'</div>';
+  $('addRelList').querySelectorAll('[data-rel]').forEach(function(el){
+    el.onclick=function(){addRel=el.getAttribute('data-rel');loadAdd(addId,addRel);};
+  });
+  $('addLast').value=n.last;
+}
+$('addSave').onclick=function(){
+  var f=$('addFirst').value.trim(),l=$('addLast').value.trim();
+  if(!f){toast('Enter a first name');$('addFirst').focus();return;}
+  toast((f+' '+l).trim()+' added · queued for sync');
+  goBack();
+};
+
+/* ---------- 12 Search ---------- */
+function renderSearch(q){
+  q=(q||'').trim().toLowerCase();
+  var list=q?NODES.filter(function(n){
+    return (n.first+' '+n.last+' '+n.rel+' '+n.sub+' '+((PROFILE[n.id]||{}).born||'')+' '+((PROFILE[n.id]||{}).place||'')).toLowerCase().indexOf(q)>=0;
+  }):NODES;
+  if(!list.length){$('searchResults').innerHTML='<div class="empty">'+t('search_empty')+'</div>';return;}
+  $('searchResults').innerHTML='<div class="sect" style="margin-top:4px"><div class="sect-h"><h4>'+list.length+' found</h4></div><div class="list">'+
+    list.map(function(n){return '<div class="row-item" data-sp="'+n.id+'" style="cursor:pointer"><div class="av '+(n.dead?'dead':'')+
+    '" style="width:38px;height:38px;font-size:13px;background:linear-gradient(140deg,'+n.c1+','+n.c2+')">'+n.init+
+    '</div><span class="grow"><span class="t">'+n.first+' '+n.last+'</span><span class="s">'+n.sub+' · '+n.rel+'</span></span>'+
+    (n.dead?'<span class="tag plum">Remembered</span>':'')+'<span class="chev ic" data-icon="chev"></span></div>';}).join('')+'</div></div>';
+  fillIcons($('searchResults'));
+  $('searchResults').querySelectorAll('[data-sp]').forEach(function(el){
+    el.onclick=function(){openPerson(el.getAttribute('data-sp'));};
+  });
+}
+$('searchInput').addEventListener('input',function(){renderSearch(this.value);});
+
+/* ---------- 13 GEDCOM import ---------- */
+$('impGo').onclick=function(){
+  $('impResult').style.display='block';
+  toast('Parsed 10 individuals · 4 families');
+};
+
+fillIcons(document);
+$('fxPray').innerHTML=praySVG();
+applyMemTheme();
+renderPeople(); renderWall(); renderMsgs(); applyI18n();
+setDark(false);
+      </script>
+      </div>
+      <div class="navpad"><i></i></div>
+    </div>
+    <div style="font-size:12px;color:var(--ink3);text-align:center;max-width:390px;line-height:1.6">
+      Prototype only — nothing is stored. Built to validate flow &amp; visual language before Flutter implementation.
+    </div>
+  </div>
+</div>
+</html>
