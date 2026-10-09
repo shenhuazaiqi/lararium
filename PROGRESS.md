@@ -64,6 +64,23 @@
 | **GitHub Pages 公网** | https://shenhuazaiqi.github.io/lararium/ | gh-pages 分支（web/ 子树）+ Pages 已启用，构建成功 | HTTP 200（首页 + privacy.html） |
 | 授权辅助脚本 | `scripts/auth-supabase.command` `scripts/auth-github.command` | 双击即用的 CLI 登录脚本（备用） | 双击运行 |
 
+### 2026-10-09（晚）· MVP 功能闭环（阶段 2/3/5 主体一次补齐）
+
+| 产物 | 路径 | 说明 | 验收方式 |
+|---|---|---|---|
+| **GEDCOM 5.5.1 解析器+导出器** | `lib/features/gedcom/gedcom.dart` | UTF-8/UTF-16/ANSEL 编码检测、CONT/CONC 多行备注、模糊日期（ABT/年月日）、INDI/FAM 全字段、代数计算（防环） | `flutter test`：6 个单测全过（往返/日期/编码/跳过标签/多行备注） |
+| **导出中心（实战）** | `lib/features/export/export_screen.dart` + `export_service.dart` | ① PDF 海报（树画布高清 PNG 嵌入 → 名字走系统字体 CJK 安全；A4/2×）② PNG 高清图（RepaintBoundary 3x）③ GEDCOM（含「剔除在世人」脱敏开关）④ JSON 全量备份 —— 全部经系统分享面板输出 | 模拟器实测：GEDCOM 导出弹出系统分享 `lararium_export.ged`（截图 13） |
+| **GEDCOM 导入（实战）** | `lib/features/import/import_screen.dart` | file_picker 选 .ged → 本机解析（不上传）→ 自动建新树 → 结果报告（人数/家庭/代数/跳过标签）→ 一键切换到新树 | 代码路径 + 单测覆盖解析；端到端待真机用真实 .ged 文件 |
+| **多树管理** | `lib/data/tree_service.dart` + 设置页树区 + `TreeGate` | 创建/切换/重命名/复制（整树含留言）；`currentTreeIdProvider` 持久化，TreeGate 让 4 个 Tab 自动换数据源 | 截图 10（Carter Family + Current 徽标 + New tree） |
+| **提醒中心** | `lib/features/reminders/` | 忌日/生日开关、9:00 提醒、提前天数（当天/1/3/7）、未来 30 天列表；flutter_local_notifications + timezone（Android 脱糖/权限/BOOT receiver 已配） | 截图 14：James Carter 忌日 11/4 正确出现在列表 |
+| **免费额度** | `lib/features/memorial/memorial_quota.dart` | 每类动作 1 次/天、留言 3 条/天、**忌日当天 +1**；耗尽弹层温和文案 + 「留言永远免费」出口（5.4.4 防差评全套）；额度常量即未来的服务端 remote_config | 截图 16：第二次献花被温和拦截 |
+| **账号+云同步** | `lib/data/sync_service.dart` + `lib/features/sync/sync_screen.dart` | 邮箱注册/登录（Supabase Auth）；整树推送（upsert）+ 拉取合并（LWW by client_updated_at）；同步状态卡/立即同步/成员/邀请占位 | **真实上云验证**：云端 SQL 计数 persons=11/families=3/children=6；App 显示 All synced + 时间（截图 12/18） |
+| **Pro 页** | `lib/features/pro/pro_screen.dart` | $19.99/年 + 6 权益 + 「免费版永远保留缅怀闭环」声明；Continue 显式提示 Billing 待商店配置（合规） | 截图 15 |
+| **i18n 补齐** | `lib/l10n/*.arb`（12 语言 + zh 回退） | 本轮新增 **91 键 × 12 语言全部翻译**（含 ru 复数 4 形式），`l10n_missing.txt` 为空 | 中文实测：设置/同步/纪念页全中文（截图 17/18） |
+| 云端修正 | `supabase/migrations/…init.sql` | persons 补 `is_self` 列（已在线上 ALTER）；tree_members 改「先查后插」规避 upsert RETURNING 与 RLS 快照冲突 | curl 复测 201 |
+
+**已知限制（下轮处理）**：① PDF 页面文字用内置拉丁字体（人名已走图像渲染不受影响）；② Google/Apple 登录、Realtime 到达提示、Web 纪念页（Edge Function）、照片上传未接；③ 留言作者名仍为占位；④ Google Play Billing 需商店配置后启用。
+
 **模拟器验证记录**（Pixel_10a / API16k，截图在 `screenshots/`）：
 欢迎页（壁龛 logo）→ 树视图（10 人 4 代连线正确、已故「1918 – 1994」去饱和、YOU+焦点环）→ 纪念墙（3 位追忆、筛选 chips、计数）→ 纪念页（英雄区/引言/动作栏/两步确认：Flowers 32→选中预览→Send→33 + Sent ✓）→ 设置 → 语言切简体中文（全 UI 即时切换、姓名变「Carter James」姓前、徽标「我」、「生于 1948」）。
 **已知已修 bug**：演示数据 isLiving 未标记（已修）；Container 负 margin 红屏（改 Transform.translate）；FX 舞台宽度塌陷（width: double.infinity）。
@@ -81,7 +98,7 @@
 
 ## 🚧 进行中（In Progress）
 
-**（无）** —— Supabase 与 GitHub/Pages 均已完成。下一步等拍板：是否开始阶段 2（GEDCOM 解析器 + PDF 导出）。
+**（无）** —— MVP 功能闭环全部完成并实测（见下）。
 
 ---
 
