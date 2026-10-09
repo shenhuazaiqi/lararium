@@ -11,7 +11,6 @@ import '../../data/providers.dart';
 import 'fx_stage.dart';
 import 'memorial_quota.dart';
 import 'memorial_theme_defs.dart';
-import 'theme_picker_sheet.dart';
 
 /// 05 纪念页 —— 核心情感差异化（规划文档 5.4）。
 /// v4 交互：动作两步确认（选中 → 舞台预览 → Send 才计数），杜绝误触。
@@ -391,11 +390,7 @@ class _MemorialScreenState extends ConsumerState<MemorialScreen> {
   }
 
   void _openThemePicker() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      builder: (_) => ThemePickerSheet(personId: widget.personId),
-    );
+    context.push('/settings/memorial-style?person=${widget.personId}');
   }
 
   // ---------- 动作 ----------

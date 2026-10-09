@@ -7,8 +7,8 @@ import '../../core/theme.dart';
 import '../../data/providers.dart';
 import '../../core/fuzzy_date.dart';
 import '../memorial/memorial_theme_defs.dart';
+import 'language_screen.dart';
 import '../memorial/memorial_wall_screen.dart' show personYears;
-import 'settings_sheets.dart';
 
 /// 04 设置。
 class SettingsScreen extends ConsumerWidget {
@@ -87,7 +87,7 @@ class SettingsScreen extends ConsumerWidget {
               iconColor: colors.ink2,
               title: l10n.language,
               subtitle: langLabel,
-              onTap: () => showLanguageSheet(context),
+              onTap: () => context.push('/settings/language'),
             ),
             _divider(colors),
             _row(
@@ -107,7 +107,7 @@ class SettingsScreen extends ConsumerWidget {
               subtitle: defaultTheme == null
                   ? l10n.followSystem
                   : themeByKey(defaultTheme).label(l10n),
-              onTap: () => showMemorialThemeSheet(context),
+              onTap: () => context.push('/settings/memorial-style'),
             ),
             _divider(colors),
             SwitchListTile(

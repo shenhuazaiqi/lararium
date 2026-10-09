@@ -16,6 +16,8 @@ import '../features/people/people_screen.dart';
 import '../features/person/add_relative_screen.dart';
 import '../features/person/edit_person_screen.dart';
 import '../features/search/search_screen.dart';
+import '../features/memorial/theme_picker_screen.dart';
+import '../features/settings/language_screen.dart';
 import '../features/settings/settings_screen.dart';
 import '../features/tree/tree_screen.dart';
 import 'theme.dart';
@@ -136,6 +138,18 @@ GoRouter buildRouter(Ref ref) {
         path: '/pro',
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) => const ProScreen(),
+      ),
+      GoRoute(
+        path: '/settings/language',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const LanguageScreen(),
+      ),
+      GoRoute(
+        path: '/settings/memorial-style',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => ThemePickerScreen(
+          personId: state.uri.queryParameters['person'],
+        ),
       ),
       GoRoute(
         path: '/export',
