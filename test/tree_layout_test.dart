@@ -96,6 +96,98 @@ void main() {
     expect(r.wires, isNotEmpty);
   });
 
+  test('多配偶：本人居中，两配偶分列两侧，各自子女挂对应侧', () {
+    // mother 先后与 father1、father2 组建家庭；
+    // father1 的孩子是 self，father2 的孩子是 kid2
+    final persons = [
+      _p('self', self: true),
+      _p('kid2'),
+      _p('mother'),
+      _p('father1'),
+      _p('father2'),
+    ];
+    final families = [
+      _f('fM', p1: 'mother', p2: 'father1'),
+      _f('fM2', p1: 'mother', p2: 'father2'),
+    ];
+    final links = [
+      _link('fM', 'self'),
+      _link('fM2', 'kid2'),
+    ];
+
+    final r = computeTreeLayout(TreeLayoutInput(
+      persons: persons,
+      families: families,
+      childLinks: links,
+      textDirection: TextDirection.ltr,
+      focusPersonId: 'self',
+    ));
+
+    // 三人同为第 0 代，且全部被收编进同一个单元（不再各自为根）
+    for (final id in ['mother', 'father1', 'father2']) {
+      expect(_genOf(r, id), 0, reason: id);
+    }
+    expect(_genOf(r, 'self'), 1);
+    expect(_genOf(r, 'kid2'), 1);
+    expect(r.nodes.length, 5); // 无重复节点
+
+    Rect rectOf(String id) =>
+        r.nodes.firstWhere((n) => n.person.id == id).rect;
+    // mother 居中：第一任 father1 在左、第二任 father2 在右，
+    // 间距恰好一个单元位
+    final m = rectOf('mother').center.dx;
+    expect(rectOf('father1').center.dx, lessThan(m));
+    expect(rectOf('father2').center.dx, greaterThan(m));
+    expect(m - rectOf('father1').center.dx, 112 + 28); // kNodeW + kCoupleGap
+    expect(rectOf('father2').center.dx - m, 112 + 28);
+
+    // 各婚姻子女挂在对应配偶一侧：self（father1 之子）在左，kid2 在右
+    expect(rectOf('self').center.dx, lessThan(m));
+    expect(rectOf('kid2').center.dx, greaterThan(m));
+  });
+
+  test('多配偶且配偶带前序子女：前序子女挂在该配偶外侧', () {
+    // father1 与前任（ex）有一子 kidEx，之后与 mother 组建家庭生 self
+    final persons = [
+      _p('self', self: true),
+      _p('kidEx'),
+      _p('mother'),
+      _p('father1'),
+      _p('ex'),
+    ];
+    final families = [
+      _f('fEx', p1: 'father1', p2: 'ex'),
+      _f('fM', p1: 'father1', p2: 'mother'),
+    ];
+    final links = [
+      _link('fEx', 'kidEx'),
+      _link('fM', 'self'),
+    ];
+
+    final r = computeTreeLayout(TreeLayoutInput(
+      persons: persons,
+      families: families,
+      childLinks: links,
+      textDirection: TextDirection.ltr,
+    ));
+
+    expect(r.nodes.length, 5); // 所有人都被收编，无重复
+    for (final id in ['father1', 'ex', 'mother']) {
+      expect(_genOf(r, id), 0, reason: id);
+    }
+    expect(_genOf(r, 'kidEx'), 1);
+    expect(_genOf(r, 'self'), 1);
+
+    Rect rectOf(String id) =>
+        r.nodes.firstWhere((n) => n.person.id == id).rect;
+    // father1 居中，ex 在左、mother 在右；各自子女挂在对应侧
+    final f = rectOf('father1').center.dx;
+    expect(rectOf('ex').center.dx, lessThan(f));
+    expect(rectOf('mother').center.dx, greaterThan(f));
+    expect(rectOf('kidEx').center.dx, lessThan(f));
+    expect(rectOf('self').center.dx, greaterThan(f));
+  });
+
   test('单亲家庭：单亲为第 0 代，子女为第 1 代', () {
     final r = computeTreeLayout(TreeLayoutInput(
       persons: [_p('kid'), _p('mom')],

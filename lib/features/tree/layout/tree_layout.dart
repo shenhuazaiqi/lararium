@@ -117,8 +117,8 @@ TreeLayoutResult computeTreeLayout(TreeLayoutInput input) {
     parentFamilyOf.putIfAbsent(link.personId, () => link.familyId);
     childrenOf.putIfAbsent(link.familyId, () => []).add(link.personId);
   }
-  // personId → 作为伴侣参与的第一个家庭
-  final partnerFamilyOf = <String, String>{};
+  // personId → 参与的全部家庭（按输入顺序），多配偶布局的基础
+  final marriagesOf = <String, List<String>>{};
   // 家庭 → 伴侣对（保持 partner1/partner2 顺序）
   final partnersOf = <String, List<String>>{};
   for (final f in input.families) {
@@ -126,7 +126,7 @@ TreeLayoutResult computeTreeLayout(TreeLayoutInput input) {
     if (partners.isEmpty) continue;
     partnersOf[f.id] = partners;
     for (final p in partners) {
-      partnerFamilyOf.putIfAbsent(p, () => f.id);
+      marriagesOf.putIfAbsent(p, () => []).add(f.id);
     }
   }
 
@@ -136,29 +136,66 @@ TreeLayoutResult computeTreeLayout(TreeLayoutInput input) {
   _Unit buildUnit(String anchorId, int depth) {
     final unit = _Unit(anchorId, depth);
     placed.add(anchorId);
-    unit.members.add(anchorId);
-    // 伴侣并入同一单元（MVP：取其参与的第一个家庭）
-    final famId = partnerFamilyOf[anchorId];
-    String? spouseId;
-    if (famId != null) {
-      for (final p in partnersOf[famId] ?? const <String>[]) {
-        if (p != anchorId && !placed.contains(p)) {
-          spouseId = p;
+
+    // 多配偶：本人的全部婚姻按结婚顺序排列，第一任在左、第二任在右，
+    // 依次向外交替（0,2,… 左侧 / 1,3,… 右侧），本人居中；
+    // 每个婚姻的子女槽位跟在对应配偶一侧，减少连线交叉。
+    final leftSpouses = <String>[]; // 婚姻序 0,2,4…（内→外）
+    final rightSpouses = <String>[]; // 婚姻序 1,3,5…（内→外）
+    final leftMarriage = <String>[]; // 与 leftSpouses 一一对应的家庭
+    final rightMarriage = <String>[];
+    final singleFamilies = <String>[]; // 无在场配偶的婚姻（单亲/配偶已布局）
+    final usedFamilies = <String>{};
+
+    var mi = 0;
+    for (final fid in marriagesOf[anchorId] ?? const <String>[]) {
+      usedFamilies.add(fid);
+      String? spouse;
+      for (final p in partnersOf[fid] ?? const <String>[]) {
+        if (p != anchorId && !placed.contains(p) && byId.containsKey(p)) {
+          spouse = p;
           break;
         }
       }
+      if (spouse == null) {
+        singleFamilies.add(fid);
+      } else {
+        placed.add(spouse);
+        if (mi.isOdd) {
+          rightSpouses.add(spouse);
+          rightMarriage.add(fid);
+        } else {
+          leftSpouses.add(spouse);
+          leftMarriage.add(fid);
+        }
+      }
+      mi++;
     }
-    if (spouseId != null) {
-      placed.add(spouseId);
-      unit.members.add(spouseId);
+
+    unit.members
+      ..addAll(leftSpouses.reversed) // 左侧：外→内
+      ..add(anchorId)
+      ..addAll(rightSpouses); // 右侧：内→外
+
+    // 配偶与其他人（前任）的家庭：子女挂在该配偶一侧的槽位
+    List<String> otherFamiliesOf(String pid) {
+      final out = <String>[];
+      for (final fid in marriagesOf[pid] ?? const <String>[]) {
+        if (usedFamilies.add(fid)) out.add(fid);
+      }
+      return out;
     }
-    // 该单元的家庭 = anchor(或 anchor+spouse) 的家庭（有孩子的优先）
-    final familyIds = <String>{
-      if (famId != null) famId,
-      if (spouseId != null && partnerFamilyOf[spouseId] != null)
-        partnerFamilyOf[spouseId]!,
-    };
-    for (final fid in familyIds) {
+
+    // 子女槽位按显示顺序：左侧配偶（外→内）→ 本人单亲婚姻 → 右侧配偶（内→外）
+    final slots = <String>[];
+    for (var k = leftSpouses.length - 1; k >= 0; k--) {
+      slots..addAll(otherFamiliesOf(leftSpouses[k]))..add(leftMarriage[k]);
+    }
+    slots.addAll(singleFamilies);
+    for (var k = 0; k < rightSpouses.length; k++) {
+      slots..add(rightMarriage[k])..addAll(otherFamiliesOf(rightSpouses[k]));
+    }
+    for (final fid in slots) {
       for (final childId in childrenOf[fid] ?? const <String>[]) {
         if (placed.contains(childId)) continue; // 已随伴侣单元布局
         if (!byId.containsKey(childId)) continue;
@@ -306,7 +343,7 @@ TreeLayoutResult computeTreeLayout(TreeLayoutInput input) {
         generation: u.depth,
         isFocus: input.focusPersonId == pid,
         isSelf: person.isSelf,
-        spouseOf: i > 0 ? u.members.first : null,
+        spouseOf: pid == u.anchorId ? null : u.anchorId,
       ));
     }
     for (final c in u.children) {
