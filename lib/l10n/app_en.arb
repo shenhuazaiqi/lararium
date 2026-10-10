@@ -327,5 +327,11 @@
         "type": "int"
       }
     }
-  }
+  },
+  "sentDone": "Sent",
+  "sharePublicTitle": "Make this memorial public",
+  "sharePublicBody": "Anyone with the link will see: the name, life dates, memorial message and tributes. Living relatives are never shown.",
+  "sharePublicEnable": "Enable & share",
+  "shareText": "In Loving Memory · {name} ({years})\n{url}",
+  "errShare": "Couldn't share · please try again"
 }

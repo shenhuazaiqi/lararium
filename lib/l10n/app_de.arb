@@ -242,5 +242,11 @@
   "annivOf": "{name} · Todestag",
   "birthdayOf": "{name} · Geburtstag",
   "upcomingThisMonth": "Anstehend",
-  "noUpcoming": "Keine Jahrestage oder Geburtstage in den nächsten 30 Tagen"
+  "noUpcoming": "Keine Jahrestage oder Geburtstage in den nächsten 30 Tagen",
+  "sentDone": "Gesendet",
+  "sharePublicTitle": "Dieses Gedenken öffentlich machen",
+  "sharePublicBody": "Wer den Link hat, sieht: Namen, Lebensdaten, Gedenktext und Gaben. Lebende Angehörige werden nie gezeigt.",
+  "sharePublicEnable": "Aktivieren & teilen",
+  "shareText": "In lieber Erinnerung · {name} ({years})\n{url}",
+  "errShare": "Teilen fehlgeschlagen · bitte erneut versuchen"
 }

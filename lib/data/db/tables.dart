@@ -47,6 +47,9 @@ class Persons extends Table {
 
   // --- 缅怀（人物级，云同步阶段映射到 memorial_profiles） ---
   // western | east_asian | latin | jewish | hindu | islamic | secular
+  // 公开纪念页开关（5.4.2：默认关闭，用户显式开启后分享链接）
+  BoolColumn get allowPublicLink =>
+      boolean().withDefault(const Constant(false))();
   TextColumn get memorialTheme => text().nullable()();
   TextColumn get epitaph => text().nullable()();
   IntColumn get flowerCount => integer().withDefault(const Constant(0))();

@@ -242,5 +242,11 @@
   "annivOf": "{name} · 기일",
   "birthdayOf": "{name} · 생일",
   "upcomingThisMonth": "다가오는 일정",
-  "noUpcoming": "향후 30일 내 기일이나 생일이 없습니다"
+  "noUpcoming": "향후 30일 내 기일이나 생일이 없습니다",
+  "sentDone": "보냄",
+  "sharePublicTitle": "추모 페이지 공개",
+  "sharePublicBody": "링크가 있는 누구나 이름·생몰년·추모 메시지·헌화를 볼 수 있습니다. 생존 가족은 표시되지 않습니다.",
+  "sharePublicEnable": "공개하고 공유",
+  "shareText": "추모 · {name}({years})\n{url}",
+  "errShare": "공유 실패 · 다시 시도해 주세요"
 }

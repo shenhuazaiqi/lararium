@@ -242,5 +242,11 @@
   "annivOf": "{name} · 命日",
   "birthdayOf": "{name} · 誕生日",
   "upcomingThisMonth": "今後の予定",
-  "noUpcoming": "今後30日以内の命日・誕生日はありません"
+  "noUpcoming": "今後30日以内の命日・誕生日はありません",
+  "sentDone": "送信済み",
+  "sharePublicTitle": "追悼ページを公開",
+  "sharePublicBody": "リンクを知っている人なら、名前・生没年・追悼メッセージ・供物を見られます。存命のご親族は表示されません。",
+  "sharePublicEnable": "公開して共有",
+  "shareText": "追悼 · {name}（{years}）\n{url}",
+  "errShare": "共有できませんでした · もう一度お試しください"
 }

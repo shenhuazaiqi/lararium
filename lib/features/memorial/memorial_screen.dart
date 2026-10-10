@@ -1,5 +1,8 @@
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -161,11 +164,7 @@ class _MemorialScreenState extends ConsumerState<MemorialScreen> {
                           _messages(p, l10n, colors, localeTag),
                           const SizedBox(height: 16),
                           OutlinedButton.icon(
-                            onPressed: () {
-                              // Web 纪念页在阶段 5（Supabase Edge Function + Pages）
-                              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                                  content: Text(l10n.memorialLinkCopied)));
-                            },
+                            onPressed: _sharePublic,
                             style: OutlinedButton.styleFrom(
                               foregroundColor: colors.ink,
                               side: BorderSide(color: colors.line2),
@@ -490,11 +489,12 @@ class _MemorialScreenState extends ConsumerState<MemorialScreen> {
           shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(14)),
         ),
-        icon: Icon(sent ? Icons.check : Icons.favorite,
-            size: 16),
+        icon: sent
+            ? null
+            : const Icon(Icons.favorite, size: 16),
         label: Text(
           sent
-              ? l10n.sentCheck
+              ? l10n.sentDone
               : _pendingAct != null
                   ? actSendLabel(l10n, _pendingAct!)
                   : l10n.chooseTribute,
@@ -503,6 +503,67 @@ class _MemorialScreenState extends ConsumerState<MemorialScreen> {
         ),
       ),
     );
+  }
+
+  /// 分享公开纪念页（5.4.2）：首次分享先征询 → 开启 allow_public_link → 分享链接。
+  Future<void> _sharePublic() async {
+    final l10n = AppLocalizations.of(context);
+    final colors = Theme.of(context).extension<LarariumColors>()!;
+    final db = ref.read(databaseProvider);
+    final person = ref.read(personProvider(widget.personId)).value;
+    if (person == null) return;
+
+    if (!person.allowPublicLink) {
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: Text(l10n.sharePublicTitle),
+          content: Text(l10n.sharePublicBody),
+          actions: [
+            TextButton(
+                onPressed: () => Navigator.pop(ctx, false),
+                child: Text(l10n.cancel)),
+            FilledButton(
+              style: FilledButton.styleFrom(backgroundColor: colors.brand),
+              onPressed: () => Navigator.pop(ctx, true),
+              child: Text(l10n.sharePublicEnable),
+            ),
+          ],
+        ),
+      );
+      if (confirmed != true) return;
+      // 本地 + 云端同步开启
+      await (db.update(db.persons)..where((t) => t.id.equals(person.id)))
+          .write(PersonsCompanion(allowPublicLink: Value(true)));
+      try {
+        await Supabase.instance.client
+            .from('memorial_profiles')
+            .update({'allow_public_link': true})
+            .eq('person_id', person.id);
+      } catch (_) {
+        // 未登录/离线：本地已开启，下次同步补写
+      }
+    }
+
+    // 公开纪念页托管在 GitHub Pages（用户自选方案：网页不买服务器），
+    // 页面用 anon RPC 读取受限字段，Supabase Edge Function 沙箱策略不适用于静态托管。
+    const publicMemorialBase =
+        'https://shenhuazaiqi.github.io/lararium/memorial.html';
+    final url = '$publicMemorialBase?p=${person.id}';
+    final years = personYears(person);
+    try {
+      // gen-l10n 占位符按字母序生成参数：{name}, {url}, {years}
+      await Share.share(l10n.shareText(
+        '${person.givenName} ${person.surname}'.trim(),
+        url,
+        years.isEmpty ? 'In Loving Memory' : years,
+      ));
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(l10n.errShare)));
+      }
+    }
   }
 
   Future<void> _send() async {

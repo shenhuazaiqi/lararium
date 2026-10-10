@@ -35,7 +35,10 @@ class _MemorialWallScreenState extends ConsumerState<MemorialWallScreen> {
 
     return personsAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, _) => Center(child: Text('$e')),
+      error: (e, st) {
+        FlutterError.reportError(FlutterErrorDetails(exception: e, stack: st));
+        return Center(child: Text('$e'));
+      },
       data: (persons) {
         final dead = persons.where((p) => !p.isLiving).toList();
         var list = switch (_filter) {

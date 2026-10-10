@@ -242,5 +242,11 @@
   "annivOf": "{name} · sterfdag",
   "birthdayOf": "{name} · verjaardag",
   "upcomingThisMonth": "Aankomend",
-  "noUpcoming": "Geen sterfdagen of verjaardagen in de komende 30 dagen"
+  "noUpcoming": "Geen sterfdagen of verjaardagen in de komende 30 dagen",
+  "sentDone": "Verzonden",
+  "sharePublicTitle": "Deze herdenking openbaar maken",
+  "sharePublicBody": "Wie de link heeft, ziet: naam, levensjaren, herdenkingsbericht en eerbetoon. Levende familieleden worden nooit getoond.",
+  "sharePublicEnable": "Inschakelen & delen",
+  "shareText": "Ter nagedachtenis · {name} ({years})\n{url}",
+  "errShare": "Delen mislukt · probeer opnieuw"
 }

@@ -242,5 +242,11 @@
   "annivOf": "{name} · 忌日",
   "birthdayOf": "{name} · 生日",
   "upcomingThisMonth": "即将到来",
-  "noUpcoming": "未来 30 天没有忌日或生日"
+  "noUpcoming": "未来 30 天没有忌日或生日",
+  "sentDone": "已送出",
+  "sharePublicTitle": "公开这页纪念",
+  "sharePublicBody": "拿到链接的人可以看到：姓名、生卒年份、纪念文字与致敬。绝不会显示在世亲属的信息。",
+  "sharePublicEnable": "开启并分享",
+  "shareText": "谨以此纪念 · {name}（{years}）\n{url}",
+  "errShare": "分享失败 · 请重试"
 }

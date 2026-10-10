@@ -242,5 +242,11 @@
   "annivOf": "{name} · anniversario di morte",
   "birthdayOf": "{name} · compleanno",
   "upcomingThisMonth": "In arrivo",
-  "noUpcoming": "Nessun anniversario o compleanno nei prossimi 30 giorni"
+  "noUpcoming": "Nessun anniversario o compleanno nei prossimi 30 giorni",
+  "sentDone": "Inviato",
+  "sharePublicTitle": "Rendi pubblico questo ricordo",
+  "sharePublicBody": "Chi ha il link vedrà: nome, date, messaggio e omaggi. I parenti viventi non sono mai mostrati.",
+  "sharePublicEnable": "Attiva e condividi",
+  "shareText": "In memoria · {name} ({years})\n{url}",
+  "errShare": "Condivisione non riuscita · riprova"
 }

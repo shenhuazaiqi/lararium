@@ -242,5 +242,11 @@
   "annivOf": "{name} · aniversario",
   "birthdayOf": "{name} · cumpleaños",
   "upcomingThisMonth": "Próximos",
-  "noUpcoming": "Ningún aniversario o cumpleaños en los próximos 30 días"
+  "noUpcoming": "Ningún aniversario o cumpleaños en los próximos 30 días",
+  "sentDone": "Enviado",
+  "sharePublicTitle": "Hacer público este homenaje",
+  "sharePublicBody": "Quien tenga el enlace verá: el nombre, las fechas, el mensaje y los homenajes. Nunca se muestran familiares vivos.",
+  "sharePublicEnable": "Activar y compartir",
+  "shareText": "En memoria · {name} ({years})\n{url}",
+  "errShare": "No se pudo compartir · inténtalo de nuevo"
 }
