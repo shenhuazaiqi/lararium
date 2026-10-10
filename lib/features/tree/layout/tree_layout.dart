@@ -168,7 +168,26 @@ TreeLayoutResult computeTreeLayout(TreeLayoutInput input) {
     return unit;
   }
 
-  // 根：所有未被单元收编的人（无父母家庭且未被当作配偶并入）
+  // 根：以「根家庭」为组件锚点 —— 夫妻双方都没有父母家庭的才做根
+  // （最老一代），其余人由父母单元向下收编，保证父母代显示在子女上方。
+  // 之前只按人物列表顺序收编，本人先入列时其父母会被平铺成同级独立根。
+  for (final f in input.families) {
+    final partners = partnersOf[f.id];
+    if (partners == null || partners.isEmpty) continue;
+    final isRootFamily =
+        partners.every((p) => !parentFamilyOf.containsKey(p));
+    if (!isRootFamily) continue;
+    String? anchor;
+    for (final p in partners) {
+      if (!placed.contains(p)) {
+        anchor = p;
+        break;
+      }
+    }
+    if (anchor == null) continue; // 双方均已随其他单元布局
+    units.add(buildUnit(anchor, 0));
+  }
+  // 兜底：无家庭归属、或父母链接悬空（父母不在谱）的人
   for (final p in input.persons) {
     if (placed.contains(p.id)) continue;
     units.add(buildUnit(p.id, 0));
