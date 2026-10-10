@@ -190,6 +190,45 @@ void main() {
     expect(rectOf('self').center.dx, greaterThan(f));
   });
 
+  test('配偶链：给已布局的成员再加配偶，紧邻入链而非独立成根（回归用例）', () {
+    // mother—father1 结婚生 self，mother—father2 再婚；
+    // 之后 father1 又与 step 结婚（fNew 输入顺序靠后）
+    final persons = [
+      _p('self', self: true),
+      _p('mother'),
+      _p('father1'),
+      _p('father2'),
+      _p('step'),
+    ];
+    final families = [
+      _f('fM', p1: 'mother', p2: 'father1'),
+      _f('fM2', p1: 'mother', p2: 'father2'),
+      _f('fNew', p1: 'father1', p2: 'step'),
+    ];
+    final links = [_link('fM', 'self')];
+
+    final r = computeTreeLayout(TreeLayoutInput(
+      persons: persons,
+      families: families,
+      childLinks: links,
+      textDirection: TextDirection.ltr,
+      focusPersonId: 'self',
+    ));
+
+    // 四个大人都收进同一单元（step 不再漂移成独立根），self 在下一代
+    expect(r.nodes.length, 5);
+    for (final id in ['mother', 'father1', 'father2', 'step']) {
+      expect(_genOf(r, id), 0, reason: id);
+    }
+    expect(_genOf(r, 'self'), 1);
+
+    Rect rectOf(String id) =>
+        r.nodes.firstWhere((n) => n.person.id == id).rect;
+    // step 紧贴 father1（相邻单元位），夫妻横杆短而清晰
+    expect(
+        (rectOf('father1').center.dx - rectOf('step').center.dx).abs(), 140);
+  });
+
   test('单子女连线：母线从夫妻中点连到孩子头顶，不断开（回归用例）', () {
     // 旧算法母线 = 「第一孩子中心 → 最后孩子中心」，单孩子时零长度，
     // 夫妻对下的竖线与孩子头顶的竖线互不相连

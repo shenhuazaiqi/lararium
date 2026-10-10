@@ -137,67 +137,83 @@ TreeLayoutResult computeTreeLayout(TreeLayoutInput input) {
     final unit = _Unit(anchorId, depth);
     placed.add(anchorId);
 
-    // 多配偶：本人的全部婚姻按结婚顺序排列，第一任在左、第二任在右，
-    // 依次向外交替（0,2,… 左侧 / 1,3,… 右侧），本人居中；
-    // 每个婚姻的子女槽位跟在对应配偶一侧，减少连线交叉。
-    final leftSpouses = <String>[]; // 婚姻序 0,2,4…（内→外）
-    final rightSpouses = <String>[]; // 婚姻序 1,3,5…（内→外）
-    final leftMarriage = <String>[]; // 与 leftSpouses 一一对应的家庭
-    final rightMarriage = <String>[];
-    final singleFamilies = <String>[]; // 无在场配偶的婚姻（单亲/配偶已布局）
+    final leftSeq = <String>[]; // 内→外
+    final rightSeq = <String>[]; // 内→外
     final usedFamilies = <String>{};
 
+    String? freeSpouseOf(String fid, String self) {
+      for (final p in partnersOf[fid] ?? const <String>[]) {
+        if (p != self && !placed.contains(p) && byId.containsKey(p)) {
+          return p;
+        }
+      }
+      return null;
+    }
+
+    // 展开成员的其余婚姻：新配偶放到其更外侧，并递归继续
+    // （配偶链：前任—本人—现任—… 每对夫妻相邻，横杆短且清晰）
+    void expand(String pid, bool left) {
+      for (final fid in marriagesOf[pid] ?? const <String>[]) {
+        if (!usedFamilies.add(fid)) continue;
+        final spouse = freeSpouseOf(fid, pid);
+        if (spouse == null) continue;
+        placed.add(spouse);
+        if (left) {
+          leftSeq.add(spouse);
+        } else {
+          rightSeq.add(spouse);
+        }
+        expand(spouse, left);
+      }
+    }
+
+    // 锚点婚姻：第一任左、第二任右、交替向外
     var mi = 0;
     for (final fid in marriagesOf[anchorId] ?? const <String>[]) {
       usedFamilies.add(fid);
-      String? spouse;
-      for (final p in partnersOf[fid] ?? const <String>[]) {
-        if (p != anchorId && !placed.contains(p) && byId.containsKey(p)) {
-          spouse = p;
-          break;
-        }
-      }
-      if (spouse == null) {
-        singleFamilies.add(fid);
-      } else {
+      final spouse = freeSpouseOf(fid, anchorId);
+      if (spouse != null) {
         placed.add(spouse);
-        if (mi.isOdd) {
-          rightSpouses.add(spouse);
-          rightMarriage.add(fid);
+        if (mi.isEven) {
+          leftSeq.add(spouse);
         } else {
-          leftSpouses.add(spouse);
-          leftMarriage.add(fid);
+          rightSeq.add(spouse);
         }
       }
       mi++;
     }
+    for (final s in leftSeq.toList()) {
+      expand(s, true);
+    }
+    for (final s in rightSeq.toList()) {
+      expand(s, false);
+    }
 
     unit.members
-      ..addAll(leftSpouses.reversed) // 左侧：外→内
+      ..addAll(leftSeq.reversed)
       ..add(anchorId)
-      ..addAll(rightSpouses); // 右侧：内→外
+      ..addAll(rightSeq);
 
-    // 配偶与其他人（前任）的家庭：子女挂在该配偶一侧的槽位
-    List<String> otherFamiliesOf(String pid) {
-      final out = <String>[];
-      for (final fid in marriagesOf[pid] ?? const <String>[]) {
-        if (usedFamilies.add(fid)) out.add(fid);
+    // 子女槽位按各家庭「夫妻对中点」的显示位置排序，
+    // 单亲家庭挂在本人位——保证子女挂在对应婚姻下方、减少连线交叉
+    final idx = <String, int>{
+      for (var i = 0; i < unit.members.length; i++) unit.members[i]: i,
+    };
+    final keyed = <MapEntry<double, String>>[];
+    for (final fid in usedFamilies) {
+      final partners =
+          (partnersOf[fid] ?? const <String>[]).where(idx.containsKey);
+      if (partners.isEmpty) continue;
+      var sum = 0.0;
+      for (final p in partners) {
+        sum += idx[p]!;
       }
-      return out;
+      keyed.add(MapEntry(sum / partners.length, fid));
     }
-
-    // 子女槽位按显示顺序：左侧配偶（外→内）→ 本人单亲婚姻 → 右侧配偶（内→外）
-    final slots = <String>[];
-    for (var k = leftSpouses.length - 1; k >= 0; k--) {
-      slots..addAll(otherFamiliesOf(leftSpouses[k]))..add(leftMarriage[k]);
-    }
-    slots.addAll(singleFamilies);
-    for (var k = 0; k < rightSpouses.length; k++) {
-      slots..add(rightMarriage[k])..addAll(otherFamiliesOf(rightSpouses[k]));
-    }
-    for (final fid in slots) {
-      for (final childId in childrenOf[fid] ?? const <String>[]) {
-        if (placed.contains(childId)) continue; // 已随伴侣单元布局
+    keyed.sort((a, b) => a.key.compareTo(b.key));
+    for (final e in keyed) {
+      for (final childId in childrenOf[e.value] ?? const <String>[]) {
+        if (placed.contains(childId)) continue;
         if (!byId.containsKey(childId)) continue;
         unit.children.add(buildUnit(childId, depth + 1));
       }

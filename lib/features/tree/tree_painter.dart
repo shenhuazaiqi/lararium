@@ -203,6 +203,25 @@ class TreePainter extends CustomPainter {
         _badge(canvas, selfBadge!, Offset(cx, r.top - 8),
             background: node.isFocus ? colors.brand : colors.ink3);
       }
+
+      // 性别徽标：♂ 蓝 / ♀ 粉（右上角，未知性别不显示）
+      final g = node.person.gender;
+      if (g == 'male' || g == 'female') {
+        final gc =
+            g == 'male' ? const Color(0xFF4C8BD9) : const Color(0xFFE2799F);
+        final gcCenter = Offset(r.right - 11, r.top + 11);
+        canvas.drawCircle(gcCenter, 8, Paint()..color = gc);
+        canvas.drawCircle(
+          gcCenter,
+          8,
+          Paint()
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 1.2
+            ..color = colors.surface,
+        );
+        _text(canvas, g == 'male' ? '♂' : '♀', gcCenter,
+            fontSize: 10, weight: FontWeight.w700, color: Colors.white);
+      }
     }
   }
 
