@@ -22,6 +22,13 @@ class FamilyService {
     String gender = 'unknown',
     DateTime? birthDate,
     String birthPrecision = 'day',
+    String? birthPlace,
+    String? occupation,
+    bool isLiving = true,
+    DateTime? deathDate,
+    String deathPrecision = 'day',
+    String? burialPlace,
+    String? note,
   }) async {
     final newPersonId = newId();
     await _db.into(_db.persons).insert(PersonsCompanion.insert(
@@ -32,6 +39,13 @@ class FamilyService {
           gender: Value(gender),
           birthDate: Value(birthDate),
           birthPrecision: Value(birthPrecision),
+          birthPlace: Value(birthPlace),
+          occupation: Value(occupation),
+          isLiving: Value(isLiving),
+          deathDate: Value(deathDate),
+          deathPrecision: Value(deathPrecision),
+          burialPlace: Value(burialPlace),
+          note: Value(note),
         ));
 
     switch (kind) {

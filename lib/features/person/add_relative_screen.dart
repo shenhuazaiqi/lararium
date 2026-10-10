@@ -3,11 +3,13 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/fuzzy_date.dart';
 import '../../core/theme.dart';
 import '../../data/providers.dart';
 import '../../data/repositories/family_service.dart';
 
-/// 11 添加亲属：先选关系，姓自动继承，名必填校验。
+/// 11 添加亲属：先选关系，姓自动继承，名必填校验；
+/// 档案字段（性别/出生/离世/备注）与编辑页一致。
 class AddRelativeScreen extends ConsumerStatefulWidget {
   const AddRelativeScreen({
     super.key,
@@ -25,6 +27,14 @@ class AddRelativeScreen extends ConsumerStatefulWidget {
 class _AddRelativeScreenState extends ConsumerState<AddRelativeScreen> {
   final _first = TextEditingController();
   final _last = TextEditingController();
+  final _born = TextEditingController();
+  final _place = TextEditingController();
+  final _occ = TextEditingController();
+  final _died = TextEditingController();
+  final _burial = TextEditingController();
+  final _note = TextEditingController();
+  String _gender = 'unknown';
+  bool _dead = false;
   late RelKind _rel;
   bool _prefilled = false;
 
@@ -43,6 +53,12 @@ class _AddRelativeScreenState extends ConsumerState<AddRelativeScreen> {
   void dispose() {
     _first.dispose();
     _last.dispose();
+    _born.dispose();
+    _place.dispose();
+    _occ.dispose();
+    _died.dispose();
+    _burial.dispose();
+    _note.dispose();
     super.dispose();
   }
 
@@ -196,6 +212,121 @@ class _AddRelativeScreenState extends ConsumerState<AddRelativeScreen> {
                   ],
                 ),
               ),
+              const SizedBox(height: 14),
+              // 性别
+              Container(
+                decoration: BoxDecoration(
+                  color: colors.surface,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: colors.line),
+                ),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(l10n.fGender,
+                        style: TextStyle(fontSize: 13, color: colors.ink3)),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8,
+                      children: [
+                        for (final (code, label) in [
+                          ('male', l10n.genderMale),
+                          ('female', l10n.genderFemale),
+                          ('other', l10n.genderOther),
+                          ('unknown', l10n.genderUnknown),
+                        ])
+                          ChoiceChip(
+                            label: Text(label),
+                            selected: _gender == code,
+                            onSelected: (_) =>
+                                setState(() => _gender = code),
+                            selectedColor: colors.brandSoft,
+                            labelStyle: TextStyle(
+                              color: _gender == code
+                                  ? colors.brand
+                                  : colors.ink2,
+                              fontWeight: FontWeight.w600,
+                            ),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(9)),
+                            side: BorderSide(
+                                color: _gender == code
+                                    ? colors.brand
+                                    : colors.line2),
+                          ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 14),
+              // 出生
+              Container(
+                decoration: BoxDecoration(
+                  color: colors.surface,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: colors.line),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 14),
+                child: Column(
+                  children: [
+                    _row(l10n.fBorn, _born, colors,
+                        hint: '1900 or 1900-03-21'),
+                    Divider(color: colors.line, height: 1),
+                    _row(l10n.fPlace, _place, colors),
+                    Divider(color: colors.line, height: 1),
+                    _row(l10n.fOccupation, _occ, colors),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 14),
+              // 离世
+              Container(
+                decoration: BoxDecoration(
+                  color: colors.surface,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: colors.line),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 14),
+                child: Column(
+                  children: [
+                    SwitchListTile(
+                      contentPadding: EdgeInsets.zero,
+                      title: Text(l10n.hasPassedAway,
+                          style: TextStyle(
+                              fontSize: 14.5,
+                              fontWeight: FontWeight.w500,
+                              color: colors.ink)),
+                      value: _dead,
+                      onChanged: (v) => setState(() => _dead = v),
+                    ),
+                    if (_dead) ...[
+                      Divider(color: colors.line, height: 1),
+                      _row(l10n.fDied, _died, colors,
+                          hint: '1994 or 1994-11-04'),
+                      Divider(color: colors.line, height: 1),
+                      _row(l10n.fBurial, _burial, colors),
+                    ],
+                  ],
+                ),
+              ),
+              const SizedBox(height: 14),
+              // 备注
+              Container(
+                decoration: BoxDecoration(
+                  color: colors.surface,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: colors.line),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 14),
+                child: Column(
+                  children: [
+                    _row(l10n.fNote, _note, colors, maxLines: 3),
+                  ],
+                ),
+              ),
               const SizedBox(height: 22),
               FilledButton(
                 style: FilledButton.styleFrom(
@@ -211,12 +342,32 @@ class _AddRelativeScreenState extends ConsumerState<AddRelativeScreen> {
                         SnackBar(content: Text(l10n.errEnterFirstName)));
                     return;
                   }
+                  final b = _born.text.trim().isEmpty
+                      ? null
+                      : FuzzyDate.tryParse(_born.text.trim());
+                  final d = _dead && _died.text.trim().isNotEmpty
+                      ? FuzzyDate.tryParse(_died.text.trim())
+                      : null;
                   await service.addRelative(
                     treeId: treeId,
                     base: base,
                     kind: _rel,
                     givenName: name,
                     surname: _last.text.trim(),
+                    gender: _gender,
+                    birthDate: b?.date,
+                    birthPrecision: b?.precision ?? 'day',
+                    birthPlace:
+                        _place.text.trim().isEmpty ? null : _place.text.trim(),
+                    occupation:
+                        _occ.text.trim().isEmpty ? null : _occ.text.trim(),
+                    isLiving: !_dead,
+                    deathDate: d?.date,
+                    deathPrecision: d?.precision ?? 'day',
+                    burialPlace: _burial.text.trim().isEmpty
+                        ? null
+                        : _burial.text.trim(),
+                    note: _note.text.trim().isEmpty ? null : _note.text.trim(),
                   );
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -236,10 +387,14 @@ class _AddRelativeScreenState extends ConsumerState<AddRelativeScreen> {
     );
   }
 
-  Widget _row(String label, TextEditingController c, LarariumColors colors) {
+  Widget _row(String label, TextEditingController c, LarariumColors colors,
+      {String? hint, int maxLines = 1}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10),
       child: Row(
+        crossAxisAlignment: maxLines > 1
+            ? CrossAxisAlignment.start
+            : CrossAxisAlignment.center,
         children: [
           SizedBox(
               width: 96,
@@ -249,12 +404,15 @@ class _AddRelativeScreenState extends ConsumerState<AddRelativeScreen> {
           Expanded(
             child: TextField(
               controller: c,
+              maxLines: maxLines,
               style: TextStyle(
                   fontSize: 14.5,
                   fontWeight: FontWeight.w500,
                   color: colors.ink),
-              decoration: const InputDecoration(
-                  hintText: '—', isDense: true, border: InputBorder.none),
+              decoration: InputDecoration(
+                  hintText: hint ?? '—',
+                  isDense: true,
+                  border: InputBorder.none),
             ),
           ),
         ],
