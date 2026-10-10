@@ -148,10 +148,10 @@ class _RelationshipScreenState extends ConsumerState<RelationshipScreen> {
           List<RelHop> path = const [];
           final families = familiesAsync.value ?? const <Family>[];
           final links = linksAsync.value ?? const <FamilyChildLink>[];
+          final graph =
+              FamilyGraph(persons: persons, families: families, links: links)
+                ..build();
           if (a != null && b != null) {
-            final graph = FamilyGraph(
-                persons: persons, families: families, links: links)
-              ..build();
             path = graph.shortestPath(a.id, b.id);
             resultText = _classify(graph, path, a.id, b.id, l10n);
           }
@@ -206,7 +206,7 @@ class _RelationshipScreenState extends ConsumerState<RelationshipScreen> {
                                 ),
                                 const SizedBox(width: 8),
                                 Text(
-                                    '\${graph.name(hop.fromId)} → \${graph.name(hop.toId)}',
+                                    '${graph.name(hop.fromId)} → ${graph.name(hop.toId)}',
                                     style: TextStyle(
                                         fontSize: 13.5, color: colors.ink2)),
                               ],

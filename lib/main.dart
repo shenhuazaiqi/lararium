@@ -78,14 +78,14 @@ Future<void> _rescheduleReminders(
     for (final p in persons) {
       if (annivOn && !p.isLiving && p.deathDate != null) {
         events.add((
-          name: '\${p.givenName} \${p.surname}'.trim(),
+          name: '${p.givenName} ${p.surname}'.trim(),
           date: p.deathDate!,
           isAnniversary: true,
         ));
       }
       if (birthOn && p.birthDate != null) {
         events.add((
-          name: '\${p.givenName} \${p.surname}'.trim(),
+          name: '${p.givenName} ${p.surname}'.trim(),
           date: p.birthDate!,
           isAnniversary: false,
         ));

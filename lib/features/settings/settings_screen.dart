@@ -7,10 +7,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/theme.dart';
 import '../../data/providers.dart';
-import '../../core/fuzzy_date.dart';
 import '../memorial/memorial_theme_defs.dart';
-import 'language_screen.dart';
-import '../memorial/memorial_wall_screen.dart' show personYears;
 
 /// 04 设置。
 class SettingsScreen extends ConsumerWidget {
@@ -310,7 +307,7 @@ class SettingsScreen extends ConsumerWidget {
                       onSelected: (action) async {
                         if (action == 'dup') {
                           final newId = await service.duplicate(
-                              t.id, '\${t.name} (copy)');
+                              t.id, '${t.name} (copy)');
                           ref.read(currentTreeIdProvider.notifier).state =
                               newId;
                           await ref

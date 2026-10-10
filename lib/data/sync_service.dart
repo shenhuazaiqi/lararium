@@ -2,7 +2,6 @@ import 'package:drift/drift.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'db/app_database.dart';
-import 'db/tables.dart';
 
 enum SyncPhase { idle, pushing, pulling, done, error }
 
@@ -282,10 +281,10 @@ class SyncService {
     final existingLinks = await (_db.select(_db.familyChildren)
           ..where((c) => c.treeId.equals(treeId)))
         .get();
-    final linkKeys = existingLinks.map((l) => '\${l.familyId}|${l.personId}').toSet();
+    final linkKeys = existingLinks.map((l) => '${l.familyId}|${l.personId}').toSet();
     for (final row in remoteLinks) {
       final map = row as Map<String, dynamic>;
-      final key = "\${map['family_id']}|\${map['person_id']}";
+      final key = "${map['family_id']}|${map['person_id']}";
       if (!linkKeys.contains(key)) {
         await _db.into(_db.familyChildren).insert(FamilyChildrenCompanion.insert(
               familyId: map['family_id'] as String,
