@@ -39,6 +39,8 @@ dependencies:
   share_plus: ^10.0.2
   file_picker: ^8.1.2
 
+  url_launcher: ^6.3.0
+
   # --- Google 一键登录 ---
   google_sign_in: ^6.2.1
 
@@ -53,6 +55,8 @@ dependency_overrides:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+
+  flutter_launcher_icons: ^0.14.1
 
   flutter_lints: ^4.0.0
   drift_dev: ^2.22.2

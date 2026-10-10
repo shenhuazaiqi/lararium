@@ -11,7 +11,7 @@ import '../../core/cloud_config.dart';
 
 import '../../core/theme.dart';
 import '../../data/providers.dart';
-import '../../data/sync_service.dart' show SyncPhase;
+import '../../data/sync_service.dart' show SyncPhase, SyncStatus;
 
 /// 08 同步与共享：登录 / 同步状态 / 邀请链接。
 class SyncScreen extends ConsumerStatefulWidget {
@@ -102,6 +102,8 @@ class _SyncScreenState extends ConsumerState<SyncScreen> {
     final service = ref.read(syncServiceProvider);
     await service.signOut();
     ref.read(authEmailProvider.notifier).state = null;
+    ref.read(syncStatusProvider.notifier).state = const SyncStatus();
+    await ref.read(prefsProvider).remove('last_sync_at');
   }
 
   Future<void> _sync() async {

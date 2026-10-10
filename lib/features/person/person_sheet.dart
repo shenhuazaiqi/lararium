@@ -85,7 +85,7 @@ class PersonSheet extends ConsumerWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              _displayName(p),
+                              personDisplayName(p, Localizations.localeOf(context)),
                               style: TextStyle(
                                   fontSize: 19,
                                   fontWeight: FontWeight.w700,

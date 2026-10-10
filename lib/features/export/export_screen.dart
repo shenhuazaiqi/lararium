@@ -2,10 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:file_picker/file_picker.dart';
+
 import '../../core/capture.dart';
 import '../../core/theme.dart';
 import '../../data/providers.dart';
 import 'export_service.dart';
+import '../../features/import/import_screen.dart';
 
 /// 07 导出中心：PDF 海报 / PNG 高清图 / GEDCOM 5.5.1 / JSON 全量备份。
 class ExportScreen extends ConsumerStatefulWidget {
@@ -100,6 +106,12 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
             ],
           ]),
           const SizedBox(height: 24),
+          const SizedBox(height: 10),
+          TextButton(
+            onPressed: _busy ? null : _restore,
+            child: Text(l10n.restoreFromBackup),
+          ),
+          const SizedBox(height: 10),
           SizedBox(
             height: 50,
             child: FilledButton.icon(
@@ -124,6 +136,39 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
         ],
       ),
     );
+  }
+
+  /// 从 JSON 备份恢复为新树（5.2 备份闭环的另一半）
+  Future<void> _restore() async {
+    final l10n = AppLocalizations.of(context);
+    setState(() => _busy = true);
+    try {
+      final picked = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['json'],
+        withData: true,
+      );
+      if (picked == null || picked.files.isEmpty) return;
+      final f = picked.files.single;
+      final text = f.bytes != null
+          ? utf8.decode(f.bytes!)
+          : await File(f.path!).readAsString();
+      final service = ExportService(ref.read(databaseProvider));
+      final base = (f.name.replaceAll(RegExp(r'\.json$', caseSensitive: false), ''));
+      final treeId = await service.restoreJsonBackup(text, newName: base);
+      if (!mounted) return;
+      ref.read(currentTreeIdProvider.notifier).state = treeId;
+      ref.read(prefsProvider).setString('current_tree_id', treeId);
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.restoreSuccess(base))));
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(l10n.restoreError)));
+      }
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
   }
 
   Future<void> _run() async {

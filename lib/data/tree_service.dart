@@ -109,6 +109,23 @@ class TreeService {
     return newId_;
   }
 
+  Future<int> countPeople(String treeId) async {
+    final rows = await (_db.select(_db.persons)
+          ..where((p) => p.treeId.equals(treeId) & p.deletedAt.isNull()))
+        .get();
+    return rows.length;
+  }
+
+  /// 删除某树后返回剩余的第一棵树 id（无则 null）。
+  Future<String?> firstRemainingTreeId({String? exclude}) async {
+    final rows = await (_db.select(_db.trees)
+          ..where((t) =>
+              t.deletedAt.isNull() &
+              (exclude == null ? t.id.isNotNull() : t.id.equals(exclude!))))
+        .get();
+    return rows.firstOrNull?.id;
+  }
+
   Future<void> softDelete(String treeId) async {
     await (_db.update(_db.trees)..where((t) => t.id.equals(treeId))).write(
       TreesCompanion(deletedAt: Value(DateTime.now()), updatedAt: Value(DateTime.now())),

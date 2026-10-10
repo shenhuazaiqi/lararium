@@ -39,6 +39,17 @@ final treesListProvider = StreamProvider<List<Tree>>((ref) {
   return ref.watch(treeServiceProvider).watchAll();
 });
 
+/// 当前树的名字（多树切换后标题跟随）
+final currentTreeNameProvider = Provider<String?>((ref) {
+  final id = ref.watch(effectiveTreeIdProvider);
+  if (id == null) return null;
+  final trees = ref.watch(treesListProvider).value ?? const <Tree>[];
+  for (final t in trees) {
+    if (t.id == id) return t.name;
+  }
+  return null;
+});
+
 /// 当前选中的树（多树管理）。null = 未选择 → 回落到默认树。
 final currentTreeIdProvider = StateProvider<String?>((ref) => null);
 

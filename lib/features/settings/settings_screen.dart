@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/theme.dart';
 import '../../data/providers.dart';
@@ -136,6 +137,17 @@ class SettingsScreen extends ConsumerWidget {
           _list(colors, [
             _row(
               context,
+              icon: Icons.description_outlined,
+              iconColor: colors.ink2,
+              title: l10n.privacyPolicy,
+              subtitle: 'shenhuazaiqi.github.io',
+              onTap: () => launchUrl(
+                  Uri.parse('https://shenhuazaiqi.github.io/lararium/privacy.html'),
+                  mode: LaunchMode.externalApplication),
+            ),
+            _divider(colors),
+            _row(
+              context,
               icon: Icons.lock_outline,
               iconColor: colors.ink2,
               title: l10n.livingPrivateTitle,
@@ -252,6 +264,47 @@ class SettingsScreen extends ConsumerWidget {
                           }
                         } else if (action == 'rename') {
                           _renameDialog(context, service, t.id, t.name, l10n);
+                        } else if (action == 'del') {
+                          final peopleCount = await service.countPeople(t.id);
+                          final ok = await showDialog<bool>(
+                            context: context,
+                            builder: (ctx) => AlertDialog(
+                              title: Text(l10n.deleteTreeTitle),
+                              content: Text(l10n.deleteTreeBody(
+                                  t.name, peopleCount)),
+                              actions: [
+                                TextButton(
+                                    onPressed: () => Navigator.pop(ctx, false),
+                                    child: Text(l10n.cancel)),
+                                FilledButton(
+                                  style: FilledButton.styleFrom(
+                                      backgroundColor: colors.danger),
+                                  onPressed: () => Navigator.pop(ctx, true),
+                                  child: Text(l10n.delete)),
+                              ],
+                            ),
+                          );
+                          if (ok == true) {
+                            await service.softDelete(t.id);
+                            if (t.id ==
+                                ref.read(currentTreeIdProvider.notifier).state) {
+                              final next =
+                                  await service.firstRemainingTreeId(exclude: t.id);
+                              ref.read(currentTreeIdProvider.notifier).state =
+                                  next;
+                              if (next != null) {
+                                await ref
+                                    .read(prefsProvider)
+                                    .setString('current_tree_id', next);
+                              }
+                            }
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                      content:
+                                          Text(l10n.treeDeleted)));
+                            }
+                          }
                         }
                       },
                       itemBuilder: (_) => [
@@ -259,6 +312,8 @@ class SettingsScreen extends ConsumerWidget {
                             value: 'dup', child: Text(l10n.duplicateTree)),
                         PopupMenuItem(
                             value: 'rename', child: Text(l10n.renameTree)),
+                        PopupMenuItem(
+                            value: 'del', child: Text(l10n.deleteTree)),
                       ],
                     ),
                 ],

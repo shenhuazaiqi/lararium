@@ -302,7 +302,7 @@ class _MemorialScreenState extends ConsumerState<MemorialScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('${p.givenName} ${p.surname}'.trim(),
+                Text(personDisplayName(p, Localizations.localeOf(context)),
                     style: const TextStyle(
                         color: Colors.white,
                         fontSize: 25,
@@ -817,6 +817,11 @@ class _MemorialScreenState extends ConsumerState<MemorialScreen> {
   Future<void> _send2(TextEditingController controller, Person p) async {
     final text = controller.text.trim();
     if (text.isEmpty) return;
+    // 登录后用账号邮箱前缀作为显示名（未登录仍是占位）
+    final authEmail = ref.read(authEmailProvider);
+    final author = authEmail == null
+        ? 'You'
+        : authEmail.split('@').first;
     // 留言额度：3 条/天（忌日 +1）
     final prefs = ref.read(prefsProvider);
     final mq = MemorialQuota.check(
@@ -837,7 +842,7 @@ class _MemorialScreenState extends ConsumerState<MemorialScreen> {
     await db.into(db.memorialMessages).insert(MemorialMessagesCompanion.insert(
           treeId: treeId ?? '',
           personId: p.id,
-          authorName: 'You', // 登录后在阶段 3 换成真实账号名
+          authorName: author, // 未登录占位；已登录用账号名
           body: text,
         ));
     await (db.update(db.persons)..where((t) => t.id.equals(p.id))).write(

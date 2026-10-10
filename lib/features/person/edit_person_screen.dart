@@ -27,6 +27,7 @@ class _EditPersonScreenState extends ConsumerState<EditPersonScreen> {
   final _born = TextEditingController();
   final _died = TextEditingController();
   final _place = TextEditingController();
+  final _burial = TextEditingController();
   final _occ = TextEditingController();
   final _note = TextEditingController();
   String _gender = 'unknown';
@@ -40,6 +41,7 @@ class _EditPersonScreenState extends ConsumerState<EditPersonScreen> {
     _born.dispose();
     _died.dispose();
     _place.dispose();
+    _burial.dispose();
     _occ.dispose();
     _note.dispose();
     super.dispose();
@@ -57,6 +59,7 @@ class _EditPersonScreenState extends ConsumerState<EditPersonScreen> {
         ? ''
         : FuzzyDate.encode(p.deathDate!, p.deathPrecision);
     _place.text = p.birthPlace ?? '';
+    _burial.text = p.burialPlace ?? '';
     _occ.text = p.occupation ?? '';
     _note.text = p.note ?? '';
     _loaded = true;
@@ -207,6 +210,8 @@ class _EditPersonScreenState extends ConsumerState<EditPersonScreen> {
                   if (_dead) ...[
                     _divider(colors),
                     _field(l10n.fDied, _died, hint: '1994 or 1994-11-04'),
+                    _divider(colors),
+                    _field(l10n.fBurial, _burial),
                   ],
                 ]),
                 const SizedBox(height: 14),
@@ -234,6 +239,9 @@ class _EditPersonScreenState extends ConsumerState<EditPersonScreen> {
                       birthPlace: drift_v(_place.text.trim().isEmpty
                           ? null
                           : _place.text.trim()),
+                      burialPlace: drift_v(_burial.text.trim().isEmpty
+                          ? null
+                          : _burial.text.trim()),
                       occupation: drift_v(_occ.text.trim().isEmpty
                           ? null
                           : _occ.text.trim()),

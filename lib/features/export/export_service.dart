@@ -10,6 +10,7 @@ import 'package:share_plus/share_plus.dart';
 
 import '../../core/capture.dart';
 import '../../data/db/app_database.dart';
+import '../../data/db/tables.dart' show newId;
 import '../gedcom/gedcom.dart';
 
 enum ExportFormat { pdf, png, gedcom, json }
@@ -180,6 +181,88 @@ class ExportService {
   Future<void> share(ExportResult r) async {
     await Share.shareXFiles([XFile(r.path)], text: 'Lararium · ${r.fileName}');
   }
+
+  /// 从 JSON 备份恢复为一棵**新树**（规划文档 5.2「自家 JSON 备份」的另一半）。
+  /// 人物/家庭 id 全部重映射，避免与现有数据主键冲突。
+  Future<String> restoreJsonBackup(String jsonText, {String? newName}) async {
+    final data = jsonDecode(jsonText) as Map<String, dynamic>;
+    if (data['format'] != 'lararium-backup') {
+      throw const FormatException('not a lararium backup');
+    }
+    final treeId = newId();
+    final srcTree = data['tree'] as Map<String, dynamic>?;
+    await (_db.into(_db.trees)).insert(TreesCompanion.insert(
+      id: Value(treeId),
+      name: newName ?? (((srcTree?['name'] as String?) ?? 'Restored') + ' (restored)'),
+      description: Value(srcTree?['description'] as String?),
+    ));
+
+    final idMap = <String, String>{};
+    for (final raw in (data['persons'] as List? ?? [])) {
+      final p = raw as Map<String, dynamic>;
+      final oldId = p['id'] as String;
+      final nid = newId();
+      idMap[oldId] = nid;
+      await _db.into(_db.persons).insert(PersonsCompanion.insert(
+            id: Value(nid),
+            treeId: treeId,
+            givenName: Value(p['givenName'] as String? ?? ''),
+            surname: Value(p['surname'] as String? ?? ''),
+            gender: Value(p['gender'] as String? ?? 'unknown'),
+            birthDate: Value(_tryDate(p['birthDate'] as String?)),
+            birthPrecision: Value(p['birthPrecision'] as String? ?? 'day'),
+            birthPlace: Value(p['birthPlace'] as String?),
+            deathDate: Value(_tryDate(p['deathDate'] as String?)),
+            deathPrecision: Value(p['deathPrecision'] as String? ?? 'day'),
+            deathPlace: Value(p['deathPlace'] as String?),
+            burialPlace: Value(p['burialPlace'] as String?),
+            isLiving: Value(p['isLiving'] as bool? ?? true),
+            occupation: Value(p['occupation'] as String?),
+            note: Value(p['note'] as String?),
+            memorialTheme: Value(p['memorialTheme'] as String?),
+            epitaph: Value(p['epitaph'] as String?),
+            isSelf: Value(p['isSelf'] as bool? ?? false),
+          ));
+    }
+    for (final raw in (data['families'] as List? ?? [])) {
+      final f = raw as Map<String, dynamic>;
+      await _db.into(_db.families).insert(FamiliesCompanion.insert(
+            id: Value(newId()),
+            treeId: treeId,
+            partner1Id:
+                Value(f['partner1Id'] == null ? null : idMap[f['partner1Id'] as String]),
+            partner2Id:
+                Value(f['partner2Id'] == null ? null : idMap[f['partner2Id'] as String]),
+            relationType: Value(f['relationType'] as String? ?? 'married'),
+            marriageDate: Value(_tryDate(f['marriageDate'] as String?)),
+          ));
+    }
+    for (final raw in (data['familyChildren'] as List? ?? [])) {
+      final l = raw as Map<String, dynamic>;
+      final fid = idMap[l['familyId'] as String? ?? ''];
+      final pid = idMap[l['personId'] as String? ?? ''];
+      if (fid == null || pid == null) continue;
+      await _db.into(_db.familyChildren).insert(FamilyChildrenCompanion.insert(
+            familyId: fid,
+            treeId: treeId,
+            personId: pid,
+          ));
+    }
+    for (final raw in (data['memorialMessages'] as List? ?? [])) {
+      final m = raw as Map<String, dynamic>;
+      final pid = idMap[m['personId'] as String? ?? ''];
+      if (pid == null) continue;
+      await _db.into(_db.memorialMessages).insert(MemorialMessagesCompanion.insert(
+            treeId: treeId,
+            personId: pid,
+            authorName: m['authorName'] as String? ?? '',
+            body: m['body'] as String? ?? '',
+          ));
+    }
+    return treeId;
+  }
+
+  DateTime? _tryDate(String? s) => s == null ? null : DateTime.tryParse(s);
 
   Future<int> countPeople(String treeId) async {
     final rows = await (_db.select(_db.persons)

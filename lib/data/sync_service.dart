@@ -161,6 +161,28 @@ class SyncService {
       ]);
       pushed += links.length;
     }
+
+    // ---------- 推送：memorial_profiles（主题/计数/公开开关） ----------
+    final profiles = await (_db.select(_db.persons)
+          ..where((p) => p.treeId.equals(treeId) & p.deletedAt.isNull()))
+        .get();
+    await _client.from('memorial_profiles').upsert([
+      for (final p in profiles)
+        {
+          'person_id': p.id,
+          'tree_id': treeId,
+          'theme': p.memorialTheme,
+          'epitaph': p.epitaph,
+          'flower_count': p.flowerCount,
+          'candle_count': p.candleCount,
+          'incense_count': p.incenseCount,
+          'prayer_count': p.prayerCount,
+          'message_count': p.messageCount,
+          'allow_public_link': p.allowPublicLink,
+          'last_memorial_at': p.lastMemorialAt?.toUtc().toIso8601String(),
+        }
+    ]);
+    pushed += profiles.length;
     final msgs = await (_db.select(_db.memorialMessages)
           ..where((m) => m.treeId.equals(treeId)))
         .get();
@@ -226,6 +248,105 @@ class SyncService {
         );
         pulled++;
       }
+    }
+
+    // ---------- 拉取：families ----------
+    final remoteFams = await _client
+        .from('families')
+        .select()
+        .eq('tree_id', treeId) as List<dynamic>;
+    for (final row in remoteFams) {
+      final map = row as Map<String, dynamic>;
+      final id = map['id'] as String;
+      final local = await (_db.select(_db.families)
+            ..where((f) => f.id.equals(id)))
+          .getSingleOrNull();
+      if (local == null) {
+        await _db.into(_db.families).insert(FamiliesCompanion.insert(
+              id: Value(id),
+              treeId: treeId,
+              partner1Id: Value(map['partner1_id'] as String?),
+              partner2Id: Value(map['partner2_id'] as String?),
+              relationType: Value('${map['relation_type'] ?? 'married'}'),
+              marriageDate: Value(_parseDate(map['marriage_date'])),
+            ));
+        pulled++;
+      }
+    }
+
+    // ---------- 拉取：family_children ----------
+    final remoteLinks = await _client
+        .from('family_children')
+        .select()
+        .eq('tree_id', treeId) as List<dynamic>;
+    final existingLinks = await (_db.select(_db.familyChildren)
+          ..where((c) => c.treeId.equals(treeId)))
+        .get();
+    final linkKeys = existingLinks.map((l) => '\${l.familyId}|${l.personId}').toSet();
+    for (final row in remoteLinks) {
+      final map = row as Map<String, dynamic>;
+      final key = "\${map['family_id']}|\${map['person_id']}";
+      if (!linkKeys.contains(key)) {
+        await _db.into(_db.familyChildren).insert(FamilyChildrenCompanion.insert(
+              familyId: map['family_id'] as String,
+              treeId: treeId,
+              personId: map['person_id'] as String,
+            ));
+        pulled++;
+      }
+    }
+
+    // ---------- 拉取：memorial_messages（按 id 缺失即插入） ----------
+    final remoteMsgs = await _client
+        .from('memorial_messages')
+        .select()
+        .eq('tree_id', treeId) as List<dynamic>;
+    final localMsgRows = await (_db.select(_db.memorialMessages)
+          ..where((m) => m.treeId.equals(treeId)))
+        .get();
+    final localMsgIds = localMsgRows.map((m) => m.id).toSet();
+    for (final row in remoteMsgs) {
+      final map = row as Map<String, dynamic>;
+      final id = map['id'] as String;
+      if (localMsgIds.contains(id)) continue;
+      if ((map['status'] ?? 'visible') != 'visible') continue;
+      await _db.into(_db.memorialMessages).insert(MemorialMessagesCompanion.insert(
+            id: Value(id),
+            treeId: treeId,
+            personId: map['person_id'] as String,
+            authorName: '${map['author_name'] ?? ''}',
+            body: '${map['body'] ?? ''}',
+          ));
+      pulled++;
+    }
+
+    // ---------- 拉取：memorial_profiles（主题/计数/公开开关 → 本地 persons） ----------
+    final remoteProfiles = await _client
+        .from('memorial_profiles')
+        .select()
+        .eq('tree_id', treeId) as List<dynamic>;
+    for (final row in remoteProfiles) {
+      final map = row as Map<String, dynamic>;
+      final pid = map['person_id'] as String;
+      final local = await (_db.select(_db.persons)
+            ..where((p) => p.id.equals(pid)))
+          .getSingleOrNull();
+      if (local == null) continue;
+      await (_db.update(_db.persons)..where((p) => p.id.equals(pid))).write(
+        PersonsCompanion(
+          memorialTheme: Value(map['theme'] as String? ?? local.memorialTheme),
+          epitaph: Value(map['epitaph'] as String? ?? local.epitaph),
+          flowerCount: Value(map['flower_count'] as int? ?? local.flowerCount),
+          candleCount: Value(map['candle_count'] as int? ?? local.candleCount),
+          incenseCount:
+              Value(map['incense_count'] as int? ?? local.incenseCount),
+          prayerCount: Value(map['prayer_count'] as int? ?? local.prayerCount),
+          messageCount:
+              Value(map['message_count'] as int? ?? local.messageCount),
+          allowPublicLink:
+              Value(map['allow_public_link'] as bool? ?? local.allowPublicLink),
+        ),
+      );
     }
 
     final now = DateTime.now();

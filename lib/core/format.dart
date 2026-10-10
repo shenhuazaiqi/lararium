@@ -1,6 +1,17 @@
+import 'dart:ui' show Locale;
+
 import 'package:intl/intl.dart';
 
 import '../data/db/app_database.dart';
+
+/// 姓名显示顺序按 locale（规划文档 6.6 坑 #4）：东亚姓前，其余名前。
+String personDisplayName(Person p, Locale locale) {
+  const surnameFirst = {'ja', 'ko', 'zh'};
+  final full = surnameFirst.contains(locale.languageCode)
+      ? '${p.surname} ${p.givenName}'
+      : '${p.givenName} ${p.surname}';
+  return full.trim().isEmpty ? '—' : full.trim();
+}
 
 /// 按精度的本地化日期显示（规划文档 6.6 坑 #5）。
 String formatFuzzyDate(DateTime d, String precision, String locale) {

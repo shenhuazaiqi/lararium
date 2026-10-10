@@ -15,6 +15,7 @@ import '../features/onboarding/welcome_screen.dart';
 import '../features/people/people_screen.dart';
 import '../features/person/add_relative_screen.dart';
 import '../features/person/edit_person_screen.dart';
+import '../features/person/person_create_screen.dart';
 import '../features/search/search_screen.dart';
 import '../features/memorial/theme_picker_screen.dart';
 import '../features/settings/language_screen.dart';
@@ -103,6 +104,11 @@ GoRouter buildRouter(Ref ref) {
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) =>
             MemorialScreen(personId: state.pathParameters['id']!),
+      ),
+      GoRoute(
+        path: '/person/new',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const PersonCreateScreen(),
       ),
       GoRoute(
         path: '/person/edit/:id',

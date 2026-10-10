@@ -85,19 +85,55 @@ class PeopleScreen extends ConsumerWidget {
                 ),
               ),
               Expanded(
-                child: ListView(
-                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
-                  children: [
-                    _group(context, l10n.groupLiving, living, colors),
-                    const SizedBox(height: 20),
-                    _group(context, l10n.groupRemembered, remembered, colors),
-                  ],
-                ),
+                child: persons.isEmpty
+                    ? _emptyState(context, colors, l10n)
+                    : ListView(
+                        padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+                        children: [
+                          _group(context, l10n.groupLiving, living, colors),
+                          const SizedBox(height: 20),
+                          _group(context, l10n.groupRemembered, remembered, colors),
+                        ],
+                      ),
               ),
             ],
           ),
         );
       },
+    );
+  }
+
+  Widget _emptyState(
+      BuildContext context, LarariumColors colors, AppLocalizations l10n) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.account_tree_outlined, size: 56, color: colors.ink4),
+          const SizedBox(height: 14),
+          Text(l10n.addFirstPerson,
+              style: TextStyle(
+                  fontSize: 16.5,
+                  fontWeight: FontWeight.w600,
+                  color: colors.ink)),
+          const SizedBox(height: 6),
+          Text(l10n.addFirstPersonSub,
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 13.5, color: colors.ink3)),
+          const SizedBox(height: 18),
+          FilledButton.icon(
+            style: FilledButton.styleFrom(
+              backgroundColor: colors.brand,
+              minimumSize: const Size(200, 48),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14)),
+            ),
+            icon: const Icon(Icons.person_add_alt_1, size: 18),
+            label: Text(l10n.personNew),
+            onPressed: () => context.push('/person/new'),
+          ),
+        ],
+      ),
     );
   }
 
@@ -178,7 +214,7 @@ class PeopleScreen extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('${p.givenName} ${p.surname}'.trim(),
+                  Text(personDisplayName(p, Localizations.localeOf(context)),
                       style: TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w500,

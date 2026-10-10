@@ -334,5 +334,15 @@
   "sharePublicEnable": "Enable & share",
   "shareText": "In Loving Memory · {name} ({years})\n{url}",
   "errShare": "Couldn't share · please try again",
-  "signInWithGoogle": "Continue with Google"
+  "signInWithGoogle": "Continue with Google",
+  "personNew": "New person",
+  "addFirstPerson": "Add the first person",
+  "addFirstPersonSub": "Start with yourself, then add relatives",
+  "fBurial": "Burial place",
+  "restoreFromBackup": "Restore from backup",
+  "restoreSuccess": "Restored · {name}",
+  "restoreError": "Couldn't restore this backup",
+  "privacyPolicy": "Privacy policy",
+  "deleteTreeTitle": "Delete this tree?",
+  "deleteTreeBody": "“{name}” and its {count} people will be removed from this device. This cannot be undone."
 }

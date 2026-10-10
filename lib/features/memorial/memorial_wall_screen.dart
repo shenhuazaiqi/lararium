@@ -172,7 +172,7 @@ class _MemorialWallScreenState extends ConsumerState<MemorialWallScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('${p.givenName} ${p.surname}'.trim(),
+                Text(personDisplayName(p, Localizations.localeOf(context)),
                     style: TextStyle(
                         fontSize: 15.5,
                         fontWeight: FontWeight.w600,

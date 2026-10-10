@@ -63,7 +63,7 @@ class _TreeScreenState extends ConsumerState<TreeScreen> {
     final personsAsync = ref.watch(personsProvider(widget.treeId));
     final familiesAsync = ref.watch(familiesProvider(widget.treeId));
     final linksAsync = ref.watch(childLinksProvider(widget.treeId));
-    final treeAsync = ref.watch(defaultTreeProvider);
+    final currentName = ref.watch(currentTreeNameProvider);
     final colors = Theme.of(context).extension<LarariumColors>()!;
     final l10n = AppLocalizations.of(context);
     final locale = Localizations.localeOf(context);
@@ -88,8 +88,7 @@ class _TreeScreenState extends ConsumerState<TreeScreen> {
           for (final n in result.nodes)
             n.person.id: _visualFor(n.person, locale, l10n),
         };
-        final treeName =
-            treeAsync.value?.name ?? l10n.treeTitle;
+        final treeName = currentName ?? l10n.treeTitle;
 
         return Scaffold(
           backgroundColor: colors.bg,
@@ -205,6 +204,28 @@ class _TreeScreenState extends ConsumerState<TreeScreen> {
                     ),
                   ),
                 ),
+                if (result.nodes.isEmpty)
+                  Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.account_tree_outlined,
+                            size: 64, color: colors.ink4),
+                        const SizedBox(height: 16),
+                        FilledButton.icon(
+                          style: FilledButton.styleFrom(
+                            backgroundColor: colors.brand,
+                            minimumSize: const Size(220, 50),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14)),
+                          ),
+                          icon: const Icon(Icons.person_add_alt_1, size: 18),
+                          label: Text(l10n.addFirstPerson),
+                          onPressed: () => context.push('/person/new'),
+                        ),
+                      ],
+                    ),
+                  ),
                 Positioned(
                   right: 14,
                   bottom: 14,
