@@ -27,6 +27,13 @@
 
 ## ✅ 已完成（Done）
 
+### 2026-10-10 · 分享纪念页 "not public" 修复（用户报告）
+
+- **根因**：分享时只对云端 `memorial_profiles` 做 update，但本地优先架构下人物往往还没同步上云——该行不存在，update 影响 0 行等于没开；网页匿名 RPC `get_public_memorial` 要求 `allow_public_link + is_enabled`，校验失败即显示 "This memorial page is not public."
+- **修复**（`memorial_screen._sharePublic`）：开启开关时先把该人物 upsert 上云（云端触发器自动建 memorial_profiles 行），再 `upsert allow_public_link+is_enabled`（onConflict person_id）；离线失败静默降级为本地标记待同步。
+- **顺手验证**：云端 persons 表无 `allow_public_link` 列（本地字段，网页开关在 memorial_profiles）——payload 已对齐。
+- **端到端验证**：手动补齐 SD NF 云状态后，匿名 RPC 返回真实数据（`{"name":"NF SD","theme":"western",...}`），GitHub Pages memorial.html HTTP 200。用户无需重新分享即可打开。
+
 ### 2026-10-10 · 幽灵家庭修复：已删除人物不得劫持布局（用户报告）
 
 - **现象**：给 laibao guo 添加父母后，新父母跑到角落、连线横跨全场，DaXia 子树整体错层。

@@ -588,10 +588,37 @@ class _MemorialScreenState extends ConsumerState<MemorialScreen> {
       await (db.update(db.persons)..where((t) => t.id.equals(person.id)))
           .write(PersonsCompanion(allowPublicLink: Value(true)));
       try {
-        await Supabase.instance.client
-            .from('memorial_profiles')
-            .update({'allow_public_link': true})
-            .eq('person_id', person.id);
+        final client = Supabase.instance.client;
+        final uid = client.auth.currentUser?.id;
+        // 人物可能尚未同步到云端（本地优先）：先推这一行，
+        // 云端触发器会创建 memorial_profiles，然后才能打开公开开关
+        //（只 update 会在 0 行上生效 = 等于没开，网页端报 not public）
+        await client.from('persons').upsert({
+          'id': person.id,
+          'tree_id': person.treeId,
+          'given_name': person.givenName,
+          'surname': person.surname,
+          'gender': person.gender,
+          'birth_date': person.birthDate?.toIso8601String().substring(0, 10),
+          'birth_date_precision': person.birthPrecision,
+          'birth_place': person.birthPlace,
+          'death_date': person.deathDate?.toIso8601String().substring(0, 10),
+          'death_date_precision': person.deathPrecision,
+          'death_place': person.deathPlace,
+          'burial_place': person.burialPlace,
+          'is_living': person.isLiving,
+          'occupation': person.occupation,
+          'note': person.note,
+          'is_self': person.isSelf,
+          'client_updated_at': DateTime.now().toUtc().toIso8601String(),
+          if (uid != null) 'created_by': uid,
+        });
+        await client.from('memorial_profiles').upsert({
+          'person_id': person.id,
+          'tree_id': person.treeId,
+          'allow_public_link': true,
+          'is_enabled': true,
+        }, onConflict: 'person_id');
       } catch (_) {
         // 未登录/离线：本地已开启，下次同步补写
       }
