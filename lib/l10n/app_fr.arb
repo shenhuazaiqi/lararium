@@ -248,5 +248,6 @@
   "sharePublicBody": "Toute personne ayant le lien verra : le nom, les dates, le message et les hommages. Les proches vivants ne sont jamais montrés.",
   "sharePublicEnable": "Activer et partager",
   "shareText": "En mémoire · {name} ({years})\n{url}",
-  "errShare": "Partage impossible · réessayez"
+  "errShare": "Partage impossible · réessayez",
+  "signInWithGoogle": "Continuer avec Google"
 }

@@ -248,5 +248,6 @@
   "sharePublicBody": "Wer den Link hat, sieht: Namen, Lebensdaten, Gedenktext und Gaben. Lebende Angehörige werden nie gezeigt.",
   "sharePublicEnable": "Aktivieren & teilen",
   "shareText": "In lieber Erinnerung · {name} ({years})\n{url}",
-  "errShare": "Teilen fehlgeschlagen · bitte erneut versuchen"
+  "errShare": "Teilen fehlgeschlagen · bitte erneut versuchen",
+  "signInWithGoogle": "Mit Google fortfahren"
 }

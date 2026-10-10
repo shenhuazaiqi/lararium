@@ -248,5 +248,6 @@
   "sharePublicBody": "リンクを知っている人なら、名前・生没年・追悼メッセージ・供物を見られます。存命のご親族は表示されません。",
   "sharePublicEnable": "公開して共有",
   "shareText": "追悼 · {name}（{years}）\n{url}",
-  "errShare": "共有できませんでした · もう一度お試しください"
+  "errShare": "共有できませんでした · もう一度お試しください",
+  "signInWithGoogle": "Google で続行"
 }

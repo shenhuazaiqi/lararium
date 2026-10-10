@@ -248,5 +248,6 @@
   "sharePublicBody": "Wie de link heeft, ziet: naam, levensjaren, herdenkingsbericht en eerbetoon. Levende familieleden worden nooit getoond.",
   "sharePublicEnable": "Inschakelen & delen",
   "shareText": "Ter nagedachtenis · {name} ({years})\n{url}",
-  "errShare": "Delen mislukt · probeer opnieuw"
+  "errShare": "Delen mislukt · probeer opnieuw",
+  "signInWithGoogle": "Doorgaan met Google"
 }

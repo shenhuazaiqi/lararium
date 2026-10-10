@@ -248,5 +248,6 @@
   "sharePublicBody": "Quem tiver o link verá: o nome, as datas, a mensagem e as homenagens. Parentes vivos nunca são exibidos.",
   "sharePublicEnable": "Ativar e compartilhar",
   "shareText": "Em memória · {name} ({years})\n{url}",
-  "errShare": "Não foi possível compartilhar · tente novamente"
+  "errShare": "Não foi possível compartilhar · tente novamente",
+  "signInWithGoogle": "Continuar com o Google"
 }

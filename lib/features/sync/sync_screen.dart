@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+
+// 调试输出用换行常量
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+import '../../core/cloud_config.dart';
 
 import '../../core/theme.dart';
 import '../../data/providers.dart';
@@ -52,6 +58,39 @@ class _SyncScreenState extends ConsumerState<SyncScreen> {
       }
     } finally {
       if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  /// Google 一键登录（规划 5.2：邮箱 / Google / Apple 登录）。
+  /// 流程：google_sign_in 取 ID Token → Supabase signInWithIdToken 换会话。
+  Future<void> _googleSignIn() async {
+    final l10n = AppLocalizations.of(context);
+    try {
+      final gs = GoogleSignIn(serverClientId: CloudConfig.googleWebClientId);
+      final user = await gs.signIn();
+      if (user == null) return; // 用户取消
+      final auth = await user.authentication;
+      if (auth.idToken == null) {
+        throw Exception('no idToken');
+      }
+      await Supabase.instance.client.auth.signInWithIdToken(
+        provider: OAuthProvider.google,
+        idToken: auth.idToken!,
+        accessToken: auth.accessToken,
+      );
+      ref.read(authEmailProvider.notifier).state =
+          Supabase.instance.client.auth.currentUser?.email;
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(l10n.allSynced)));
+        _sync();
+      }
+    } catch (e) {
+      // ApiException:10 = DEVELOPER_ERROR（包名/SHA-1/Client ID 类型不匹配）
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(l10n.syncError)));
+      }
     }
   }
 
@@ -205,6 +244,23 @@ class _SyncScreenState extends ConsumerState<SyncScreen> {
                         isDense: true),
                   ),
                   const SizedBox(height: 14),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 46,
+                    child: OutlinedButton.icon(
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: colors.ink,
+                        backgroundColor: colors.surface,
+                        side: BorderSide(color: colors.line2),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
+                      ),
+                      icon: const Icon(Icons.g_mobiledata, size: 28),
+                      label: Text(l10n.signInWithGoogle),
+                      onPressed: _busy ? null : _googleSignIn,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
                   SizedBox(
                     width: double.infinity,
                     height: 46,

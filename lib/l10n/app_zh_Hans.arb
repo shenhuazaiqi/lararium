@@ -248,5 +248,6 @@
   "sharePublicBody": "拿到链接的人可以看到：姓名、生卒年份、纪念文字与致敬。绝不会显示在世亲属的信息。",
   "sharePublicEnable": "开启并分享",
   "shareText": "谨以此纪念 · {name}（{years}）\n{url}",
-  "errShare": "分享失败 · 请重试"
+  "errShare": "分享失败 · 请重试",
+  "signInWithGoogle": "使用 Google 继续"
 }

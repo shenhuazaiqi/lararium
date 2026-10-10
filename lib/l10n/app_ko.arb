@@ -248,5 +248,6 @@
   "sharePublicBody": "링크가 있는 누구나 이름·생몰년·추모 메시지·헌화를 볼 수 있습니다. 생존 가족은 표시되지 않습니다.",
   "sharePublicEnable": "공개하고 공유",
   "shareText": "추모 · {name}({years})\n{url}",
-  "errShare": "공유 실패 · 다시 시도해 주세요"
+  "errShare": "공유 실패 · 다시 시도해 주세요",
+  "signInWithGoogle": "Google로 계속하기"
 }
