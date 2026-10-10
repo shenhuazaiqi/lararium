@@ -229,6 +229,34 @@ void main() {
         (rectOf('father1').center.dx - rectOf('step').center.dx).abs(), 140);
   });
 
+  test('幽灵家庭：父母已删除时不得劫持子女布局（回归用例）', () {
+    // ghost 不在 persons 里（已删除），但其家庭行和亲子链接还在。
+    // 旧算法会为幽灵建隐形单元并把整棵子树挂到它下面（用户报告）。
+    final persons = [_p('self', self: true), _p('spouse'), _p('kid')];
+    final r = computeTreeLayout(TreeLayoutInput(
+      persons: persons,
+      families: [
+        _f('fGhost', p1: 'ghost'), // 已删除的父母
+        _f('f1', p1: 'self', p2: 'spouse'),
+      ],
+      childLinks: [
+        _link('fGhost', 'self'),
+        _link('f1', 'kid'),
+      ],
+      textDirection: TextDirection.ltr,
+    ));
+
+    expect(r.nodes.length, 3); // 幽灵节点不渲染
+    expect(_genOf(r, 'self'), 0); // self 是根，不被挂到幽灵下一层
+    expect(_genOf(r, 'spouse'), 0);
+    expect(_genOf(r, 'kid'), 1);
+    // 无悬空线：所有连线端点都在可见行内（无负 y 悬浮锚点）
+    for (final w in r.wires) {
+      expect(w.from.dy, greaterThanOrEqualTo(0), reason: '$w');
+      expect(w.to.dy, greaterThanOrEqualTo(0), reason: '$w');
+    }
+  });
+
   test('单子女连线：母线从夫妻中点连到孩子头顶，不断开（回归用例）', () {
     // 旧算法母线 = 「第一孩子中心 → 最后孩子中心」，单孩子时零长度，
     // 夫妻对下的竖线与孩子头顶的竖线互不相连

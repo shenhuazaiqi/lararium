@@ -225,8 +225,12 @@ TreeLayoutResult computeTreeLayout(TreeLayoutInput input) {
   // （最老一代），其余人由父母单元向下收编，保证父母代显示在子女上方。
   // 之前只按人物列表顺序收编，本人先入列时其父母会被平铺成同级独立根。
   for (final f in input.families) {
-    final partners = partnersOf[f.id];
-    if (partners == null || partners.isEmpty) continue;
+    // 只统计在谱（未删除）的伴侣：幽灵家庭（成员均已删除）
+    // 不得建单元、不得抢走子女——否则子女会被挂到看不见的节点下
+    final partners = (partnersOf[f.id] ?? const <String>[])
+        .where(byId.containsKey)
+        .toList();
+    if (partners.isEmpty) continue;
     final isRootFamily =
         partners.every((p) => !parentFamilyOf.containsKey(p));
     if (!isRootFamily) continue;
@@ -393,10 +397,12 @@ TreeLayoutResult computeTreeLayout(TreeLayoutInput input) {
         .where(nodeRects.containsKey)
         .toList();
     if (kids.isEmpty) continue;
-    final partners = [f.partner1Id, f.partner2Id]
-        .whereType<String>()
-        .where(nodeRects.containsKey)
-        .toList();
+    final partnerIds =
+        [f.partner1Id, f.partner2Id].whereType<String>().toList();
+    final partners =
+        partnerIds.where(nodeRects.containsKey).toList();
+    // 父母全部不在谱（已删除）：孩子另有归属，不画悬空连线
+    if (partnerIds.isNotEmpty && partners.isEmpty) continue;
     Offset anchor;
     if (partners.length == 2) {
       final a = nodeRects[partners[0]]!;
