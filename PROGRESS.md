@@ -87,6 +87,8 @@
 - ⚠️ 技术备忘：Supabase Edge Functions 对未认证响应强制 `text/plain + CSP sandbox`（防钓鱼策略），静态托管方案因此成为必选；Edge Function `memorial` 保留作服务端兜底。
 - 本地 schema v2：persons 加 `allow_public_link` 列（onUpgrade 迁移，实测 user_version 1→2）。
 
+**Google 登录已打通（2026-10-10）**：用户申请的 OAuth 客户端（Android 类型 + Web 类型）已配置。Supabase Google 服务商启用，client_id = Web ID,Android ID（逗号分隔）。App「Continue with Google」→ google_sign_in → signInWithIdToken → **实测登录成功**（guojianpude@gmail.com 会话建立，云端 auth.users 可见）。排障记录：① 报 ApiException:10 (DEVELOPER_ERROR) 的根因之一是 **GCP OAuth 同意屏幕处于「测试」状态且测试用户为空** —— 已把 guojianpude@gmail.com 加入测试用户；② Supabase 侧 "Unacceptable audience" 需把 **Web ID 和 Android ID 都**写入 client_id（逗号分隔，additional_client_ids 字段经 Management API 无法持久化）。正式发布前需把 OAuth 同意屏幕「发布应用」转正式（当前测试状态上限 100 用户）。
+
 **已知限制（下轮处理）**：① PDF 页面文字用内置拉丁字体（人名已走图像渲染不受影响）；② Google/Apple 登录、Realtime 到达提示、Web 纪念页（Edge Function）、照片上传未接；③ 留言作者名仍为占位；④ Google Play Billing 需商店配置后启用。
 
 **模拟器验证记录**（Pixel_10a / API16k，截图在 `screenshots/`）：
