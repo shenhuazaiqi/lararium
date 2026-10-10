@@ -104,6 +104,17 @@
 - ✅ **同步拉取完整性**（B6）：families/family_children/memorial_messages 增量拉取 + memorial_profiles 双向（主题/计数/公开开关）
 - 遗留：PDF 页面文字拉丁字体（人名已走图像不受影响）；Apple 登录/Realtime/照片上传/邀请协作/Billing 属后续阶段
 
+**最后一批功能闭环（2026-10-10 晚）——除 Apple 登录与 Banner 广告外全部完成**：
+- ✅ **Realtime 到达提示**：纪念页订阅 memorial_acts inserts（Supabase Realtime，按 person_id 过滤，自己动作不提示），家人献花实时 SnackBar「🌸 XX just offered a tribute」
+- ✅ **邀请协作**：云端 `create_invite`（所有者生成 8 位码）/`redeem_invite`（兑换加入树成员）RPC + 同步页生成/显示/兑换 UI + 兑换后整树拉取到本地（persons/families/links/messages 幂等插入）。所有权保护实测：非所有者对他人树生成邀请被正确拒绝
+- ✅ **照片头像**：`photo_service.dart`（flutter_image_compress 压缩 1024/80 → Supabase Storage 私密桶 `person-photos`，路径 `tree_<id>/person_<id>.jpg`，RLS 按路径树成员校验）→ 签名 URL（1h）在人物详情页显示（CachedNetworkImage）；编辑页 Photo 按钮实选图上传
+- ✅ **账号删除真实执行**：Edge Function `delete-account`（用户 JWT 验证 → service role 删拥有的树级联 + 成员记录 + auth 用户）+ App 内确认弹层 → 云端清洗 → 本地五表清空 + prefs 重置 → 回欢迎页（GDPR/Play 合规闭环）
+- ✅ **Play Billing**：`billing_service.dart`（in_app_purchase，商品 `pro_year`，购买流监听/恢复/completePurchase → prefs `pro_active`）；Pro 页接真实商品查询与购买；**无商店配置的构建优雅降级**（显示合规说明，绝不引导外部支付）
+- ✅ **关系计算器**（P1）：`relationship_screen.dart` —— 家族图（亲子+配偶边）BFS 最短路径 → 分类输出（直系尊属/直系后代/兄弟姐妹/配偶/表亲 N 代/叔侄/姻亲/无关联）+ 路径链可视化；人物页入口（计算器图标）
+- ✅ **人物时间轴**（P1）：详情页新增「人生大事记」——出生/结婚/各子女出生/逝世按年份排序，纯数据计算无新表
+- ✅ **i18n**：+57 键 × 12 语言全部翻译，无缺失
+- 同步模型说明：树的所有权属于创建者；其他账号通过邀请码加入后可同步共享（Carter 演示树属于测试邮箱账号，Google 账号对它"同步失败"是 RLS 所有权保护的**正确行为**）
+
 **已知限制（下轮处理）**：① PDF 页面文字用内置拉丁字体（人名已走图像渲染不受影响）；② Google/Apple 登录、Realtime 到达提示、Web 纪念页（Edge Function）、照片上传未接；③ 留言作者名仍为占位；④ Google Play Billing 需商店配置后启用。
 
 **模拟器验证记录**（Pixel_10a / API16k，截图在 `screenshots/`）：
