@@ -8,7 +8,6 @@ import '../../core/format.dart';
 import '../../core/theme.dart';
 import '../../data/db/app_database.dart';
 import '../../data/providers.dart';
-import '../../data/photo_service.dart';
 import '../tree/tree_painter.dart' show avatarColorsFor, desaturate;
 
 /// 10 人物详情底部 Sheet（规划文档：编辑用底部 Sheet，绝不弹窗套弹窗）。
@@ -41,12 +40,6 @@ class PersonSheet extends ConsumerWidget {
         final families = ref.watch(familiesProvider(p.treeId)).value ?? const <Family>[];
         final links = ref.watch(childLinksProvider(p.treeId)).value ?? const <FamilyChildLink>[];
         final treePersons = ref.watch(personsProvider(p.treeId)).value ?? const <Person>[];
-        final nameOf = (String id) {
-          for (final q in treePersons) {
-            if (q.id == id) return '\${q.givenName} \${q.surname}'.trim();
-          }
-          return '—';
-        };
         final timeline = <(int, String)>[];
         if (p.birthDate != null) {
           timeline.add((p.birthDate!.year, l10n.timelineBirth));
@@ -66,7 +59,7 @@ class PersonSheet extends ConsumerWidget {
                 timeline.add((
                   child.birthDate!.year,
                   l10n.timelineChildBorn(
-                      '\${child.givenName} \${child.surname}'.trim()),
+                      '${child.givenName} ${child.surname}'.trim()),
                 ));
               }
             }
@@ -365,7 +358,6 @@ class _Avatar extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final colors = Theme.of(context).extension<LarariumColors>()!;
     final dead = !person.isLiving;
     final palette = avatarColorsFor(person.id);
     final colors2 = dead

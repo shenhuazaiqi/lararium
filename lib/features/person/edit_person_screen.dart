@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:drift/drift.dart' show Value;
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -9,8 +11,8 @@ import '../../core/fuzzy_date.dart';
 import '../../core/theme.dart';
 import '../../data/db/app_database.dart';
 import '../../data/providers.dart';
-import '../../data/photo_service.dart';
-import '../tree/tree_painter.dart';
+import 'avatar_crop_screen.dart';
+import 'photo_avatar.dart';
 
 /// 10 编辑人物：表单预填真实档案；在世者自动隐藏「逝世」字段。
 class EditPersonScreen extends ConsumerStatefulWidget {
@@ -88,10 +90,6 @@ class _EditPersonScreenState extends ConsumerState<EditPersonScreen> {
             return const Center(child: Text('—'));
           }
           if (!_loaded) _fill(person);
-          final initials =
-              '${_first.text.isNotEmpty ? _first.text[0] : ''}${_last.text.isNotEmpty ? _last.text[0] : ''}'
-                  .toUpperCase();
-          final palette = avatarColorsFor(person.id);
           return Form(
             key: _formKey,
             child: ListView(
@@ -100,35 +98,12 @@ class _EditPersonScreenState extends ConsumerState<EditPersonScreen> {
                 Center(
                   child: Column(
                     children: [
-                      Container(
-                        width: 80,
-                        height: 80,
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          gradient: LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: _dead
-                                ? [
-                                    desaturate(palette[0]),
-                                    desaturate(palette[1])
-                                  ]
-                                : palette,
-                          ),
-                        ),
-                        child: Text(
-                          initials.isEmpty ? '?' : initials,
-                          style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 27,
-                              fontWeight: FontWeight.w600),
-                        ),
-                      ),
+                      PhotoAvatar(
+                          person: person, size: 80, fontSize: 27),
                       const SizedBox(height: 4),
                       TextButton(
                         onPressed: () async {
-                          // 媒体上传（阶段 3）：压缩 → Storage 私密桶 → 记录路径
+                          // 媒体上传（阶段 3）：选图 → 裁剪页 → 压缩 → Storage 私密桶
                           try {
                             final picked = await FilePicker.platform.pickFiles(
                               type: FileType.image,
@@ -137,12 +112,17 @@ class _EditPersonScreenState extends ConsumerState<EditPersonScreen> {
                             if (picked == null || picked.files.isEmpty) return;
                             final path = picked.files.single.path;
                             if (path == null) return;
+                            final bytes = await File(path).readAsBytes();
+                            if (!mounted) return;
+                            final cropped =
+                                await AvatarCropScreen.push(context, bytes);
+                            if (cropped == null) return;
                             final treeId = ref.read(effectiveTreeIdProvider);
                             if (treeId == null) return;
                             await ref.read(photoServiceProvider).uploadAvatar(
                                   treeId: treeId,
                                   personId: widget.personId,
-                                  sourceFilePath: path,
+                                  imageBytes: cropped,
                                 );
                             // 触发 provider 重取（头像立即刷新）
                             ref.invalidate(personProvider(widget.personId));
@@ -152,7 +132,9 @@ class _EditPersonScreenState extends ConsumerState<EditPersonScreen> {
                                       content:
                                           Text(l10n.photoUploaded)));
                             }
-                          } catch (_) {
+                          } catch (e) {
+                            // ignore: avoid_print
+                            print('PHOTO_UPLOAD_ERR: $e');
                             if (mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(

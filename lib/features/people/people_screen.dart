@@ -8,6 +8,7 @@ import '../../core/theme.dart';
 import '../../data/db/app_database.dart';
 import '../../data/providers.dart';
 import '../person/person_sheet.dart';
+import '../person/photo_avatar.dart';
 import '../tree/tree_painter.dart';
 
 /// 02 人物列表：Living / Remembered 分组，已故头像去饱和。
@@ -194,26 +195,7 @@ class PeopleScreen extends ConsumerWidget {
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         child: Row(
           children: [
-            Container(
-              width: 40,
-              height: 40,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: dead
-                      ? [desaturate(palette[0]), desaturate(palette[1])]
-                      : palette,
-                ),
-              ),
-              child: Text(initials,
-                  style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600)),
-            ),
+            PhotoAvatar(person: p, size: 40, fontSize: 14),
             const SizedBox(width: 12),
             Expanded(
               child: Column(

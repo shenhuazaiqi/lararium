@@ -298,5 +298,8 @@
   "photoUploaded": "写真を更新しました",
   "photoPickFailed": "この写真を処理できませんでした",
   "proBillingUnavailable": "このビルドでは Google Play Billing を利用できません。ストア設定後に有効化されます。",
-  "proPurchased": "ありがとうございます！Lararium Pro が有効になりました。"
+  "proPurchased": "ありがとうございます！Lararium Pro が有効になりました。",
+  "cropTitle": "写真をトリミング",
+  "cropConfirm": "写真を使用",
+  "cropRotate": "回転"
 }

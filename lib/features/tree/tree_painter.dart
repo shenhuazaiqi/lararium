@@ -1,3 +1,5 @@
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
 
 import '../../core/theme.dart';
@@ -74,6 +76,8 @@ class TreePainter extends CustomPainter {
     required this.viewport,
     required this.colors,
     required this.selfBadge,
+    this.avatarImages = const {},
+    this.avatarVersion = 0,
   }) : super(repaint: viewport);
 
   final TreeLayoutResult result;
@@ -81,6 +85,10 @@ class TreePainter extends CustomPainter {
   final TreeViewport viewport;
   final LarariumColors colors;
   final String? selfBadge;
+  /// personId → 已解码头像（有照片的人物）
+  final Map<String, ui.Image> avatarImages;
+  /// 头像加载完成后自增，驱动重绘
+  final int avatarVersion;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -150,22 +158,34 @@ class TreePainter extends CustomPainter {
 
       final cx = r.center.dx;
 
-      // 头像（已故 → 去饱和）
-      final top = dead ? desaturate(v.avatarTop) : v.avatarTop;
-      final bottom = dead ? desaturate(v.avatarBottom) : v.avatarBottom;
+      // 头像：优先照片（已解码），否则字母渐变（已故去饱和）
       final avatarRect = Rect.fromCircle(center: Offset(cx, r.top + 19), radius: 13);
-      canvas.drawCircle(
-        avatarRect.center,
-        13,
-        Paint()
-          ..shader = LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [top, bottom],
-          ).createShader(avatarRect),
-      );
-      _text(canvas, v.initials, avatarRect.center, fontSize: 10,
-          weight: FontWeight.w700, color: Colors.white);
+      final photo = avatarImages[node.person.id];
+      if (photo != null) {
+        canvas.save();
+        canvas.clipPath(Path()
+          ..addOval(avatarRect));
+        canvas.drawImageRect(
+          photo,
+          Rect.fromLTWH(0, 0, photo.width.toDouble(), photo.height.toDouble()),
+          avatarRect,
+          Paint(),
+        );
+        canvas.restore();
+      } else {
+        canvas.drawCircle(
+          avatarRect.center,
+          13,
+          Paint()
+            ..shader = LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [dead ? desaturate(v.avatarTop) : v.avatarTop, dead ? desaturate(v.avatarBottom) : v.avatarBottom],
+            ).createShader(avatarRect),
+        );
+        _text(canvas, v.initials, avatarRect.center, fontSize: 10,
+            weight: FontWeight.w700, color: Colors.white);
+      }
 
       // 姓名
       _text(canvas, v.name, Offset(cx, r.top + 42),
@@ -237,5 +257,8 @@ class TreePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant TreePainter old) =>
-      old.result != result || old.colors != colors || old.selfBadge != selfBadge;
+      old.result != result ||
+      old.colors != colors ||
+      old.selfBadge != selfBadge ||
+      old.avatarVersion != avatarVersion;
 }

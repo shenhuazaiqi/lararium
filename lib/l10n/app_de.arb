@@ -298,5 +298,8 @@
   "photoUploaded": "Foto aktualisiert",
   "photoPickFailed": "Dieses Foto konnte nicht verarbeitet werden",
   "proBillingUnavailable": "Google Play Billing ist in diesem Build nicht verfügbar. Pro wird nach der Store-Einrichtung aktiviert.",
-  "proPurchased": "Danke! Lararium Pro ist aktiv."
+  "proPurchased": "Danke! Lararium Pro ist aktiv.",
+  "cropTitle": "Foto zuschneiden",
+  "cropConfirm": "Foto verwenden",
+  "cropRotate": "Drehen"
 }

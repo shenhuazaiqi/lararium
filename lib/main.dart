@@ -9,7 +9,6 @@ import 'app.dart';
 import 'core/cloud_config.dart';
 import 'package:drift/drift.dart';
 
-import 'data/db/app_database.dart';
 import 'data/providers.dart';
 import 'features/reminders/reminder_service.dart';
 

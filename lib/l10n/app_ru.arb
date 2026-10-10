@@ -298,5 +298,8 @@
   "photoUploaded": "Фото обновлено",
   "photoPickFailed": "Не удалось обработать это фото",
   "proBillingUnavailable": "Google Play Billing недоступен в этой сборке. Pro активируется после настройки магазина.",
-  "proPurchased": "Спасибо! Lararium Pro активен."
+  "proPurchased": "Спасибо! Lararium Pro активен.",
+  "cropTitle": "Обрезать фото",
+  "cropConfirm": "Использовать фото",
+  "cropRotate": "Повернуть"
 }

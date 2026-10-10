@@ -1,6 +1,9 @@
+import 'dart:async';
 import 'dart:math' as math;
+import 'dart:ui' as ui;
 
 import 'package:flutter/gestures.dart';
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart' hide Family;
@@ -27,6 +30,10 @@ class TreeScreen extends ConsumerStatefulWidget {
 class _TreeScreenState extends ConsumerState<TreeScreen> {
   final TreeViewport _viewport = TreeViewport();
   bool _fitted = false;
+  // 已解码的人物照片（personId → ui.Image），供画笔绘制照片头像
+  final Map<String, ui.Image> _avatarImages = {};
+  final Set<String> _avatarRequested = {};
+  int _avatarVersion = 0;
 
   static const double _tapSlop = 6; // 拖动阈值：小于视为点按
   Offset? _startFocal;
@@ -89,6 +96,17 @@ class _TreeScreenState extends ConsumerState<TreeScreen> {
             n.person.id: _visualFor(n.person, locale, l10n),
         };
         final treeName = currentName ?? l10n.treeTitle;
+
+        // 有照片的人物 → 异步解码头像并触发重绘
+        for (final p in persons) {
+          if (p.avatarPath != null &&
+              p.avatarPath!.isNotEmpty &&
+              !_avatarImages.containsKey(p.id) &&
+              !_avatarRequested.contains(p.id)) {
+            _avatarRequested.add(p.id);
+            _loadAvatarImage(p.id, p.avatarPath!);
+          }
+        }
 
         return Scaffold(
           backgroundColor: colors.bg,
@@ -196,6 +214,8 @@ class _TreeScreenState extends ConsumerState<TreeScreen> {
                                 viewport: _viewport,
                                 colors: colors,
                                 selfBadge: self == null ? null : l10n.selfBadge,
+                                avatarImages: _avatarImages,
+                                avatarVersion: _avatarVersion,
                               ),
                             ),
                           ),
@@ -263,6 +283,26 @@ class _TreeScreenState extends ConsumerState<TreeScreen> {
         );
       },
     );
+  }
+
+  /// 拉签名 URL → HTTP 取字节 → 解码 ui.Image → 存入 map 并重绘
+  Future<void> _loadAvatarImage(String personId, String path) async {
+    try {
+      final url = await ref.read(photoServiceProvider).signedUrl(path);
+      if (url == null || !mounted) return;
+      final resp =
+          await http.get(Uri.parse(url)).timeout(const Duration(seconds: 15));
+      if (resp.statusCode != 200) return;
+      final codec = await ui.instantiateImageCodec(resp.bodyBytes);
+      final frame = await codec.getNextFrame();
+      if (!mounted) return;
+      setState(() {
+        _avatarImages[personId] = frame.image;
+        _avatarVersion++;
+      });
+    } catch (_) {
+      // 静默回退到字母渐变
+    }
   }
 
   Widget _zoomBtn(BuildContext context, IconData icon, VoidCallback onTap,

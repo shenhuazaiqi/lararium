@@ -298,5 +298,8 @@
   "photoUploaded": "照片已更新",
   "photoPickFailed": "无法处理这张照片",
   "proBillingUnavailable": "当前构建没有 Google Play 商店结算。商店配置完成后 Pro 即可购买。",
-  "proPurchased": "感谢支持！Lararium Pro 已激活。"
+  "proPurchased": "感谢支持！Lararium Pro 已激活。",
+  "cropTitle": "裁剪照片",
+  "cropConfirm": "使用照片",
+  "cropRotate": "旋转"
 }

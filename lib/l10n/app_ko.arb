@@ -298,5 +298,8 @@
   "photoUploaded": "사진이 업데이트되었습니다",
   "photoPickFailed": "이 사진을 처리할 수 없습니다",
   "proBillingUnavailable": "이 빌드에서는 Google Play Billing을 사용할 수 없습니다. 스토어 설정 후 활성화됩니다.",
-  "proPurchased": "감사합니다! Lararium Pro가 활성화되었습니다."
+  "proPurchased": "감사합니다! Lararium Pro가 활성화되었습니다.",
+  "cropTitle": "사진 자르기",
+  "cropConfirm": "사진 사용",
+  "cropRotate": "회전"
 }

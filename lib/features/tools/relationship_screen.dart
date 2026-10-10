@@ -6,8 +6,6 @@ import '../../core/format.dart';
 import '../../core/theme.dart';
 import '../../data/db/app_database.dart';
 import '../../data/providers.dart';
-import '../person/person_sheet.dart';
-import '../tree/tree_painter.dart';
 
 /// P1「关系计算器」：在家族图（亲子+配偶边）上 BFS 找最短关系路径并归类。
 enum RelHopKind { parentOf, childOf, spouseOf }
@@ -144,7 +142,6 @@ class _RelationshipScreenState extends ConsumerState<RelationshipScreen> {
           }
           final a = persons.where((p) => p.id == _aId).firstOrNull;
           final b = persons.where((p) => p.id == _bId).firstOrNull;
-          final locale = Localizations.localeOf(context);
 
           // 关系计算
           String? resultText;

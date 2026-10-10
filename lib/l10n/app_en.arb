@@ -456,5 +456,8 @@
         "type": "String"
       }
     }
-  }
+  },
+  "cropTitle": "Crop photo",
+  "cropConfirm": "Use photo",
+  "cropRotate": "Rotate"
 }

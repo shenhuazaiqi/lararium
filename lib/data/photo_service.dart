@@ -1,10 +1,10 @@
+import 'dart:typed_data';
+
 import 'package:drift/drift.dart' show Value;
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'db/app_database.dart';
-import 'db/tables.dart';
 
 /// 人物照片上传（阶段 3 媒体）：压缩 → Supabase Storage（私密桶）→ 本地记录路径。
 /// 路径约定：tree_<treeId>/person_<personId>.jpg（RLS 按路径中的 tree_id 校验成员）。
@@ -20,25 +20,22 @@ class PhotoService {
   Future<String> storagePath(String treeId, String personId) =>
       Future.value('tree_$treeId/person_$personId.jpg');
 
-  /// 压缩到最长边 1024 / 质量 80（规划文档：头像 ≤200KB）并上传，
-  /// 成功后写本地 persons.avatarPath。返回存储路径。
+  /// 上传头像字节（裁剪页输出的 1024×1024）：
+  /// 压缩（质量 80）→ Storage 私密桶 → 写本地 persons.avatarPath。返回存储路径。
   Future<String> uploadAvatar({
     required String treeId,
     required String personId,
-    required String sourceFilePath,
+    required Uint8List imageBytes,
   }) async {
     final path = await storagePath(treeId, personId);
 
-    final compressed = await FlutterImageCompress.compressWithFile(
-      sourceFilePath,
+    final compressed = await FlutterImageCompress.compressWithList(
+      imageBytes,
       minWidth: 1024,
       minHeight: 1024,
       quality: 80,
       format: CompressFormat.jpeg,
     );
-    if (compressed == null) {
-      throw Exception('compress failed');
-    }
 
     await _client.storage.from(bucket).uploadBinary(
           path,
@@ -60,8 +57,8 @@ class PhotoService {
             avatarPath,
             3600,
           );
-      // 签名 URL 形如 /object/sign/...?token=...，需要拼上主机
-      return '\$supabaseUrl/storage/v1\$res';
+      // createSignedUrl 已返回完整 URL（含域名与 token）
+      return res;
     } catch (_) {
       return null;
     }
