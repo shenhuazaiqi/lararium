@@ -89,6 +89,21 @@
 
 **Google 登录已打通（2026-10-10）**：用户申请的 OAuth 客户端（Android 类型 + Web 类型）已配置。Supabase Google 服务商启用，client_id = Web ID,Android ID（逗号分隔）。App「Continue with Google」→ google_sign_in → signInWithIdToken → **实测登录成功**（guojianpude@gmail.com 会话建立，云端 auth.users 可见）。排障记录：① 报 ApiException:10 (DEVELOPER_ERROR) 的根因之一是 **GCP OAuth 同意屏幕处于「测试」状态且测试用户为空** —— 已把 guojianpude@gmail.com 加入测试用户；② Supabase 侧 "Unacceptable audience" 需把 **Web ID 和 Android ID 都**写入 client_id（逗号分隔，additional_client_ids 字段经 Management API 无法持久化）。正式发布前需把 OAuth 同意屏幕「发布应用」转正式（当前测试状态上限 100 用户）。
 
+**完成度修复一轮（2026-10-10 下午）**——盘点发现的缺口按优先级清完：
+- ✅ **启动图标**：用户提供的 icon.png（暗绿底发光家族树）→ flutter_launcher_icons 生成自适应+全密度图标，桌面实测生效
+- ✅ **空树加人**（A1）：新增「创建人物」页 `/person/new`；树/人物页空态 CTA「Add the first person」；树的第一个人自动成为焦点（isSelf）。实测：新建树 → CTA → 建 Sarah → 节点带 YOU 徽标居中
+- ✅ **登录态恢复**（A3）：main() 从 Supabase session 回填 authEmailProvider，重启后 UI 显示已登录
+- ✅ **提醒启动重排**（A4）：main() 启动后按当前树人物重排通知（不阻塞首帧）
+- ✅ **JSON 备份恢复**（A2）：ExportService.restoreJsonBackup（id 重映射防冲突）+ 导出页「Restore from backup」入口 → 恢复为新树并切换
+- ✅ **登出清理**（B12）：清同步状态与最后同步时间
+- ✅ **安葬地字段**（B9）：编辑页逝世区新增「安葬地」
+- ✅ **姓名顺序全局化**（B10）：personDisplayName 移入 core/format.dart，人物列表/详情/搜索/纪念页/纪念墙全部按 locale 切姓前名后
+- ✅ **删除树**（B11）：设置页树弹层「删除树」+ 确认对话框（显示影响人数）；删除当前树自动切到剩余树
+- ✅ **隐私政策 App 内入口**（B13）：设置隐私区链接到 GitHub Pages 政策页
+- ✅ **留言作者名**（B8）：登录后用账号邮箱前缀
+- ✅ **同步拉取完整性**（B6）：families/family_children/memorial_messages 增量拉取 + memorial_profiles 双向（主题/计数/公开开关）
+- 遗留：PDF 页面文字拉丁字体（人名已走图像不受影响）；Apple 登录/Realtime/照片上传/邀请协作/Billing 属后续阶段
+
 **已知限制（下轮处理）**：① PDF 页面文字用内置拉丁字体（人名已走图像渲染不受影响）；② Google/Apple 登录、Realtime 到达提示、Web 纪念页（Edge Function）、照片上传未接；③ 留言作者名仍为占位；④ Google Play Billing 需商店配置后启用。
 
 **模拟器验证记录**（Pixel_10a / API16k，截图在 `screenshots/`）：
