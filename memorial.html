@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>In Loving Memory</title>
+<style>
+  body{margin:0;font-family:system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;background:#F7F5F1;color:#1A1917}
+  .hero{background:linear-gradient(168deg,#211D28,#3A3040 44%,#6B5568);padding:56px 24px 72px;text-align:center}
+  .arch{width:84px;height:78px;margin:0 auto 18px;border:1.5px solid rgba(255,236,206,.25);border-bottom:0;border-radius:42px 42px 0 0;display:grid;place-items:center;font-size:30px}
+  h1{color:#fff;font-size:26px;margin:0;letter-spacing:-.02em}
+  .dates{color:rgba(255,255,255,.8);font-size:14px;margin-top:6px}
+  .card{max-width:560px;margin:-44px auto 0;background:#fff;border:1px solid #E6E1D9;border-radius:18px;padding:22px;text-align:center}
+  .loving{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#8B857C;font-weight:700}
+  .epitaph{font-style:italic;color:#5C574F;font-size:15px;margin-top:10px;line-height:1.6}
+  .counts{display:flex;justify-content:center;gap:26px;margin-top:18px;font-size:14px;color:#5C574F;font-weight:600}
+  .sect{max-width:560px;margin:26px auto;padding:0 16px}
+  .sect h2{font-size:12.5px;letter-spacing:.06em;text-transform:uppercase;color:#8B857C}
+  .msg{padding:12px 0;border-bottom:1px solid rgba(0,0,0,.06)}
+  .msg .who{font-weight:600;font-size:14px}
+  .msg .tx{font-size:14.5px;color:#5C574F;margin-top:3px;line-height:1.55}
+  form{display:flex;gap:8px;max-width:560px;margin:14px auto;padding:0 16px}
+  input{flex:1;min-width:0;height:44px;border-radius:12px;border:1px solid #D8D2C7;background:#fff;padding:0 14px;font-size:14px;outline:none}
+  select{height:44px;border-radius:12px;border:1px solid #D8D2C7;background:#fff;padding:0 10px;font-size:14px}
+  button{height:44px;border:0;border-radius:12px;background:#C87A1E;color:#fff;font-weight:600;font-size:14px;padding:0 18px;cursor:pointer}
+  button:disabled{opacity:.5}
+  .thanks,.errbox{max-width:560px;margin:12px auto;padding:0 16px}
+  .thanks div{background:#FBEFD8;border-radius:12px;padding:12px 16px;font-size:14px;color:#5C574F}
+  .errbox div{background:#FAEAE8;border-radius:12px;padding:12px 16px;font-size:14px;color:#B4433A}
+  .note{max-width:560px;margin:20px auto 40px;padding:0 16px;text-align:center;color:#B4AEA4;font-size:12px;line-height:1.6}
+  .loading{text-align:center;color:#8B857C;padding:60px 20px;font-size:14px}
+</style>
+</head>
+<body>
+  <div class="hero">
+    <div class="arch">🕯️</div>
+    <h1 id="name">…</h1>
+    <div class="dates" id="dates"></div>
+  </div>
+  <div class="card">
+    <div class="loving">In Loving Memory</div>
+    <div class="epitaph" id="epitaph" style="display:none"></div>
+    <div class="counts" id="counts"></div>
+  </div>
+  <div id="banner"></div>
+  <form id="tributeForm" style="display:none">
+    <input name="name" maxlength="40" placeholder="Your name (optional)">
+    <select name="kind">
+      <option value="flower">🌸 Flower</option>
+      <option value="candle">🕯️ Candle</option>
+      <option value="prayer">🙏 Prayer</option>
+    </select>
+    <button type="submit" id="offerBtn">Offer</button>
+  </form>
+  <div class="sect">
+    <h2>Messages</h2>
+    <div id="messages" class="loading">Loading…</div>
+  </div>
+  <div class="note">
+    Kept with Lararium — the shrine your family keeps.<br>
+    Visible via a private link shared by the family.
+  </div>
+
+<script>
+const SUPABASE_URL = 'https://sdxhduusacwnimcrkkqv.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNkeGhkdXVzYWN3bmltY3Jra3F2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE1NDU2ODMsImV4cCI6MjEwNzEyMTY4M30.V39Gt2UbFcwo76y2Odda5MQ_Vg2WpopGB_0H3nfZ6CQ';
+
+const pid = new URLSearchParams(location.search).get('p');
+const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+async function rpc(fn, body) {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${fn}`, {
+    method: 'POST',
+    headers: {
+      'apikey': SUPABASE_ANON_KEY,
+      'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+function fmtDate(d) {
+  if (!d) return '';
+  return new Date(d).toLocaleDateString('en-US', {year:'numeric', month:'short', day:'numeric'});
+}
+
+let counts = {flower:0, candle:0, incense:0, prayer:0};
+
+async function load() {
+  if (!pid || !/^[0-9a-f-]{36}$/i.test(pid)) {
+    document.getElementById('name').textContent = 'This memorial page is not public.';
+    document.getElementById('messages').textContent = '';
+    return;
+  }
+  try {
+    const m = await rpc('get_public_memorial', { pid });
+    if (!m) {
+      document.getElementById('name').textContent = 'This memorial page is not public.';
+      document.getElementById('messages').textContent = '';
+      return;
+    }
+    document.title = 'In Loving Memory · ' + m.name;
+    document.getElementById('name').textContent = m.name;
+    document.getElementById('dates').textContent =
+      [fmtDate(m.birth), fmtDate(m.death)].filter(Boolean).join(' – ');
+    if (m.epitaph) {
+      const el = document.getElementById('epitaph');
+      el.textContent = '“' + m.epitaph + '”';
+      el.style.display = 'block';
+    }
+    counts = m.counts || counts;
+    renderCounts();
+    const box = document.getElementById('messages');
+    box.className = '';
+    box.innerHTML = (m.messages || []).map((msg) =>
+      `<div class="msg"><div class="who">${esc(msg.author)}</div><div class="tx">${esc(msg.body)}</div></div>`
+    ).join('') || '<p style="color:#8B857C;font-size:14px">—</p>';
+    document.getElementById('tributeForm').style.display = 'flex';
+  } catch (e) {
+    document.getElementById('name').textContent = 'This memorial page is not public.';
+    document.getElementById('messages').textContent = '';
+  }
+}
+
+function renderCounts() {
+  document.getElementById('counts').innerHTML =
+    `<span>🌸 ${counts.flower ?? 0}</span><span>🕯️ ${counts.candle ?? 0}</span><span>🙏 ${counts.prayer ?? 0}</span>`;
+}
+
+document.getElementById('tributeForm').addEventListener('submit', async (ev) => {
+  ev.preventDefault();
+  const btn = document.getElementById('offerBtn');
+  const name = ev.target.name.value;
+  const kind = ev.target.kind.value;
+  btn.disabled = true; btn.textContent = '…';
+  try {
+    counts = await rpc('public_tribute', { pid, kind, display_name: name });
+    renderCounts();
+    banner(`<div>Your tribute was offered. Thank you.</div>`);
+  } catch (e) {
+    banner(`<div>Couldn't offer the tribute right now. Please try again later.</div>`);
+  } finally {
+    btn.disabled = false; btn.textContent = 'Offer';
+  }
+});
+
+function banner(html) {
+  document.getElementById('banner').innerHTML = `<div class="thanks">${html}</div>`;
+  setTimeout(() => { document.getElementById('banner').innerHTML = ''; }, 6000);
+}
+
+load();
+</script>
+</body>
+</html>
