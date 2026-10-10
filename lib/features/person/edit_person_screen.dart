@@ -124,6 +124,9 @@ class _EditPersonScreenState extends ConsumerState<EditPersonScreen> {
                                   personId: widget.personId,
                                   imageBytes: cropped,
                                 );
+                            // 头像版本自增 → 树页/头像组件立即重拉
+                            // （存储路径固定，路径无变化必须显式通知）
+                            ref.read(avatarEpochProvider.notifier).state++;
                             // 触发 provider 重取（头像立即刷新）
                             ref.invalidate(personProvider(widget.personId));
                             if (mounted) {

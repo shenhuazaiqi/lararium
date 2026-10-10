@@ -358,6 +358,8 @@ class _Avatar extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // 上传新头像后 epoch 自增 → 触发重建，下方 future 随 build 重新签名
+    ref.watch(avatarEpochProvider);
     final dead = !person.isLiving;
     final palette = avatarColorsFor(person.id);
     final colors2 = dead

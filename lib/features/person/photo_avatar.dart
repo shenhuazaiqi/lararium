@@ -46,6 +46,10 @@ class _PhotoAvatarState extends ConsumerState<PhotoAvatar> {
 
   @override
   Widget build(BuildContext context) {
+    // 上传新头像后 epoch 自增 → 重新签名 URL 拉取（路径固定不变）
+    ref.listen(avatarEpochProvider, (_, __) {
+      setState(() => _urlFuture = _fetch());
+    });
     final p = widget.person;
     final dead = !p.isLiving;
     final palette = avatarColorsFor(p.id);

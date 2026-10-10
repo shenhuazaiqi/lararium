@@ -34,6 +34,7 @@ class _TreeScreenState extends ConsumerState<TreeScreen> {
   final Map<String, ui.Image> _avatarImages = {};
   final Set<String> _avatarRequested = {};
   int _avatarVersion = 0;
+  int _avatarEpochSeen = 0; // 上传新头像后 epoch 自增 → 清缓存重拉
 
   static const double _tapSlop = 6; // 拖动阈值：小于视为点按
   Offset? _startFocal;
@@ -96,6 +97,15 @@ class _TreeScreenState extends ConsumerState<TreeScreen> {
             n.person.id: _visualFor(n.person, locale, l10n),
         };
         final treeName = currentName ?? l10n.treeTitle;
+
+        // 上传新头像后 epoch 自增：清掉已解码缓存与"已请求"标记，
+        // 让下面的加载循环按新照片重新拉取（存储路径固定，路径本身无变化）
+        final avatarEpoch = ref.watch(avatarEpochProvider);
+        if (avatarEpoch != _avatarEpochSeen) {
+          _avatarEpochSeen = avatarEpoch;
+          _avatarImages.clear();
+          _avatarRequested.clear();
+        }
 
         // 有照片的人物 → 异步解码头像并触发重绘
         for (final p in persons) {

@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart' hide Family;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'db/app_database.dart';
-import 'db/tables.dart';
 import 'repositories/demo_seed.dart';
 import 'repositories/family_service.dart';
 import '../core/cloud_config.dart';
@@ -144,3 +143,7 @@ final localeOverrideProvider = StateProvider<String?>((ref) => null);
 
 /// 缅怀默认主题包（全局兜底，人物级选择优先）。
 final memorialDefaultThemeProvider = StateProvider<String?>((ref) => null);
+
+/// 头像版本号：上传新头像后自增，所有头像展示处（树画笔/PhotoAvatar）
+/// 监听变化并强制重新拉取（存储路径固定不变，无法靠路径判断内容更新）。
+final avatarEpochProvider = StateProvider<int>((ref) => 0);
