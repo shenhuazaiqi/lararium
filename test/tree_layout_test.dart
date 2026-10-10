@@ -1,6 +1,8 @@
 // 树布局引擎回归测试 —— 重点覆盖「父母代必须显示在子女代上方」。
 // 回归背景：旧根选择按人物列表顺序取"未被收编者"，本人先入列时
 // 其父母会被平铺成同代独立根（2026-10-10 用户报告）。
+import 'dart:math' as math;
+
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -186,6 +188,35 @@ void main() {
     expect(rectOf('mother').center.dx, greaterThan(f));
     expect(rectOf('kidEx').center.dx, lessThan(f));
     expect(rectOf('self').center.dx, greaterThan(f));
+  });
+
+  test('单子女连线：母线从夫妻中点连到孩子头顶，不断开（回归用例）', () {
+    // 旧算法母线 = 「第一孩子中心 → 最后孩子中心」，单孩子时零长度，
+    // 夫妻对下的竖线与孩子头顶的竖线互不相连
+    final persons = [_p('self', self: true), _p('father'), _p('mother')];
+    final r = computeTreeLayout(TreeLayoutInput(
+      persons: persons,
+      families: [_f('fP', p1: 'father', p2: 'mother')],
+      childLinks: [_link('fP', 'self')],
+      textDirection: TextDirection.ltr,
+    ));
+
+    Rect rectOf(String id) =>
+        r.nodes.firstWhere((n) => n.person.id == id).rect;
+    final coupleMid =
+        (rectOf('father').center.dx + rectOf('mother').center.dx) / 2;
+    final kidCx = rectOf('self').center.dx;
+
+    // 存在一条水平母线，x 范围同时覆盖夫妻中点与孩子中心，
+    // 且 y 位于两代之间
+    final hasConnectingBus = r.wires.any((w) =>
+        w.from.dy == w.to.dy &&
+        math.min(w.from.dx, w.to.dx) <= math.min(coupleMid, kidCx) &&
+        math.max(w.from.dx, w.to.dx) >= math.max(coupleMid, kidCx) &&
+        w.from.dy > rectOf('father').bottom &&
+        w.from.dy < rectOf('self').top);
+    expect(hasConnectingBus, isTrue,
+        reason: '夫妻中点与孩子之间必须有连续的水平母线');
   });
 
   test('单亲家庭：单亲为第 0 代，子女为第 1 代', () {

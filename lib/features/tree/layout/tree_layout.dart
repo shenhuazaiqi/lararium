@@ -400,8 +400,10 @@ TreeLayoutResult computeTreeLayout(TreeLayoutInput input) {
     final firstKidTop = nodeRects[kids.first]!.top;
     final busY = anchor.dy + (firstKidTop - anchor.dy) * 0.45;
     wires.add(WireSegment(anchor, Offset(anchor.dx, busY)));
-    wires.add(WireSegment(Offset(kidCenters.first.dx, busY),
-        Offset(kidCenters.last.dx, busY)));
+    // 母线覆盖锚点 x 与子女跨度——单子女时从锚点到孩子，避免 L 断开
+    final busLeft = math.min(anchor.dx, kidCenters.first.dx);
+    final busRight = math.max(anchor.dx, kidCenters.last.dx);
+    wires.add(WireSegment(Offset(busLeft, busY), Offset(busRight, busY)));
     for (final kc in kidCenters) {
       wires.add(WireSegment(Offset(kc.dx, busY), Offset(kc.dx, firstKidTop)));
     }
