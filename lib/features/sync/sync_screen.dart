@@ -85,8 +85,12 @@ class _SyncScreenState extends ConsumerState<SyncScreen> {
             .showSnackBar(SnackBar(content: Text(l10n.allSynced)));
         _sync();
       }
-    } catch (e) {
+    } catch (e, st) {
       // ApiException:10 = DEVELOPER_ERROR（包名/SHA-1/Client ID 类型不匹配）
+      // ignore: avoid_print
+      print('GOOGLE_SIGNIN_ERROR: $e');
+      // ignore: avoid_print
+      print('GOOGLE_SIGNIN_STACK: ${st.toString().split("\n").take(8).join(' | ')}');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content: Text(l10n.syncError)));
