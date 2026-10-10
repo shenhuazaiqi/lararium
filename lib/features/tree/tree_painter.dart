@@ -204,14 +204,14 @@ class TreePainter extends CustomPainter {
             background: node.isFocus ? colors.brand : colors.ink3);
       }
 
-      // 性别符号：♂ 蓝 / ♀ 粉（右上角，无背景，未知性别不显示）
+      // 性别符号：♂ 蓝 / ♀ 粉（右上角留边距，无背景，未知性别不显示）
       final g = node.person.gender;
       if (g == 'male' || g == 'female') {
         _text(
           canvas,
           g == 'male' ? '♂' : '♀',
-          Offset(r.right - 10, r.top + 11),
-          fontSize: 13,
+          Offset(r.right - 15, r.top + 14),
+          fontSize: 11,
           weight: FontWeight.w700,
           color: g == 'male'
               ? const Color(0xFF4C8BD9)
