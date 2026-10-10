@@ -20,6 +20,7 @@ import '../features/search/search_screen.dart';
 import '../features/memorial/theme_picker_screen.dart';
 import '../features/settings/language_screen.dart';
 import '../features/settings/settings_screen.dart';
+import '../features/tools/relationship_screen.dart';
 import '../features/tree/tree_screen.dart';
 import 'theme.dart';
 
@@ -104,6 +105,12 @@ GoRouter buildRouter(Ref ref) {
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) =>
             MemorialScreen(personId: state.pathParameters['id']!),
+      ),
+      GoRoute(
+        path: '/tools/relationship',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => TreeGate(
+            builder: (id) => RelationshipScreen()),
       ),
       GoRoute(
         path: '/person/new',

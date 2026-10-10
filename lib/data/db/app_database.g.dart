@@ -504,6 +504,12 @@ class $PersonsTable extends Persons with TableInfo<$PersonsTable, Person> {
       defaultConstraints: GeneratedColumn.constraintIsAlways(
           'CHECK ("allow_public_link" IN (0, 1))'),
       defaultValue: const Constant(false));
+  static const VerificationMeta _avatarPathMeta =
+      const VerificationMeta('avatarPath');
+  @override
+  late final GeneratedColumn<String> avatarPath = GeneratedColumn<String>(
+      'avatar_path', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
   static const VerificationMeta _memorialThemeMeta =
       const VerificationMeta('memorialTheme');
   @override
@@ -611,6 +617,7 @@ class $PersonsTable extends Persons with TableInfo<$PersonsTable, Person> {
         occupation,
         note,
         allowPublicLink,
+        avatarPath,
         memorialTheme,
         epitaph,
         flowerCount,
@@ -712,6 +719,12 @@ class $PersonsTable extends Persons with TableInfo<$PersonsTable, Person> {
           _allowPublicLinkMeta,
           allowPublicLink.isAcceptableOrUnknown(
               data['allow_public_link']!, _allowPublicLinkMeta));
+    }
+    if (data.containsKey('avatar_path')) {
+      context.handle(
+          _avatarPathMeta,
+          avatarPath.isAcceptableOrUnknown(
+              data['avatar_path']!, _avatarPathMeta));
     }
     if (data.containsKey('memorial_theme')) {
       context.handle(
@@ -816,6 +829,8 @@ class $PersonsTable extends Persons with TableInfo<$PersonsTable, Person> {
           .read(DriftSqlType.string, data['${effectivePrefix}note']),
       allowPublicLink: attachedDatabase.typeMapping.read(
           DriftSqlType.bool, data['${effectivePrefix}allow_public_link'])!,
+      avatarPath: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}avatar_path']),
       memorialTheme: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}memorial_theme']),
       epitaph: attachedDatabase.typeMapping
@@ -866,6 +881,7 @@ class Person extends DataClass implements Insertable<Person> {
   final String? occupation;
   final String? note;
   final bool allowPublicLink;
+  final String? avatarPath;
   final String? memorialTheme;
   final String? epitaph;
   final int flowerCount;
@@ -897,6 +913,7 @@ class Person extends DataClass implements Insertable<Person> {
       this.occupation,
       this.note,
       required this.allowPublicLink,
+      this.avatarPath,
       this.memorialTheme,
       this.epitaph,
       required this.flowerCount,
@@ -942,6 +959,9 @@ class Person extends DataClass implements Insertable<Person> {
       map['note'] = Variable<String>(note);
     }
     map['allow_public_link'] = Variable<bool>(allowPublicLink);
+    if (!nullToAbsent || avatarPath != null) {
+      map['avatar_path'] = Variable<String>(avatarPath);
+    }
     if (!nullToAbsent || memorialTheme != null) {
       map['memorial_theme'] = Variable<String>(memorialTheme);
     }
@@ -995,6 +1015,9 @@ class Person extends DataClass implements Insertable<Person> {
           : Value(occupation),
       note: note == null && nullToAbsent ? const Value.absent() : Value(note),
       allowPublicLink: Value(allowPublicLink),
+      avatarPath: avatarPath == null && nullToAbsent
+          ? const Value.absent()
+          : Value(avatarPath),
       memorialTheme: memorialTheme == null && nullToAbsent
           ? const Value.absent()
           : Value(memorialTheme),
@@ -1038,6 +1061,7 @@ class Person extends DataClass implements Insertable<Person> {
       occupation: serializer.fromJson<String?>(json['occupation']),
       note: serializer.fromJson<String?>(json['note']),
       allowPublicLink: serializer.fromJson<bool>(json['allowPublicLink']),
+      avatarPath: serializer.fromJson<String?>(json['avatarPath']),
       memorialTheme: serializer.fromJson<String?>(json['memorialTheme']),
       epitaph: serializer.fromJson<String?>(json['epitaph']),
       flowerCount: serializer.fromJson<int>(json['flowerCount']),
@@ -1072,6 +1096,7 @@ class Person extends DataClass implements Insertable<Person> {
       'occupation': serializer.toJson<String?>(occupation),
       'note': serializer.toJson<String?>(note),
       'allowPublicLink': serializer.toJson<bool>(allowPublicLink),
+      'avatarPath': serializer.toJson<String?>(avatarPath),
       'memorialTheme': serializer.toJson<String?>(memorialTheme),
       'epitaph': serializer.toJson<String?>(epitaph),
       'flowerCount': serializer.toJson<int>(flowerCount),
@@ -1104,6 +1129,7 @@ class Person extends DataClass implements Insertable<Person> {
           Value<String?> occupation = const Value.absent(),
           Value<String?> note = const Value.absent(),
           bool? allowPublicLink,
+          Value<String?> avatarPath = const Value.absent(),
           Value<String?> memorialTheme = const Value.absent(),
           Value<String?> epitaph = const Value.absent(),
           int? flowerCount,
@@ -1133,6 +1159,7 @@ class Person extends DataClass implements Insertable<Person> {
         occupation: occupation.present ? occupation.value : this.occupation,
         note: note.present ? note.value : this.note,
         allowPublicLink: allowPublicLink ?? this.allowPublicLink,
+        avatarPath: avatarPath.present ? avatarPath.value : this.avatarPath,
         memorialTheme:
             memorialTheme.present ? memorialTheme.value : this.memorialTheme,
         epitaph: epitaph.present ? epitaph.value : this.epitaph,
@@ -1176,6 +1203,8 @@ class Person extends DataClass implements Insertable<Person> {
       allowPublicLink: data.allowPublicLink.present
           ? data.allowPublicLink.value
           : this.allowPublicLink,
+      avatarPath:
+          data.avatarPath.present ? data.avatarPath.value : this.avatarPath,
       memorialTheme: data.memorialTheme.present
           ? data.memorialTheme.value
           : this.memorialTheme,
@@ -1221,6 +1250,7 @@ class Person extends DataClass implements Insertable<Person> {
           ..write('occupation: $occupation, ')
           ..write('note: $note, ')
           ..write('allowPublicLink: $allowPublicLink, ')
+          ..write('avatarPath: $avatarPath, ')
           ..write('memorialTheme: $memorialTheme, ')
           ..write('epitaph: $epitaph, ')
           ..write('flowerCount: $flowerCount, ')
@@ -1255,6 +1285,7 @@ class Person extends DataClass implements Insertable<Person> {
         occupation,
         note,
         allowPublicLink,
+        avatarPath,
         memorialTheme,
         epitaph,
         flowerCount,
@@ -1288,6 +1319,7 @@ class Person extends DataClass implements Insertable<Person> {
           other.occupation == this.occupation &&
           other.note == this.note &&
           other.allowPublicLink == this.allowPublicLink &&
+          other.avatarPath == this.avatarPath &&
           other.memorialTheme == this.memorialTheme &&
           other.epitaph == this.epitaph &&
           other.flowerCount == this.flowerCount &&
@@ -1319,6 +1351,7 @@ class PersonsCompanion extends UpdateCompanion<Person> {
   final Value<String?> occupation;
   final Value<String?> note;
   final Value<bool> allowPublicLink;
+  final Value<String?> avatarPath;
   final Value<String?> memorialTheme;
   final Value<String?> epitaph;
   final Value<int> flowerCount;
@@ -1349,6 +1382,7 @@ class PersonsCompanion extends UpdateCompanion<Person> {
     this.occupation = const Value.absent(),
     this.note = const Value.absent(),
     this.allowPublicLink = const Value.absent(),
+    this.avatarPath = const Value.absent(),
     this.memorialTheme = const Value.absent(),
     this.epitaph = const Value.absent(),
     this.flowerCount = const Value.absent(),
@@ -1380,6 +1414,7 @@ class PersonsCompanion extends UpdateCompanion<Person> {
     this.occupation = const Value.absent(),
     this.note = const Value.absent(),
     this.allowPublicLink = const Value.absent(),
+    this.avatarPath = const Value.absent(),
     this.memorialTheme = const Value.absent(),
     this.epitaph = const Value.absent(),
     this.flowerCount = const Value.absent(),
@@ -1411,6 +1446,7 @@ class PersonsCompanion extends UpdateCompanion<Person> {
     Expression<String>? occupation,
     Expression<String>? note,
     Expression<bool>? allowPublicLink,
+    Expression<String>? avatarPath,
     Expression<String>? memorialTheme,
     Expression<String>? epitaph,
     Expression<int>? flowerCount,
@@ -1442,6 +1478,7 @@ class PersonsCompanion extends UpdateCompanion<Person> {
       if (occupation != null) 'occupation': occupation,
       if (note != null) 'note': note,
       if (allowPublicLink != null) 'allow_public_link': allowPublicLink,
+      if (avatarPath != null) 'avatar_path': avatarPath,
       if (memorialTheme != null) 'memorial_theme': memorialTheme,
       if (epitaph != null) 'epitaph': epitaph,
       if (flowerCount != null) 'flower_count': flowerCount,
@@ -1475,6 +1512,7 @@ class PersonsCompanion extends UpdateCompanion<Person> {
       Value<String?>? occupation,
       Value<String?>? note,
       Value<bool>? allowPublicLink,
+      Value<String?>? avatarPath,
       Value<String?>? memorialTheme,
       Value<String?>? epitaph,
       Value<int>? flowerCount,
@@ -1505,6 +1543,7 @@ class PersonsCompanion extends UpdateCompanion<Person> {
       occupation: occupation ?? this.occupation,
       note: note ?? this.note,
       allowPublicLink: allowPublicLink ?? this.allowPublicLink,
+      avatarPath: avatarPath ?? this.avatarPath,
       memorialTheme: memorialTheme ?? this.memorialTheme,
       epitaph: epitaph ?? this.epitaph,
       flowerCount: flowerCount ?? this.flowerCount,
@@ -1572,6 +1611,9 @@ class PersonsCompanion extends UpdateCompanion<Person> {
     if (allowPublicLink.present) {
       map['allow_public_link'] = Variable<bool>(allowPublicLink.value);
     }
+    if (avatarPath.present) {
+      map['avatar_path'] = Variable<String>(avatarPath.value);
+    }
     if (memorialTheme.present) {
       map['memorial_theme'] = Variable<String>(memorialTheme.value);
     }
@@ -1633,6 +1675,7 @@ class PersonsCompanion extends UpdateCompanion<Person> {
           ..write('occupation: $occupation, ')
           ..write('note: $note, ')
           ..write('allowPublicLink: $allowPublicLink, ')
+          ..write('avatarPath: $avatarPath, ')
           ..write('memorialTheme: $memorialTheme, ')
           ..write('epitaph: $epitaph, ')
           ..write('flowerCount: $flowerCount, ')
@@ -3177,6 +3220,7 @@ typedef $$PersonsTableCreateCompanionBuilder = PersonsCompanion Function({
   Value<String?> occupation,
   Value<String?> note,
   Value<bool> allowPublicLink,
+  Value<String?> avatarPath,
   Value<String?> memorialTheme,
   Value<String?> epitaph,
   Value<int> flowerCount,
@@ -3208,6 +3252,7 @@ typedef $$PersonsTableUpdateCompanionBuilder = PersonsCompanion Function({
   Value<String?> occupation,
   Value<String?> note,
   Value<bool> allowPublicLink,
+  Value<String?> avatarPath,
   Value<String?> memorialTheme,
   Value<String?> epitaph,
   Value<int> flowerCount,
@@ -3282,6 +3327,9 @@ class $$PersonsTableFilterComposer
   ColumnFilters<bool> get allowPublicLink => $composableBuilder(
       column: $table.allowPublicLink,
       builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get avatarPath => $composableBuilder(
+      column: $table.avatarPath, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<String> get memorialTheme => $composableBuilder(
       column: $table.memorialTheme, builder: (column) => ColumnFilters(column));
@@ -3381,6 +3429,9 @@ class $$PersonsTableOrderingComposer
       column: $table.allowPublicLink,
       builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get avatarPath => $composableBuilder(
+      column: $table.avatarPath, builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<String> get memorialTheme => $composableBuilder(
       column: $table.memorialTheme,
       builder: (column) => ColumnOrderings(column));
@@ -3479,6 +3530,9 @@ class $$PersonsTableAnnotationComposer
   GeneratedColumn<bool> get allowPublicLink => $composableBuilder(
       column: $table.allowPublicLink, builder: (column) => column);
 
+  GeneratedColumn<String> get avatarPath => $composableBuilder(
+      column: $table.avatarPath, builder: (column) => column);
+
   GeneratedColumn<String> get memorialTheme => $composableBuilder(
       column: $table.memorialTheme, builder: (column) => column);
 
@@ -3555,6 +3609,7 @@ class $$PersonsTableTableManager extends RootTableManager<
             Value<String?> occupation = const Value.absent(),
             Value<String?> note = const Value.absent(),
             Value<bool> allowPublicLink = const Value.absent(),
+            Value<String?> avatarPath = const Value.absent(),
             Value<String?> memorialTheme = const Value.absent(),
             Value<String?> epitaph = const Value.absent(),
             Value<int> flowerCount = const Value.absent(),
@@ -3586,6 +3641,7 @@ class $$PersonsTableTableManager extends RootTableManager<
             occupation: occupation,
             note: note,
             allowPublicLink: allowPublicLink,
+            avatarPath: avatarPath,
             memorialTheme: memorialTheme,
             epitaph: epitaph,
             flowerCount: flowerCount,
@@ -3617,6 +3673,7 @@ class $$PersonsTableTableManager extends RootTableManager<
             Value<String?> occupation = const Value.absent(),
             Value<String?> note = const Value.absent(),
             Value<bool> allowPublicLink = const Value.absent(),
+            Value<String?> avatarPath = const Value.absent(),
             Value<String?> memorialTheme = const Value.absent(),
             Value<String?> epitaph = const Value.absent(),
             Value<int> flowerCount = const Value.absent(),
@@ -3648,6 +3705,7 @@ class $$PersonsTableTableManager extends RootTableManager<
             occupation: occupation,
             note: note,
             allowPublicLink: allowPublicLink,
+            avatarPath: avatarPath,
             memorialTheme: memorialTheme,
             epitaph: epitaph,
             flowerCount: flowerCount,

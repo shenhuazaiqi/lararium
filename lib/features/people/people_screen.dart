@@ -48,6 +48,11 @@ class PeopleScreen extends ConsumerWidget {
             ),
             actions: [
               IconButton(
+                icon: const Icon(Icons.calculate_outlined),
+                tooltip: l10n.relationshipTitle,
+                onPressed: () => context.push('/tools/relationship'),
+              ),
+              IconButton(
                 icon: const Icon(Icons.person_add_alt_1_outlined),
                 onPressed: () {
                   final self =

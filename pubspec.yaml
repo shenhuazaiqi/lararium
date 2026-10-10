@@ -40,6 +40,9 @@ dependencies:
   file_picker: ^8.1.2
 
   url_launcher: ^6.3.0
+  in_app_purchase: ^3.1.13
+  flutter_image_compress: ^2.3.0
+  cached_network_image: ^3.4.1
 
   # --- Google 一键登录 ---
   google_sign_in: ^6.2.1

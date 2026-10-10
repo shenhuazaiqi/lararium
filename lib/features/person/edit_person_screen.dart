@@ -1,4 +1,5 @@
 import 'package:drift/drift.dart' show Value;
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -8,6 +9,7 @@ import '../../core/fuzzy_date.dart';
 import '../../core/theme.dart';
 import '../../data/db/app_database.dart';
 import '../../data/providers.dart';
+import '../../data/photo_service.dart';
 import '../tree/tree_painter.dart';
 
 /// 10 编辑人物：表单预填真实档案；在世者自动隐藏「逝世」字段。
@@ -125,10 +127,39 @@ class _EditPersonScreenState extends ConsumerState<EditPersonScreen> {
                       ),
                       const SizedBox(height: 4),
                       TextButton(
-                        onPressed: () {
-                          // 媒体上传属阶段 3（Supabase Storage + 压缩队列）
-                          ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text(l10n.comingSoon)));
+                        onPressed: () async {
+                          // 媒体上传（阶段 3）：压缩 → Storage 私密桶 → 记录路径
+                          try {
+                            final picked = await FilePicker.platform.pickFiles(
+                              type: FileType.image,
+                              withData: false,
+                            );
+                            if (picked == null || picked.files.isEmpty) return;
+                            final path = picked.files.single.path;
+                            if (path == null) return;
+                            final treeId = ref.read(effectiveTreeIdProvider);
+                            if (treeId == null) return;
+                            await ref.read(photoServiceProvider).uploadAvatar(
+                                  treeId: treeId,
+                                  personId: widget.personId,
+                                  sourceFilePath: path,
+                                );
+                            // 触发 provider 重取（头像立即刷新）
+                            ref.invalidate(personProvider(widget.personId));
+                            if (mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                      content:
+                                          Text(l10n.photoUploaded)));
+                            }
+                          } catch (_) {
+                            if (mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                      content:
+                                          Text(l10n.errShare)));
+                            }
+                          }
                         },
                         child: Text(l10n.photo),
                       ),

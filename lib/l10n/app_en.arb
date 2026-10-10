@@ -344,5 +344,117 @@
   "restoreError": "Couldn't restore this backup",
   "privacyPolicy": "Privacy policy",
   "deleteTreeTitle": "Delete this tree?",
-  "deleteTreeBody": "“{name}” and its {count} people will be removed from this device. This cannot be undone."
+  "deleteTreeBody": "“{name}” and its {count} people will be removed from this device. This cannot be undone.",
+  "inviteCodeHint": "Invite code (e.g. AB12CD34)",
+  "redeem": "Join",
+  "memberOwner": "owner",
+  "memberEditor": "editor",
+  "memberViewer": "viewer",
+  "inviteFailed": "Couldn't create invite — are you the tree owner?",
+  "proBillingUnavailable": "Google Play Billing isn't available on this build. Pro unlocks after store setup.",
+  "proPurchased": "Thank you! Lararium Pro is active.",
+  "photoPickFailed": "Couldn't process this photo",
+  "relationshipTitle": "Relationship calculator",
+  "relationshipPickA": "Select the first person",
+  "relationshipPickB": "Select the second person",
+  "relationshipCompute": "How are they related?",
+  "relSelf": "Same person",
+  "relSpouseOf": "{a} is the spouse of {b}",
+  "relParentOf": "{a} is the parent of {b}",
+  "relChildOf": "{a} is the child of {b}",
+  "relNth": "{a} and {b} are {deg}° relatives",
+  "relNoPath": "No family connection found between them",
+  "relPath": "Path",
+  "timelineTitle": "Life timeline",
+  "timelineBirth": "Born",
+  "timelineDeath": "Died",
+  "timelineMarriage": "Married",
+  "timelineChildBorn": "{name} was born",
+  "deleteAccountDone": "Account and cloud data deleted",
+  "deleteAccountLocalOnly": "You're not signed in — local data cleared instead",
+  "wipeLocalConfirm": "Also delete everything stored on this device?",
+  "wipeLocal": "Delete local data",
+  "realtimeTribute": "{name} just offered a tribute",
+  "photoUploaded": "Photo updated",
+  "relPathTitle": "Connection path",
+  "relSpouses": "{a} and {b} are spouses",
+  "relDirectAncestor": "{name} is {gen, plural, one{1 generation} other{{gen} generations}} up the line",
+  "relDirectDescendant": "{name} is {gen, plural, one{1 generation} other{{gen} generations}} down the line",
+  "relSiblings": "{a} and {b} are siblings",
+  "relCousins": "{a} and {b} are {deg}° cousins",
+  "relUncleNiece": "{a} and {b} are in an aunt/uncle – niece/nephew relation",
+  "relRelatedByMarriage": "{a} and {b} are connected through marriage",
+  "@relDirectAncestor": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "gen": {
+        "type": "int"
+      }
+    }
+  },
+  "@relDirectDescendant": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "gen": {
+        "type": "int"
+      }
+    }
+  },
+  "@relSiblings": {
+    "placeholders": {
+      "a": {
+        "type": "String"
+      },
+      "b": {
+        "type": "String"
+      }
+    }
+  },
+  "@relSpouses": {
+    "placeholders": {
+      "a": {
+        "type": "String"
+      },
+      "b": {
+        "type": "String"
+      }
+    }
+  },
+  "@relCousins": {
+    "placeholders": {
+      "a": {
+        "type": "String"
+      },
+      "b": {
+        "type": "String"
+      },
+      "deg": {
+        "type": "int"
+      }
+    }
+  },
+  "@relUncleNiece": {
+    "placeholders": {
+      "a": {
+        "type": "String"
+      },
+      "b": {
+        "type": "String"
+      }
+    }
+  },
+  "@relRelatedByMarriage": {
+    "placeholders": {
+      "a": {
+        "type": "String"
+      },
+      "b": {
+        "type": "String"
+      }
+    }
+  }
 }

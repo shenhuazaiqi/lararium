@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/theme.dart';
@@ -160,11 +161,7 @@ class SettingsScreen extends ConsumerWidget {
               iconColor: colors.danger,
               title: l10n.deleteAccountData,
               danger: true,
-              onTap: () {
-                // 账号删除入口属阶段 3 合规项（应用内 + 网页端）
-                ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(l10n.comingSoon)));
-              },
+              onTap: () => _deleteAccountFlow(context, ref, colors, l10n),
             ),
           ]),
           const SizedBox(height: 22),
@@ -186,6 +183,67 @@ class SettingsScreen extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  /// 账号删除（Play 合规 + GDPR）：登录态 → 云端清洗 + 本地清空；未登录 → 仅清本地。
+  Future<void> _deleteAccountFlow(
+    BuildContext context,
+    WidgetRef ref,
+    LarariumColors colors,
+    AppLocalizations l10n,
+  ) async {
+    final email = ref.read(authEmailProvider);
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.deleteAccountData),
+        content: Text(email == null
+            ? l10n.deleteAccountLocalOnly
+            : l10n.wipeLocalConfirm),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: Text(l10n.cancel)),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: colors.danger),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(l10n.delete),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !context.mounted) return;
+
+    // 1) 已登录 → 调删除函数（云端清洗 auth 用户 + 树级联）
+    if (email != null) {
+      try {
+        await Supabase.instance.client.functions
+            .invoke('delete-account', method: HttpMethod.post);
+        await Supabase.instance.client.auth.signOut();
+        ref.read(authEmailProvider.notifier).state = null;
+      } catch (e) {
+        // 云端失败也要继续清本地（用户可稍后重试云端）
+        // ignore: avoid_print
+        print('DELETE_ACCOUNT_CLOUD: $e');
+      }
+    }
+
+    // 2) 清空本机数据（各表全清 + 关键偏好重置）
+    final db = ref.read(databaseProvider);
+    await (db.delete(db.memorialMessages)).go();
+    await (db.delete(db.familyChildren)).go();
+    await (db.delete(db.families)).go();
+    await (db.delete(db.persons)).go();
+    await (db.delete(db.trees)).go();
+    final prefs = ref.read(prefsProvider);
+    await prefs.clear();
+
+    // 3) 退出到欢迎页（重启后全新状态）
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.deleteAccountDone)));
+      context.go('/welcome');
+    }
   }
 
   Widget _treesSection(BuildContext context, WidgetRef ref,

@@ -50,6 +50,8 @@ class Persons extends Table {
   // 公开纪念页开关（5.4.2：默认关闭，用户显式开启后分享链接）
   BoolColumn get allowPublicLink =>
       boolean().withDefault(const Constant(false))();
+  // 头像照片（Supabase Storage 路径：tree_<treeId>/person_<personId>.jpg）
+  TextColumn get avatarPath => text().nullable()();
   TextColumn get memorialTheme => text().nullable()();
   TextColumn get epitaph => text().nullable()();
   IntColumn get flowerCount => integer().withDefault(const Constant(0))();

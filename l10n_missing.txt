@@ -1,181 +1,61 @@
 {
   "de": [
     "remUpcoming",
-    "remindersSection",
-    "personNew",
-    "addFirstPerson",
-    "addFirstPersonSub",
-    "fBurial",
-    "restoreFromBackup",
-    "restoreSuccess",
-    "restoreError",
-    "privacyPolicy",
-    "deleteTreeTitle",
-    "deleteTreeBody"
+    "remindersSection"
   ],
 
   "es": [
     "remUpcoming",
-    "remindersSection",
-    "personNew",
-    "addFirstPerson",
-    "addFirstPersonSub",
-    "fBurial",
-    "restoreFromBackup",
-    "restoreSuccess",
-    "restoreError",
-    "privacyPolicy",
-    "deleteTreeTitle",
-    "deleteTreeBody"
+    "remindersSection"
   ],
 
   "fr": [
     "remUpcoming",
-    "remindersSection",
-    "personNew",
-    "addFirstPerson",
-    "addFirstPersonSub",
-    "fBurial",
-    "restoreFromBackup",
-    "restoreSuccess",
-    "restoreError",
-    "privacyPolicy",
-    "deleteTreeTitle",
-    "deleteTreeBody"
+    "remindersSection"
   ],
 
   "it": [
     "remUpcoming",
-    "remindersSection",
-    "personNew",
-    "addFirstPerson",
-    "addFirstPersonSub",
-    "fBurial",
-    "restoreFromBackup",
-    "restoreSuccess",
-    "restoreError",
-    "privacyPolicy",
-    "deleteTreeTitle",
-    "deleteTreeBody"
+    "remindersSection"
   ],
 
   "ja": [
     "remUpcoming",
-    "remindersSection",
-    "personNew",
-    "addFirstPerson",
-    "addFirstPersonSub",
-    "fBurial",
-    "restoreFromBackup",
-    "restoreSuccess",
-    "restoreError",
-    "privacyPolicy",
-    "deleteTreeTitle",
-    "deleteTreeBody"
+    "remindersSection"
   ],
 
   "ko": [
     "remUpcoming",
-    "remindersSection",
-    "personNew",
-    "addFirstPerson",
-    "addFirstPersonSub",
-    "fBurial",
-    "restoreFromBackup",
-    "restoreSuccess",
-    "restoreError",
-    "privacyPolicy",
-    "deleteTreeTitle",
-    "deleteTreeBody"
+    "remindersSection"
   ],
 
   "nl": [
     "remUpcoming",
-    "remindersSection",
-    "personNew",
-    "addFirstPerson",
-    "addFirstPersonSub",
-    "fBurial",
-    "restoreFromBackup",
-    "restoreSuccess",
-    "restoreError",
-    "privacyPolicy",
-    "deleteTreeTitle",
-    "deleteTreeBody"
+    "remindersSection"
   ],
 
   "pt": [
     "remUpcoming",
-    "remindersSection",
-    "personNew",
-    "addFirstPerson",
-    "addFirstPersonSub",
-    "fBurial",
-    "restoreFromBackup",
-    "restoreSuccess",
-    "restoreError",
-    "privacyPolicy",
-    "deleteTreeTitle",
-    "deleteTreeBody"
+    "remindersSection"
   ],
 
   "ru": [
     "remUpcoming",
-    "remindersSection",
-    "personNew",
-    "addFirstPerson",
-    "addFirstPersonSub",
-    "fBurial",
-    "restoreFromBackup",
-    "restoreSuccess",
-    "restoreError",
-    "privacyPolicy",
-    "deleteTreeTitle",
-    "deleteTreeBody"
+    "remindersSection"
   ],
 
   "zh": [
     "remUpcoming",
-    "remindersSection",
-    "personNew",
-    "addFirstPerson",
-    "addFirstPersonSub",
-    "fBurial",
-    "restoreFromBackup",
-    "restoreSuccess",
-    "restoreError",
-    "privacyPolicy",
-    "deleteTreeTitle",
-    "deleteTreeBody"
+    "remindersSection"
   ],
 
   "zh_Hans": [
     "remUpcoming",
-    "remindersSection",
-    "personNew",
-    "addFirstPerson",
-    "addFirstPersonSub",
-    "fBurial",
-    "restoreFromBackup",
-    "restoreSuccess",
-    "restoreError",
-    "privacyPolicy",
-    "deleteTreeTitle",
-    "deleteTreeBody"
+    "remindersSection"
   ],
 
   "zh_Hant": [
     "remUpcoming",
-    "remindersSection",
-    "personNew",
-    "addFirstPerson",
-    "addFirstPersonSub",
-    "fBurial",
-    "restoreFromBackup",
-    "restoreSuccess",
-    "restoreError",
-    "privacyPolicy",
-    "deleteTreeTitle",
-    "deleteTreeBody"
+    "remindersSection"
   ]
 }

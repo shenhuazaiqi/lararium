@@ -30,6 +30,58 @@ class _MemorialScreenState extends ConsumerState<MemorialScreen> {
   String? _pendingAct; // 已选中、待发送
   String? _sentAct; // 本会话已发送
   bool _pickerShown = false;
+  RealtimeChannel? _realtimeChannel;
+
+  @override
+  void initState() {
+    super.initState();
+    // Realtime：家人致敬实时到达提示（规划 5.4.2「John 刚刚献了一束花」）
+    WidgetsBinding.instance.addPostFrameCallback((_) => _subscribeRealtime());
+  }
+
+  void _subscribeRealtime() {
+    final client = Supabase.instance.client;
+    final uid = client.auth.currentUser?.id;
+    _realtimeChannel = client
+        .channel('memorial-${widget.personId}')
+        .onPostgresChanges(
+          event: PostgresChangeEvent.insert,
+          schema: 'public',
+          table: 'memorial_acts',
+          filter: PostgresChangeFilter(
+              type: PostgresChangeFilterType.eq,
+              column: 'person_id',
+              value: widget.personId),
+          callback: (payload) {
+            final row = payload.newRecord;
+            final actor = '${row['actor_name'] ?? ''}';
+            final actorId = row['actor_user_id'] as String?;
+            if (actorId != null && actorId == uid) return; // 自己的动作不提示
+            final kind = '${row['kind'] ?? ''}';
+            final emoji = switch (kind) {
+              'flower' => '🌸',
+              'candle' => '🕯️',
+              'incense' => '🪔',
+              'prayer' => '🙏',
+              _ => '🤍',
+            };
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  content: Text('$emoji  ' +
+                      (actor.isEmpty ? 'A family member' : actor) +
+                      ' just offered a tribute'),
+                  duration: const Duration(seconds: 4)));
+            }
+          },
+        )
+        .subscribe();
+  }
+
+  @override
+  void dispose() {
+    _realtimeChannel?.unsubscribe();
+    super.dispose();
+  }
 
   int _countFor(Person p, String actKey) => switch (actKey) {
         'flower' || 'marigold' || 'garland' => p.flowerCount,

@@ -6,6 +6,9 @@ import 'db/app_database.dart';
 import 'db/tables.dart';
 import 'repositories/demo_seed.dart';
 import 'repositories/family_service.dart';
+import '../core/cloud_config.dart';
+import 'invite_service.dart';
+import 'photo_service.dart';
 import 'sync_service.dart';
 import 'tree_service.dart';
 
@@ -28,6 +31,17 @@ final treeServiceProvider =
 
 final syncServiceProvider =
     Provider<SyncService>((ref) => SyncService(ref.watch(databaseProvider)));
+
+final cloudUrlProvider =
+    Provider<String>((ref) => CloudConfig.supabaseUrl);
+
+final inviteServiceProvider =
+    Provider<InviteService>((ref) => InviteService(ref.watch(databaseProvider)));
+
+final photoServiceProvider = Provider<PhotoService>((ref) => PhotoService(
+      ref.watch(databaseProvider),
+      supabaseUrl: ref.watch(cloudUrlProvider),
+    ));
 
 /// 同步状态流（同步屏与设置页共用）
 final syncStatusProvider = StateProvider<SyncStatus>((ref) => const SyncStatus());

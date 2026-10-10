@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 // 调试输出用换行常量
+import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -11,6 +12,7 @@ import '../../core/cloud_config.dart';
 
 import '../../core/theme.dart';
 import '../../data/providers.dart';
+import '../../data/invite_service.dart';
 import '../../data/sync_service.dart' show SyncPhase, SyncStatus;
 
 /// 08 同步与共享：登录 / 同步状态 / 邀请链接。
@@ -24,15 +26,72 @@ class SyncScreen extends ConsumerStatefulWidget {
 class _SyncScreenState extends ConsumerState<SyncScreen> {
   final _email = TextEditingController();
   final _password = TextEditingController();
+  final _inviteCode = TextEditingController();
   bool _signUpMode = false;
   bool _busy = false;
   bool _syncing = false;
+  String? _inviteCodeValue; // 本树邀请码
+  List<({String userId, String role})> _members = const [];
 
   @override
   void dispose() {
     _email.dispose();
     _password.dispose();
+    _inviteCode.dispose();
     super.dispose();
+  }
+
+  /// 生成邀请码（树所有者）
+  Future<void> _genInvite() async {
+    final treeId = ref.read(effectiveTreeIdProvider);
+    if (treeId == null) return;
+    try {
+      final code = await ref
+          .read(inviteServiceProvider)
+          .createInvite(treeId);
+      if (mounted) setState(() => _inviteCodeValue = code);
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(AppLocalizations.of(context).syncError)));
+      }
+    }
+  }
+
+  /// 兑换邀请码加入共享树
+  Future<void> _redeem() async {
+    final l10n = AppLocalizations.of(context);
+    final code = _inviteCode.text.trim();
+    if (code.isEmpty) return;
+    setState(() => _busy = true);
+    try {
+      final (treeId, treeName) =
+          await ref.read(inviteServiceProvider).redeem(code);
+      await ref.read(prefsProvider).setString('current_tree_id', treeId);
+      ref.read(currentTreeIdProvider.notifier).state = treeId;
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(l10n.treeSwitched(treeName))));
+        context.go('/tree');
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(l10n.syncError)));
+      }
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  /// 拉取成员列表
+  Future<void> _loadMembers() async {
+    final treeId = ref.read(effectiveTreeIdProvider);
+    if (treeId == null) return;
+    try {
+      final m = await ref.read(inviteServiceProvider).members(treeId);
+      if (mounted) setState(() => _members = m);
+    } catch (_) {}
   }
 
   Future<void> _auth() async {
@@ -151,6 +210,11 @@ class _SyncScreenState extends ConsumerState<SyncScreen> {
     final lastSync = lastSyncStr == null
         ? null
         : DateTime.tryParse(lastSyncStr);
+
+    // 登录状态下加载成员列表
+    if (email != null && _members.isEmpty && !_busy) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _loadMembers());
+    }
 
     return Scaffold(
       backgroundColor: colors.bg,
@@ -374,51 +438,100 @@ class _SyncScreenState extends ConsumerState<SyncScreen> {
                   fontWeight: FontWeight.w700,
                   color: colors.ink3)),
           const SizedBox(height: 9),
-          Container(
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              color: colors.surface,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: colors.line),
+          for (final m in _members)
+            Container(
+              margin: const EdgeInsets.only(bottom: 8),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+              decoration: BoxDecoration(
+                color: colors.surface,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: colors.line),
+              ),
+              child: Row(
+                children: [
+                  CircleAvatar(
+                    radius: 16,
+                    backgroundColor: colors.brandSoft,
+                    child: Icon(Icons.person_outline,
+                        size: 18, color: colors.brand),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(m.userId.substring(0, 8),
+                        style: TextStyle(
+                            fontSize: 13.5,
+                            fontFamily: 'monospace',
+                            color: colors.ink)),
+                  ),
+                  Text(m.role,
+                      style: TextStyle(
+                          fontSize: 11.5,
+                          fontWeight: FontWeight.w600,
+                          color: colors.ink3)),
+                ],
+              ),
             ),
-            child: Row(
+          if (email != null) ...[
+            const SizedBox(height: 8),
+            Row(
               children: [
-                CircleAvatar(
-                  radius: 18,
-                  backgroundColor: colors.brandSoft,
-                  child: Icon(Icons.person_outline,
-                      size: 20, color: colors.brand),
-                ),
-                const SizedBox(width: 12),
                 Expanded(
-                  child: Text(
-                    email == null ? l10n.authNeedAccount : email,
-                    style:
-                        TextStyle(fontSize: 14, color: colors.ink),
+                  child: OutlinedButton.icon(
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: colors.ink,
+                      side: BorderSide(color: colors.line2),
+                      minimumSize: const Size.fromHeight(46),
+                    ),
+                    icon: const Icon(Icons.qr_code, size: 18),
+                    label: Text(l10n.copyInvite),
+                    onPressed: _inviteCodeValue == null
+                        ? _genInvite
+                        : () => ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(_inviteCodeValue!))),
                   ),
                 ),
-                Text(l10n.currentTag,
-                    style: TextStyle(
-                        fontSize: 11.5,
-                        fontWeight: FontWeight.w600,
-                        color: colors.ink3)),
               ],
             ),
-          ),
-          const SizedBox(height: 12),
-          OutlinedButton.icon(
-            style: OutlinedButton.styleFrom(
-              foregroundColor: colors.ink,
-              side: BorderSide(color: colors.line2),
-              minimumSize: const Size.fromHeight(48),
+            if (_inviteCodeValue != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Center(
+                  child: Text(_inviteCodeValue!,
+                      style: TextStyle(
+                          fontSize: 20,
+                          letterSpacing: 4,
+                          fontWeight: FontWeight.w700,
+                          fontFamily: 'monospace',
+                          color: colors.brand)),
+                ),
+              ),
+          ],
+          if (email != null) ...[
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _inviteCode,
+                    textCapitalization: TextCapitalization.characters,
+                    style: TextStyle(fontSize: 14, color: colors.ink),
+                    decoration: InputDecoration(
+                        hintText: l10n.inviteCodeHint, isDense: true),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                FilledButton(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: colors.brand,
+                    minimumSize: const Size(90, 44),
+                  ),
+                  onPressed: _busy ? null : _redeem,
+                  child: Text(l10n.redeem),
+                ),
+              ],
             ),
-            icon: const Icon(Icons.link, size: 18),
-            label: Text(l10n.copyInvite),
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(l10n.memorialLinkCopied)));
-            },
-          ),
+          ],
           const SizedBox(height: 14),
           Center(
             child: Text(l10n.offlineQueueNote,

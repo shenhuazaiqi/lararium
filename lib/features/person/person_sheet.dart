@@ -1,12 +1,14 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart' hide Family;
 import 'package:go_router/go_router.dart';
 
 import '../../core/format.dart';
 import '../../core/theme.dart';
 import '../../data/db/app_database.dart';
 import '../../data/providers.dart';
+import '../../data/photo_service.dart';
 import '../tree/tree_painter.dart' show avatarColorsFor, desaturate;
 
 /// 10 人物详情底部 Sheet（规划文档：编辑用底部 Sheet，绝不弹窗套弹窗）。
@@ -35,6 +37,46 @@ class PersonSheet extends ConsumerWidget {
                 (p.surname.isNotEmpty ? p.surname[0] : ''))
             .toUpperCase();
 
+        // 时间轴数据（P1：从家庭关系计算，无新表）
+        final families = ref.watch(familiesProvider(p.treeId)).value ?? const <Family>[];
+        final links = ref.watch(childLinksProvider(p.treeId)).value ?? const <FamilyChildLink>[];
+        final treePersons = ref.watch(personsProvider(p.treeId)).value ?? const <Person>[];
+        final nameOf = (String id) {
+          for (final q in treePersons) {
+            if (q.id == id) return '\${q.givenName} \${q.surname}'.trim();
+          }
+          return '—';
+        };
+        final timeline = <(int, String)>[];
+        if (p.birthDate != null) {
+          timeline.add((p.birthDate!.year, l10n.timelineBirth));
+        }
+        for (final f in families) {
+          final isPartner = f.partner1Id == p.id || f.partner2Id == p.id;
+          if (isPartner && f.marriageDate != null) {
+            timeline.add((f.marriageDate!.year, l10n.timelineMarriage));
+          }
+          if (isPartner) {
+            for (final l in links) {
+              if (l.familyId != f.id) continue;
+              final child = treePersons
+                  .where((q) => q.id == l.personId && q.birthDate != null)
+                  .firstOrNull;
+              if (child != null) {
+                timeline.add((
+                  child.birthDate!.year,
+                  l10n.timelineChildBorn(
+                      '\${child.givenName} \${child.surname}'.trim()),
+                ));
+              }
+            }
+          }
+        }
+        if (dead && p.deathDate != null) {
+          timeline.add((p.deathDate!.year, l10n.timelineDeath));
+        }
+        timeline.sort((x, y) => x.$1.compareTo(y.$1));
+
         final facts = <(String, String)>[
           (l10n.born, bornLine(p, locale)),
           if (dead) (l10n.died, diedLine(p, locale)),
@@ -56,28 +98,11 @@ class PersonSheet extends ConsumerWidget {
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Container(
-                        width: 62,
-                        height: 62,
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          gradient: LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: dead
-                                ? [
-                                    _grey(p)[0],
-                                    _grey(p)[1],
-                                  ]
-                                : _avatarFor(p.id),
-                          ),
-                        ),
-                        child: Text(initials.isEmpty ? '?' : initials,
-                            style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w600,
-                                fontSize: 21)),
+                      _Avatar(
+                        person: p,
+                        initials: initials,
+                        size: 62,
+                        fontSize: 21,
                       ),
                       const SizedBox(width: 14),
                       Expanded(
@@ -149,6 +174,43 @@ class PersonSheet extends ConsumerWidget {
                             ),
                           ),
                         ],
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 18),
+                  _SectionTitle(l10n.timelineTitle),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: colors.surface,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: colors.line),
+                    ),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                    child: Column(
+                      children: [
+                        for (final t in timeline)
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 7),
+                            child: Row(
+                              children: [
+                                SizedBox(
+                                  width: 52,
+                                  child: Text('${t.$1}',
+                                      style: TextStyle(
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w600,
+                                          color: colors.brand)),
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(t.$2,
+                                      style: TextStyle(
+                                          fontSize: 14, color: colors.ink)),
+                                ),
+                              ],
+                            ),
+                          ),
                       ],
                     ),
                   ),
@@ -283,6 +345,70 @@ class _MemorialCard extends ConsumerWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// 头像组件：登录且有照片 → 私密桶签名 URL 网络图；否则字母渐变。
+class _Avatar extends ConsumerWidget {
+  const _Avatar({
+    required this.person,
+    required this.initials,
+    required this.size,
+    required this.fontSize,
+  });
+
+  final Person person;
+  final String initials;
+  final double size;
+  final double fontSize;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final colors = Theme.of(context).extension<LarariumColors>()!;
+    final dead = !person.isLiving;
+    final palette = avatarColorsFor(person.id);
+    final colors2 = dead
+        ? [desaturate(palette[0]), desaturate(palette[1])]
+        : palette;
+
+    final placeholder = Container(
+      width: size,
+      height: size,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: colors2,
+        ),
+      ),
+      child: Text(initials,
+          style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w600,
+              fontSize: fontSize)),
+    );
+
+    final path = person.avatarPath;
+    if (path == null || path.isEmpty) return placeholder;
+
+    return FutureBuilder<String?>(
+      future: ref.read(photoServiceProvider).signedUrl(path),
+      builder: (context, snap) {
+        final url = snap.data;
+        if (url == null) return placeholder;
+        return ClipOval(
+          child: CachedNetworkImage(
+            imageUrl: url,
+            width: size,
+            height: size,
+            fit: BoxFit.cover,
+            errorWidget: (_, __, ___) => placeholder,
+          ),
+        );
+      },
     );
   }
 }
