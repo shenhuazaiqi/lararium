@@ -81,6 +81,12 @@
 
 **UX 修正（2026-10-10）**：语言选择与缅怀方式选择从底部弹层改为**独立页面**（用户反馈：13 项内容把「完成」按钮顶出屏幕、无法返回）。新交互：带返回键 + 点选即生效即保存。路由 `/settings/language`、`/settings/memorial-style`（支持 `?person=` 人物级）。旧弹层代码已删除。
 
+**分享纪念页实战 + 双对号修复（2026-10-10）**：
+- 「已送出 ✓」按钮去掉双对号（图标 + 文案各一个），改为纯文字「已送出」（`sentDone` 键 ×12 语言）。
+- **Web 公开纪念页真功能落地**：`web/memorial.html`（GitHub Pages 托管）+ 云端 `get_public_memorial`（anon 只读受限字段：姓名/生卒/纪念文字/计数/最近 20 条留言）+ `public_tribute`（网页匿名献花，security definer + 每日 50 次限额）。流程：纪念页点「分享」→ 首次弹确认（明示公开范围，在世亲属永不显示）→ 写入 `allow_public_link`（本地+云端）→ 分享链接 `https://shenhuazaiqi.github.io/lararium/memorial.html?p=<id>`。**实测闭环**：App 分享面板带真实链接 ✓、浏览器渲染公开页 ✓、网页 Offer 献花 → 云端计数落库 ✓。
+- ⚠️ 技术备忘：Supabase Edge Functions 对未认证响应强制 `text/plain + CSP sandbox`（防钓鱼策略），静态托管方案因此成为必选；Edge Function `memorial` 保留作服务端兜底。
+- 本地 schema v2：persons 加 `allow_public_link` 列（onUpgrade 迁移，实测 user_version 1→2）。
+
 **已知限制（下轮处理）**：① PDF 页面文字用内置拉丁字体（人名已走图像渲染不受影响）；② Google/Apple 登录、Realtime 到达提示、Web 纪念页（Edge Function）、照片上传未接；③ 留言作者名仍为占位；④ Google Play Billing 需商店配置后启用。
 
 **模拟器验证记录**（Pixel_10a / API16k，截图在 `screenshots/`）：
