@@ -27,6 +27,16 @@
 
 ## ✅ 已完成（Done）
 
+### 2026-10-13 · App 缅怀 ↔ 分享页数据打通（用户反馈"两边对不上"）
+
+- **根因**：App 端缅怀只写本地计数列，从不上云；云端 memorial_profiles 计数靠 memorial_acts 触发器累加（只有网页送礼会产生）→ 网页全是 0；且 sync 曾用本地计数覆盖云端（会清掉网页访客的祝福）。
+- **修复**：
+  1. App `_send` 在本地计数外同步插入一条云端 `memorial_acts`（作者=登录邮箱前缀，RLS `acts_insert` 已允许树成员）→ 触发器累加云计数 + 网页 Tributes 列表出明细；
+  2. **sync 不再推送计数**（云计数改由 acts 统一聚合，App 离线时本地计数仍可用）；
+  3. 触发器 kind→计数列映射补全（bow/donation→prayer，marigold/garland→flower，diya/ofrenda/stone→candle，对齐 App 语义）；RPC tributes 带 item_code；网页动词标签扩展 12 种。
+- **积压补写**（管理 API 绕过每日配额触发器，历史行为不受今日限额）：SD NF 的 2×上香/2×献花/2×鞠躬 → 云计数 flower 2 / incense 2 / prayer 2，tributes 6 条。
+- **验证**：匿名 RPC counts 与 App 徽标完全一致；线上页面浏览器截图确认计数卡 + 6 条明细渲染正确。
+
 ### 2026-10-13 · 公开纪念页 v2：纯浏览视图（用户反馈"只能看不能操作"）
 
 - **需求**：分享出去的页面要能看到多少人留言、谁送了哪些祝福；只能看，不能操作。
