@@ -842,73 +842,97 @@ class _FxPainter extends CustomPainter {
     final baseY = size.height - 22;
 
     _groundPool(canvas, size, theme.accent, w: 0.4);
-    _halo(canvas, Offset(cx, baseY - 62), 46, theme.glow, strength: 0.45);
+    _halo(canvas, Offset(cx, baseY - 58), 46, theme.glow, strength: 0.45);
 
-    // 预备-俯身-起身（30%~72% 区间完成一个周期，ease in out）
+    // 一次完整鞠躬：22%~30% 预备吸气（微微后仰）→ 30%~58% 缓缓俯身 →
+    // 58%~66% 顶格停驻 → 66%~92% 缓缓起身
     final phase = t;
     double bend = 0;
-    if (phase > 0.28 && phase < 0.74) {
-      final p = ((phase - 0.28) / 0.46).clamp(0.0, 1.0);
-      bend = _easeInOut(p);
+    if (phase >= 0.22 && phase < 0.3) {
+      bend = -_easeInOut((phase - 0.22) / 0.08) * 0.06;
+    } else if (phase >= 0.3 && phase < 0.58) {
+      bend = _easeInOut((phase - 0.3) / 0.28);
+    } else if (phase >= 0.58 && phase < 0.66) {
+      bend = 1;
+    } else if (phase >= 0.66 && phase < 0.92) {
+      bend = 1 - _easeInOut((phase - 0.66) / 0.26);
     }
-    final angle = bend * 14 * math.pi / 180;
     final breathe = _breathe(speed: 0.5);
 
-    // 地面投影（随俯身收缩变深）
-    final shadowW = 44 - bend * 14;
+    // 地面投影（随俯身前移、收窄、变深）
+    final shadowW = 40 - bend * 10;
     canvas.drawOval(
       Rect.fromCenter(
-          center: Offset(cx, baseY + 3), width: shadowW, height: 7),
-      Paint()..color = Colors.black.withOpacity(0.16 + bend * 0.1),
+          center: Offset(cx + bend * 10, baseY + 3),
+          width: shadowW,
+          height: 6.5),
+      Paint()..color = Colors.black.withOpacity(0.15 + bend * 0.12),
     );
 
-    final scale = (size.height - 60) / 96;
+    final scale = (size.height - 52) / 92;
     canvas.save();
     canvas.translate(cx, baseY);
     canvas.scale(scale, scale);
-    // 原点 = 脚底
-    canvas.save();
-    canvas.translate(0, -2);
-    canvas.rotate(angle); // 绕脚踝前倾
 
-    final body = Paint()
-        ..color = theme.accent.withOpacity((0.88 * breathe).clamp(0.0, 1.0));
+    final suit = Paint()
+      ..color = theme.accent.withOpacity((0.9 * breathe).clamp(0.0, 1.0));
+    final suitDark = Color.lerp(theme.accent, Colors.black, 0.22)!;
     final rim = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 1
-      ..color = theme.wick.withOpacity(0.35);
+      ..strokeWidth = 0.9
+      ..color = theme.wick.withOpacity(0.3);
 
-    // 剪影：头（圆）+ 躯干 + 双腿
-    canvas.drawCircle(const Offset(0, -57), 7.4, body);
-    canvas.drawCircle(const Offset(0, -57), 7.4, rim);
-    // 躯干与腿
-    final torso = Path()
-      ..moveTo(-7, -50)
-      ..quadraticBezierTo(-9, -38, -8, -26)
-      ..quadraticBezierTo(-7.4, -18, -6, -12)
-      ..lineTo(6, -12)
-      ..quadraticBezierTo(7.4, -18, 8, -26)
-      ..quadraticBezierTo(9, -38, 7, -50)
-      ..quadraticBezierTo(0, -53.5, -7, -50)
-      ..close();
-    canvas.drawPath(torso, body);
-    canvas.drawPath(torso, rim);
-    // 双腿
+    // 双腿（静止直立，鞠躬只折腰）
     final legs = Path()
-      ..moveTo(-5.4, -12)
-      ..lineTo(-5.8, -1)
-      ..lineTo(-1.6, -1)
-      ..lineTo(-1, -12)
-      ..moveTo(1.4, -12)
-      ..lineTo(1.8, -1)
-      ..lineTo(6, -1)
-      ..lineTo(5.2, -12)
+      ..moveTo(-6.6, 0)
+      ..quadraticBezierTo(-6.2, -16, -5, -30)
+      ..lineTo(-0.8, -30)
+      ..quadraticBezierTo(-1.8, -16, -2.2, 0)
       ..close();
-    canvas.drawPath(legs, body);
-    // 合十的手（胸前一枚小光点）
-    _softDot(canvas, Offset(0, -40), 4.6, theme.wick, core: 0.95);
-    canvas.restore();
-    canvas.restore();
+    canvas.drawPath(legs, suit);
+    final leg2 = Path()
+      ..moveTo(1.6, 0)
+      ..quadraticBezierTo(1.4, -16, 1.2, -30)
+      ..lineTo(5.4, -30)
+      ..quadraticBezierTo(6.2, -16, 6.4, 0)
+      ..close();
+    canvas.drawPath(leg2, suit);
+
+    // 上身绕髋部（0,-31）前折 42°：经典折腰礼
+    canvas.save();
+    canvas.translate(0, -31);
+    canvas.rotate(bend * 42 * math.pi / 180);
+    canvas.translate(0, 31);
+
+    // 躯干（侧影，面朝右：后背弧线 + 胸腹）
+    final torso = Path()
+      ..moveTo(-5.5, -31)
+      ..quadraticBezierTo(-8, -42, -5.5, -51)
+      ..quadraticBezierTo(-4.5, -55, -1.5, -56.5)
+      ..lineTo(4, -56.5)
+      ..quadraticBezierTo(7, -52, 7.6, -44)
+      ..quadraticBezierTo(8.2, -37, 5.5, -31)
+      ..close();
+    canvas.drawPath(torso, suit);
+    canvas.drawPath(torso, rim);
+    // 头（随上身前折，微收下巴）
+    final head = Offset(1.2 + bend * 1.2, -63.5);
+    canvas.drawCircle(head, 6.6, suit);
+    canvas.drawCircle(head, 6.6, rim);
+    // 手臂（前伸扶腹，俯身时随躯干垂落）
+    final arm = Path()
+      ..moveTo(3.5, -49)
+      ..quadraticBezierTo(9.5, -44, 8.5, -36)
+      ..quadraticBezierTo(8, -33.5, 5, -33.8)
+      ..quadraticBezierTo(6.2, -40, 1, -46)
+      ..close();
+    canvas.drawPath(arm, Paint()..color = suitDark);
+    // 掌心光点
+    _softDot(canvas, Offset(6.4, -35.5 + bend * 1.5), 3.8, theme.wick,
+        core: 0.95);
+    canvas.restore(); // 上身
+
+    canvas.restore(); // 整体
 
     // 环绕微尘
     _risingMotes(
