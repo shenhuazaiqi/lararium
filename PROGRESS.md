@@ -27,7 +27,22 @@
 
 ## ✅ 已完成（Done）
 
-### 2026-10-10 · 分享纪念页 "not public" 修复（用户报告）
+### 2026-10-10 · 缅怀特效舞台 v2：8 种动效全部重做（用户反馈"太粗糙"）
+
+- **设计原则**：三层景深（环境光晕呼吸→远景微粒→主体→近景粒子）、余弦/回弹缓动、配色全部联动主题包、纯 CustomPaint 零依赖。
+- **8 套独立动效语言**：
+  - 献花/万寿菊/花环/祭坛（bloom）：双层花器 + 四花错峰绽放（back-out 回弹）+ 三景深落瓣
+  - 蜡烛（candle）：融蜡顶 + 圆柱明暗 + 黄铜托盘 + 三层焰芯（噪声摆动）+ 上升余烬 + 呼吸光晕
+  - 上香（incense）：铜炉三炷香 + 烬火明灭 + 双频正弦卷曲青烟 + 烟丝
+  - 祈福（pray）：**弃用 🙏 emoji** → 呼吸圣光 + 反向双旋祈环 + 环上光珠 + 光尘升腾 + 顶光带（跨文化抽象）
+  - 鞠躬（bow）：火柴人 → 红衣剪影（填充路径）+ 预备-俯身缓动 + 地面投影收缩
+  - 叠石（stone）：立体明暗 + 错峰落石 + 落地尘烟扩散 + 回弹
+  - 油灯（diya）：陶盏油面反光 + 星芒闪烁 + 浮瓣
+  - 追忆（spark）：流萤光尘（利萨茹游移 + 明灭）
+- **修复**：`withOpacity(0.9×呼吸系数)` 超 1.0 触发 debug 断言导致鞠躬人形不渲染（paint 中断）——透明度全部 clamp。
+- **验证**：模拟器 7 主题逐一截图验收（上香/献花/鞠躬/蜡烛/祈福/叠石/油灯/流萤全部成立），主循环 6s。
+
+### 2026-10-10 · 分享纪念页 "not public" 修复（用户报告） "not public" 修复（用户报告）
 
 - **根因**：分享时只对云端 `memorial_profiles` 做 update，但本地优先架构下人物往往还没同步上云——该行不存在，update 影响 0 行等于没开；网页匿名 RPC `get_public_memorial` 要求 `allow_public_link + is_enabled`，校验失败即显示 "This memorial page is not public."
 - **修复**（`memorial_screen._sharePublic`）：开启开关时先把该人物 upsert 上云（云端触发器自动建 memorial_profiles 行），再 `upsert allow_public_link+is_enabled`（onConflict person_id）；离线失败静默降级为本地标记待同步。
