@@ -8,7 +8,6 @@ import '../../core/theme.dart';
 import '../../data/db/app_database.dart';
 import '../../data/providers.dart';
 import '../tree/tree_painter.dart';
-import 'memorial_theme_defs.dart';
 
 /// 03 纪念墙：树内已故人物卡片 + 最近被缅怀排序。
 class MemorialWallScreen extends ConsumerStatefulWidget {

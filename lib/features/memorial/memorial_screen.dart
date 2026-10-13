@@ -204,11 +204,6 @@ class _MemorialScreenState extends ConsumerState<MemorialScreen> {
                                     ? _fxOf(theme, _sentAct!)
                                     : null),
                             theme: theme,
-                            hint: _sentAct != null
-                                ? l10n.tributeOffered
-                                : _pendingAct != null
-                                    ? l10n.tributeArmed
-                                    : l10n.chooseTribute,
                           ),
                           const SizedBox(height: 10),
                           _sendButton(theme, l10n, colors),
@@ -277,7 +272,7 @@ class _MemorialScreenState extends ConsumerState<MemorialScreen> {
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 stops: [0, 0.44, 1],
-                colors: [Color(0xFF211D28), Color(0xFF3A3040), Color(0xFF6B5568)],
+                colors: [Color(0xFF120F17), Color(0xFF1E1826), Color(0xFF362A38)],
               ),
             ),
           ),
@@ -288,7 +283,7 @@ class _MemorialScreenState extends ConsumerState<MemorialScreen> {
                 center: const Alignment(0, -0.55),
                 radius: 1.1,
                 colors: [
-                  const Color(0xFFFFD6A0).withOpacity( 0.18),
+                  const Color(0xFFFFD6A0).withOpacity( 0.13),
                   Colors.transparent,
                 ],
               ),

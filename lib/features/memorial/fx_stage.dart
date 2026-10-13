@@ -19,12 +19,10 @@ class FxStage extends StatefulWidget {
     super.key,
     required this.kind, // null = 空态
     required this.theme,
-    required this.hint,
   });
 
   final String? kind;
   final MemorialThemeDef theme;
-  final String hint;
 
   @override
   State<FxStage> createState() => _FxStageState();
@@ -64,42 +62,17 @@ class _FxStageState extends State<FxStage> with SingleTickerProviderStateMixin {
             ? null
             : Theme.of(context).colorScheme.surfaceContainerHighest,
       ),
-      child: AnimatedDefaultTextStyle(
-        duration: const Duration(milliseconds: 400),
-        style: TextStyle(
-          fontSize: 12.5,
-          height: 1.5,
-          color: active
-              ? Colors.white.withOpacity(0.5)
-              : Theme.of(context).colorScheme.onSurfaceVariant,
-        ),
-        child: Stack(
-          alignment: Alignment.topCenter,
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 26),
-              child: Text(
-                widget.hint,
-                textAlign: TextAlign.center,
-                maxLines: 2,
-              ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(17),
+        child: AnimatedBuilder(
+          animation: _ctrl,
+          builder: (context, _) => CustomPaint(
+            painter: _FxPainter(
+              t: _ctrl.value,
+              kind: widget.kind,
+              theme: widget.theme,
             ),
-            Positioned.fill(
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(17),
-                child: AnimatedBuilder(
-                  animation: _ctrl,
-                  builder: (context, _) => CustomPaint(
-                    painter: _FxPainter(
-                      t: _ctrl.value,
-                      kind: widget.kind,
-                      theme: widget.theme,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );
