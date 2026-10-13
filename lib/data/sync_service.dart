@@ -161,7 +161,10 @@ class SyncService {
       pushed += links.length;
     }
 
-    // ---------- 推送：memorial_profiles（主题/计数/公开开关） ----------
+    // ---------- 推送：memorial_profiles（主题/墓志铭/公开开关） ----------
+    // 注意：不推计数（flower/candle/incense/prayer/message）——
+    // 云端计数由 memorial_acts 触发器统一累加（App 送礼插 acts 行 +
+    // 网页送礼走 public_tribute），推送本地值会覆盖网页访客的计数。
     final profiles = await (_db.select(_db.persons)
           ..where((p) => p.treeId.equals(treeId) & p.deletedAt.isNull()))
         .get();
@@ -172,13 +175,7 @@ class SyncService {
           'tree_id': treeId,
           'theme': p.memorialTheme,
           'epitaph': p.epitaph,
-          'flower_count': p.flowerCount,
-          'candle_count': p.candleCount,
-          'incense_count': p.incenseCount,
-          'prayer_count': p.prayerCount,
-          'message_count': p.messageCount,
           'allow_public_link': p.allowPublicLink,
-          'last_memorial_at': p.lastMemorialAt?.toUtc().toIso8601String(),
         }
     ]);
     pushed += profiles.length;

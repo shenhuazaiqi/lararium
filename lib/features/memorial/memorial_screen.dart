@@ -703,6 +703,21 @@ class _MemorialScreenState extends ConsumerState<MemorialScreen> {
       await (db.update(db.persons)..where((t) => t.id.equals(widget.personId)))
           .write(PersonsCompanion(lastMemorialAt: Value(DateTime.now())));
     }
+    // 云端明细：memorial_acts（服务端触发器累加云计数；
+    // 公开纪念页据此展示"谁送了什么"）。离线静默，计数本地为准。
+    try {
+      final client = Supabase.instance.client;
+      final uid = client.auth.currentUser?.id;
+      final email = ref.read(authEmailProvider);
+      await client.from('memorial_acts').insert({
+        'person_id': widget.personId,
+        'tree_id': p.treeId,
+        if (uid != null) 'actor_user_id': uid,
+        'actor_name': email == null ? 'You' : email.split('@').first,
+        'kind': act,
+        'source': 'app',
+      });
+    } catch (_) {}
     setState(() => _sentAct = act);
   }
 

@@ -111,12 +111,23 @@ function fmtDate(d) {
 }
 
 const KIND = {
-  flower: {ico:'🌸', label:'offered flowers'},
-  candle: {ico:'🕯️', label:'lit a candle'},
-  prayer: {ico:'🙏',  label:'said a prayer'},
-  incense:{ico:'🪵',  label:'burned incense'},
+  flower:   {ico:'🌸', label:'offered flowers'},
+  marigold: {ico:'🌼', label:'offered marigolds'},
+  garland:  {ico:'💐', label:'placed a garland'},
+  candle:   {ico:'🕯️', label:'lit a candle'},
+  diya:     {ico:'🪔', label:'lit a diya'},
+  ofrenda:  {ico:'🍊', label:'added to the ofrenda'},
+  stone:    {ico:'🪨', label:'placed a stone'},
+  incense:  {ico:'🪵', label:'burned incense'},
+  prayer:   {ico:'🙏', label:'said a prayer'},
+  bow:      {ico:'🙇', label:'bowed in respect'},
+  donation: {ico:'💝', label:'made a donation'},
+  memory:   {ico:'💭', label:'shared a memory'},
 };
-const kindOf = (k) => KIND[k] || {ico:'💐', label:'sent a tribute'};
+const kindOf = (k, item) => {
+  const key = item || k; // item_code 更精确（如 bow 存为 prayer/item=bow 时）
+  return KIND[k] || KIND[key] || {ico:'💐', label:'sent a tribute'};
+};
 
 function notPublic() {
   document.getElementById('loading').style.display = 'none';
@@ -153,7 +164,7 @@ async function load() {
     // 祝福明细：谁送了什么（只读）
     const tr = m.tributes || [];
     document.getElementById('tributes').innerHTML = tr.length ? tr.map((a) => {
-      const k = kindOf(a.kind);
+      const k = kindOf(a.kind, a.item);
       return `<div class="tribute"><div class="ico">${k.ico}</div>
         <div style="flex:1;min-width:0"><div class="who">${esc(a.who)}</div>
         <div class="what">${k.label}</div></div>
