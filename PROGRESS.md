@@ -27,6 +27,15 @@
 
 ## ✅ 已完成（Done）
 
+### 2026-10-13 · 公开纪念页 v2：纯浏览视图（用户反馈"只能看不能操作"）
+
+- **需求**：分享出去的页面要能看到多少人留言、谁送了哪些祝福；只能看，不能操作。
+- **RPC**（迁移 20261010030000，已应用云端）：`get_public_memorial` 新增 `tributes` 明细（memorial_acts 最近 50 条：who/kind/at）。
+- **网页**（web/memorial.html，已部署 gh-pages）：删除匿名 Offer 表单；新布局 = 深色圆角 hero（对齐 App）+ 四项计数卡（含 Incense）+ **Tributes 列表**（图标 + 谁 + 什么 + 日期）+ **Messages 列表**（作者/内容/日期），页脚标注 read-only。
+- **部署**：gh-pages 分支（线上站点根）。**教训**：gh-pages 的 memorial.html 在分支根目录、与 main 的 web/ 是两份拷贝，改网页必须两边同步。
+- **数据补写**：SD NF 本地留言 "I miss you" 推上云（memorial_messages 插入需 `author_user_id = auth.uid()`）。
+- **验证**：线上页面浏览器截图——计数卡、空态 Tributes、留言渲染全部正确；匿名 RPC 返回 tributes 字段。
+
 ### 2026-10-10 · 纪念页视觉微调（用户截图反馈）
 
 - 顶部人物信息区改为**深色圆角面板**：近黑→深紫→暖暗的纵向渐变 + 底部 26px 圆角收边；**删除了混入页面米色的「底部渐隐」遮罩**（那层渐隐正是浑浊灰紫带的元凶），交界干脆。暖光减弱。
