@@ -260,22 +260,23 @@ class _MemorialScreenState extends ConsumerState<MemorialScreen> {
       if (born.isNotEmpty) born,
       if (died.isNotEmpty) died,
     ].join(' – ');
-    return Container(
-      height: 214,
-      color: colors.surface,
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          const DecoratedBox(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                stops: [0, 0.44, 1],
-                colors: [Color(0xFF120F17), Color(0xFF1E1826), Color(0xFF362A38)],
+    return ClipRRect(
+      borderRadius: const BorderRadius.vertical(bottom: Radius.circular(26)),
+      child: Container(
+        height: 214,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            const DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  stops: [0, 0.55, 1],
+                  colors: [Color(0xFF100D14), Color(0xFF1D1626), Color(0xFF372A35)],
+                ),
               ),
             ),
-          ),
           // 暖光
           DecoratedBox(
             decoration: BoxDecoration(
@@ -321,20 +322,6 @@ class _MemorialScreenState extends ConsumerState<MemorialScreen> {
               ),
             ),
           ),
-          // 底部渐隐
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: Container(
-              height: 106,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [colors.bg.withOpacity( 0), colors.bg],
-                ),
-              ),
-            ),
-          ),
           // 返回
           Positioned(
             top: 44,
@@ -364,6 +351,7 @@ class _MemorialScreenState extends ConsumerState<MemorialScreen> {
             ),
           ),
         ],
+        ),
       ),
     );
   }
