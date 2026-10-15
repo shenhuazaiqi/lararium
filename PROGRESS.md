@@ -27,6 +27,12 @@
 
 ## ✅ 已完成（Done）
 
+### 2026-10-13 · 「更多」展开全部缅怀 + 分享页全图标计数（用户反馈）
+
+- **App**：主题包只显示精选 3 种缅怀，下方新增「更多/收起」按钮（l10n showMore/showLess ×13）；展开显示全部 12 种（主题精选在前，4 行网格，各自计数徽标）。fx 映射改为全局目录（`allTributeActions`），任意主题下每种缅怀都有正确动效。
+- **分享页**：计数卡直接显示全部 12 种图标+计数（Material 图标）——核心 4 类用 memorial_profiles 冗余计数，其余 8 类来自新 RPC 字段 `kind_counts`（memorial_acts 按 kind 聚合，迁移 20261010032000 已应用云端）；计数格 flex-wrap 换行防溢出。
+- **验证**：模拟器展开/收起双态截图 + 线上分享页截图（12 格换行渲染、Flowers 2/Incense 2/Prayers 2/Bows 2 与 App 徽标一致）。
+
 ### 2026-10-13 · 分享页图标与 App 统一（用户反馈）
 
 - 分享页 tribute 行 / 计数卡 / hero 拱形的 emoji 全部替换为 **Material Symbols Rounded**（Google Fonts CDN），符号名与 App `_actButton` 的图标一一对应（local_florist/air/south/light_mode/self_improvement/landscape/card_giftcard/favorite/photo_library）。
