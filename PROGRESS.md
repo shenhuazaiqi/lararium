@@ -27,6 +27,10 @@
 
 ## ✅ 已完成（Done）
 
+### 2026-10-13 · 分享页图标与 App 统一（用户反馈）
+
+- 分享页 tribute 行 / 计数卡 / hero 拱形的 emoji 全部替换为 **Material Symbols Rounded**（Google Fonts CDN），符号名与 App `_actButton` 的图标一一对应（local_florist/air/south/light_mode/self_improvement/landscape/card_giftcard/favorite/photo_library）。
+
 ### 2026-10-13 · App 缅怀 ↔ 分享页数据打通（用户反馈"两边对不上"）
 
 - **根因**：App 端缅怀只写本地计数列，从不上云；云端 memorial_profiles 计数靠 memorial_acts 触发器累加（只有网页送礼会产生）→ 网页全是 0；且 sync 曾用本地计数覆盖云端（会清掉网页访客的祝福）。
