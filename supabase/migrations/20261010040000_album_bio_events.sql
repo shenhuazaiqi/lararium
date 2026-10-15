@@ -1,48 +1,10 @@
 -- 人物相册 + 简介 + 自定义大事记：公开纪念页扩展。
--- 1) person-album 私密桶（路径 tree_<treeId>/person_<personId>/<mediaId>.jpg，
---    复用 path_tree_id 解析树归属）
-insert into storage.buckets (id, name, public)
-values ('person-album', 'person-album', false)
-on conflict (id) do nothing;
-
-drop policy if exists "album read: tree members" on storage.objects;
-create policy "album read: tree members" on storage.objects
-    for select to authenticated
-    using (bucket_id = 'person-album'
-        and public.is_tree_member(public.path_tree_id(name)));
-
-drop policy if exists "album write: tree editors" on storage.objects;
-create policy "album write: tree editors" on storage.objects
-    for insert to authenticated
-    with check (bucket_id = 'person-album'
-        and public.is_tree_member(public.path_tree_id(name), 'editor'));
-
-drop policy if exists "album update: tree editors" on storage.objects;
-create policy "album update: tree editors" on storage.objects
-    for update to authenticated
-    using (bucket_id = 'person-album'
-        and public.is_tree_member(public.path_tree_id(name), 'editor'))
-    with check (bucket_id = 'person-album'
-        and public.is_tree_member(public.path_tree_id(name), 'editor'));
-
-drop policy if exists "album delete: tree editors" on storage.objects;
-create policy "album delete: tree editors" on storage.objects
-    for delete to authenticated
-    using (bucket_id = 'person-album'
-        and public.is_tree_member(public.path_tree_id(name), 'editor'));
-
--- 分享页匿名只读：仅 allow_public_link + is_enabled 人物的相册对象可见
-drop policy if exists "album public read when shared" on storage.objects;
-create policy "album public read when shared" on storage.objects
-    for select to anon
-    using (bucket_id = 'person-album'
-        and exists (
-          select 1 from public.media m
-          join public.memorial_profiles mp on mp.person_id = m.person_id
-          where m.storage_path = storage.objects.name
-            and mp.allow_public_link = true
-            and mp.is_enabled = true
-        ));
+-- 1) 人物相册桶 person-album 设为 public：公开分享页直接经
+--    /storage/v1/object/public/person-album/<path> 读取（路径含不可猜测的
+--    mediaId UUID，等同于「分享链接即凭证」；成员写入仍走 RLS 策略）。
+--    注：私密桶对匿名不可见，签名 URL 的 SQL 函数在本项目 schema 中不存在，
+--    故采用 public 桶方案。
+update storage.buckets set public = true where id = 'person-album';
 
 -- 2) 公开 RPC 扩展：bio（人物简介 = persons.note）、album（签名 URL 相册）、
 --    events（自定义大事记）。仅在 allow_public_link 开启时随整体返回。

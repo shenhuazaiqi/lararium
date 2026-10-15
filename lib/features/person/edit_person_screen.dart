@@ -372,10 +372,9 @@ class _EditPersonScreenState extends ConsumerState<EditPersonScreen> {
             ),
             const SizedBox(height: 10),
             if (media.isEmpty && !_uploadingPhotos)
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 6),
-                child: Text(l10n.writeMessage,
-                    style: TextStyle(fontSize: 13, color: colors.ink3)),
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 6),
+                child: SizedBox(height: 8),
               ),
             if (media.isNotEmpty)
               Wrap(
@@ -529,10 +528,9 @@ class _EditPersonScreenState extends ConsumerState<EditPersonScreen> {
                 style: TextStyle(fontSize: 13, color: colors.ink3)),
             const SizedBox(height: 10),
             if (sorted.isEmpty)
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4),
-                child: Text(l10n.writeMessage,
-                    style: TextStyle(fontSize: 13, color: colors.ink3)),
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 4),
+                child: SizedBox(height: 8),
               ),
             for (final e in sorted)
               Padding(
