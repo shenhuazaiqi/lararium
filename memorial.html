@@ -158,11 +158,21 @@ async function load() {
     }
 
     const c = m.counts || {};
+    const kc = m.kind_counts || {};
+    const v = (k) => c[k] ?? kc[k] ?? 0;
     const items = [
-      ['local_florist', c.flower ?? 0, 'Flowers'],
-      ['light_mode', c.candle ?? 0, 'Candles'],
-      ['air', c.incense ?? 0, 'Incense'],
-      ['self_improvement', c.prayer ?? 0, 'Prayers'],
+      ['local_florist', v('flower'), 'Flowers'],
+      ['light_mode', v('candle'), 'Candles'],
+      ['air', v('incense'), 'Incense'],
+      ['self_improvement', v('prayer'), 'Prayers'],
+      ['filter_vintage', v('marigold'), 'Marigolds'],
+      ['local_florist', v('garland'), 'Garlands'],
+      ['south', v('bow'), 'Bows'],
+      ['landscape', v('stone'), 'Stones'],
+      ['light_mode', v('diya'), 'Diyas'],
+      ['card_giftcard', v('ofrenda'), 'Ofrenda'],
+      ['favorite', v('donation'), 'Donations'],
+      ['photo_library', v('memory'), 'Memories'],
     ];
     document.getElementById('counts').innerHTML = items.map(([ico, n, l]) =>
       `<div class="count"><div class="n"><span class="msr" style="font-size:16px;vertical-align:-3px">${ico}</span> ${n}</div><div class="l">${l}</div></div>`
