@@ -143,6 +143,7 @@ class _MemorialScreenState extends ConsumerState<MemorialScreen> {
                   padding: EdgeInsets.zero,
                   children: [
                     _hero(p, localeTag, colors),
+                    if ((p.epitaph?.isNotEmpty ?? false) || (p.note?.isNotEmpty ?? false))
                     Transform.translate(
                       offset: const Offset(0, -34),
                       child: Padding(
@@ -157,7 +158,7 @@ class _MemorialScreenState extends ConsumerState<MemorialScreen> {
                           ),
                           child: Column(
                             children: [
-                              Text(l10n.inLovingMemory.toUpperCase(),
+                              Text(l10n.fNote,
                                   style: TextStyle(
                                       fontSize: 11,
                                       letterSpacing: 1,
@@ -173,48 +174,22 @@ class _MemorialScreenState extends ConsumerState<MemorialScreen> {
                                         fontStyle: FontStyle.italic,
                                         color: colors.ink2)),
                               ],
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                    // 简介（原备注字段，语义升级）
-                    if (p.note?.isNotEmpty ?? false)
-                      Transform.translate(
-                        offset: const Offset(0, -22),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 20),
-                          child: Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.all(14),
-                            decoration: BoxDecoration(
-                              color: colors.surface,
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(color: colors.line),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(l10n.fNote,
-                                    style: TextStyle(
-                                        fontSize: 11,
-                                        letterSpacing: 1,
-                                        fontWeight: FontWeight.w700,
-                                        color: colors.ink3)),
-                                const SizedBox(height: 6),
+                              if (p.note?.isNotEmpty ?? false) ...[
+                                const SizedBox(height: 8),
                                 Text(p.note!,
                                     style: TextStyle(
                                         fontSize: 13.5,
                                         height: 1.6,
                                         color: colors.ink2)),
                               ],
-                            ),
+                            ],
                           ),
                         ),
                       ),
-                    // 相册（横滑）
+                    ),
+                    // 相册（横滑，点击看大图）
                     Transform.translate(
-                      offset: Offset(0, p.note?.isNotEmpty ?? false ? -10 : -22),
+                      offset: const Offset(0, -22),
                       child: _albumStrip(p, l10n, colors),
                     ),
                     // 大事记（自动 + 自定义合并）
@@ -339,6 +314,38 @@ class _MemorialScreenState extends ConsumerState<MemorialScreen> {
 
   // ---------- hero ----------
 
+  /// 相册缩略图：本地副本优先，缺失时走公开对象 URL
+  Widget _albumThumb(PersonMedia m, LarariumColors colors) {
+    if (m.localPath != null && File(m.localPath!).existsSync()) {
+      return Image.file(File(m.localPath!),
+          width: 116, height: 116, fit: BoxFit.cover, gaplessPlayback: true);
+    }
+    if (m.storagePath != null) {
+      return Image.network(
+        '${CloudConfig.supabaseUrl}/storage/v1/object/person-album/${m.storagePath!}',
+        width: 116, height: 116, fit: BoxFit.cover,
+        errorBuilder: (context, error, stack) => Container(
+            width: 116,
+            height: 116,
+            color: colors.surface2,
+            child: const Icon(Icons.image_outlined)),
+      );
+    }
+    return Container(width: 116, height: 116, color: colors.surface2);
+  }
+
+  /// 全屏大图查看器：双指缩放 + 拖动，点按或关闭按钮退出
+  void _openAlbumViewer(BuildContext context, PersonMedia m) {
+    Navigator.of(context, rootNavigator: true).push(PageRouteBuilder(
+      opaque: false,
+      barrierColor: Colors.black,
+      pageBuilder: (_, animation, __) => FadeTransition(
+        opacity: animation,
+        child: _AlbumViewer(media: m),
+      ),
+    ));
+  }
+
   /// 相册横滑条（本地副本优先；缺失时走公开对象 URL）
   Widget _albumStrip(Person p, AppLocalizations l10n, LarariumColors colors) {
     final mediaAsync = ref.watch(mediaByPersonProvider(p.id));
@@ -364,28 +371,16 @@ class _MemorialScreenState extends ConsumerState<MemorialScreen> {
               separatorBuilder: (_, __) => const SizedBox(width: 10),
               itemBuilder: (context, i) {
                 final m = media[i];
-                Widget img;
-                if (m.localPath != null && File(m.localPath!).existsSync()) {
-                  img = Image.file(File(m.localPath!),
-                      width: 116, height: 116, fit: BoxFit.cover,
-                      gaplessPlayback: true);
-                } else if (m.storagePath != null) {
-                  img = Image.network(
-                    '${CloudConfig.supabaseUrl}/storage/v1/object/person-album/${m.storagePath!}',
-                    width: 116, height: 116, fit: BoxFit.cover,
-                    errorBuilder: (context, error, stack) => Container(
+                return GestureDetector(
+                  onTap: () => _openAlbumViewer(context, m),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: SizedBox(
                         width: 116,
                         height: 116,
-                        color: colors.surface2,
-                        child: const Icon(Icons.image_outlined)),
-                  );
-                } else {
-                  img = Container(
-                      width: 116, height: 116, color: colors.surface2);
-                }
-                return ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: SizedBox(width: 116, height: 116, child: img));
+                        child: _albumThumb(m, colors)),
+                  ),
+                );
               },
             ),
           ),
@@ -395,7 +390,8 @@ class _MemorialScreenState extends ConsumerState<MemorialScreen> {
     );
   }
 
-  /// 大事记卡片：自动事件（出生/逝世）+ 自定义大事记，按年份合并排序
+  /// 大事记卡片：自动事件（出生/逝世）+ 自定义大事记，按日期排序，
+  /// 竖向时间轴样式（圆点 + 连接线）
   Widget _timelineCard(
       Person p, AppLocalizations l10n, LarariumColors colors) {
     final eventsAsync = ref.watch(eventsByPersonProvider(p.id));
@@ -441,24 +437,59 @@ class _MemorialScreenState extends ConsumerState<MemorialScreen> {
                     letterSpacing: 1,
                     fontWeight: FontWeight.w700,
                     color: colors.ink3)),
-            const SizedBox(height: 8),
-            for (final (date, title, whn) in rows)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 8),
+            const SizedBox(height: 12),
+            for (var i = 0; i < rows.length; i++)
+              IntrinsicHeight(
                 child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
+                    // 日期列
                     SizedBox(
-                        width: 92,
-                        child: Text(whn,
+                      width: 78,
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 1),
+                        child: Text(rows[i].$3,
                             style: TextStyle(
                                 fontSize: 12.5,
                                 fontWeight: FontWeight.w600,
-                                color: colors.brand))),
+                                color: colors.brand)),
+                      ),
+                    ),
+                    // 时间轴：圆点 + 连接线
+                    SizedBox(
+                      width: 26,
+                      child: Column(
+                        children: [
+                          Container(
+                            width: 10,
+                            height: 10,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: colors.brand,
+                              border: Border.all(
+                                  color: colors.brand.withOpacity(0.35),
+                                  width: 2.5),
+                            ),
+                          ),
+                          if (i < rows.length - 1)
+                            Expanded(
+                              child: Container(
+                                width: 1.6,
+                                color: colors.line,
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    // 事件标题
                     Expanded(
-                      child: Text(title,
-                          style: TextStyle(
-                              fontSize: 13.5, color: colors.ink)),
+                      child: Padding(
+                        padding: const EdgeInsets.only(bottom: 18),
+                        child: Text(rows[i].$2,
+                            style: TextStyle(
+                                fontSize: 14, color: colors.ink)),
+                      ),
                     ),
                   ],
                 ),
@@ -1149,5 +1180,85 @@ class _MemorialScreenState extends ConsumerState<MemorialScreen> {
       PersonsCompanion(lastMemorialAt: Value(DateTime.now())),
     );
     controller.clear();
+  }
+}
+
+
+/// 相册全屏大图查看器：InteractiveViewer 缩放拖动 + 顶部关闭
+class _AlbumViewer extends StatelessWidget {
+  const _AlbumViewer({required this.media});
+
+  final PersonMedia media;
+
+  @override
+  Widget build(BuildContext context) {
+    Widget img;
+    if (media.localPath != null && File(media.localPath!).existsSync()) {
+      img = Image.file(File(media.localPath!), fit: BoxFit.contain);
+    } else if (media.storagePath != null) {
+      img = Image.network(
+        '${CloudConfig.supabaseUrl}/storage/v1/object/person-album/${media.storagePath!}',
+        fit: BoxFit.contain,
+        errorBuilder: (context, error, stack) => const Center(
+            child: Icon(Icons.image_not_supported_outlined,
+                size: 60, color: Colors.white38)),
+      );
+    } else {
+      img = const SizedBox.shrink();
+    }
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: InteractiveViewer(
+              maxScale: 5,
+              child: Center(child: img),
+            ),
+          ),
+          SafeArea(
+            child: Align(
+              alignment: Alignment.topLeft,
+              child: Padding(
+                padding: const EdgeInsets.all(10),
+                child: _ViewerCloseButton(),
+              ),
+            ),
+          ),
+          if (media.caption?.isNotEmpty ?? false)
+            SafeArea(
+              child: Align(
+                alignment: Alignment.bottomCenter,
+                child: Padding(
+                  padding: const EdgeInsets.all(22),
+                  child: Text(media.caption!,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                          color: Colors.white.withOpacity(0.85),
+                          fontSize: 14)),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ViewerCloseButton extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.black.withOpacity(0.45),
+      shape: const CircleBorder(side: BorderSide(color: Colors.white24)),
+      child: InkWell(
+        customBorder: const CircleBorder(),
+        onTap: () => Navigator.of(context).pop(),
+        child: const SizedBox(
+            width: 38,
+            height: 38,
+            child: Icon(Icons.close, size: 20, color: Colors.white)),
+      ),
+    );
   }
 }
