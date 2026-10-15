@@ -301,5 +301,7 @@
   "proPurchased": "Bedankt! Lararium Pro is actief.",
   "cropTitle": "Foto bijsnijden",
   "cropConfirm": "Foto gebruiken",
-  "cropRotate": "Draaien"
+  "cropRotate": "Draaien",
+  "showMore": "Meer",
+  "showLess": "Minder weergeven"
 }

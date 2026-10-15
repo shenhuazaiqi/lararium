@@ -175,6 +175,22 @@ final _secular = MemorialThemeDef(
   swatches: [Color(0xFFE6E1D9), Color(0xFF8B857C), Color(0xFF5C574F)],
 );
 
+/// 全量缅怀方式（「更多」展开时显示；fx 为各自动效）
+const List<TributeActionDef> allTributeActions = [
+  TributeActionDef('flower', 'bloom'),
+  TributeActionDef('candle', 'candle'),
+  TributeActionDef('incense', 'incense'),
+  TributeActionDef('prayer', 'pray'),
+  TributeActionDef('bow', 'bow'),
+  TributeActionDef('stone', 'stone'),
+  TributeActionDef('diya', 'diya'),
+  TributeActionDef('marigold', 'bloom'),
+  TributeActionDef('garland', 'bloom'),
+  TributeActionDef('ofrenda', 'bloom'),
+  TributeActionDef('donation', 'pray'),
+  TributeActionDef('memory', 'spark'),
+];
+
 final List<MemorialThemeDef> memorialThemes = [
   _western, _eastAsian, _latin, _jewish, _hindu, _islamic, _secular,
 ];

@@ -301,5 +301,7 @@
   "proPurchased": "感谢支持！Lararium Pro 已激活。",
   "cropTitle": "裁剪照片",
   "cropConfirm": "使用照片",
-  "cropRotate": "旋转"
+  "cropRotate": "旋转",
+  "showMore": "更多",
+  "showLess": "收起"
 }

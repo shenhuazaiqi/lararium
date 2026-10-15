@@ -301,5 +301,7 @@
   "proPurchased": "감사합니다! Lararium Pro가 활성화되었습니다.",
   "cropTitle": "사진 자르기",
   "cropConfirm": "사진 사용",
-  "cropRotate": "회전"
+  "cropRotate": "회전",
+  "showMore": "더보기",
+  "showLess": "접기"
 }

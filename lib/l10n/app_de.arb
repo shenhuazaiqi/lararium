@@ -301,5 +301,7 @@
   "proPurchased": "Danke! Lararium Pro ist aktiv.",
   "cropTitle": "Foto zuschneiden",
   "cropConfirm": "Foto verwenden",
-  "cropRotate": "Drehen"
+  "cropRotate": "Drehen",
+  "showMore": "Mehr",
+  "showLess": "Weniger anzeigen"
 }

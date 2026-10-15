@@ -301,5 +301,7 @@
   "proPurchased": "Merci ! Lararium Pro est actif.",
   "cropTitle": "Recadrer la photo",
   "cropConfirm": "Utiliser la photo",
-  "cropRotate": "Pivoter"
+  "cropRotate": "Pivoter",
+  "showMore": "Plus",
+  "showLess": "Afficher moins"
 }

@@ -459,5 +459,7 @@
   },
   "cropTitle": "Crop photo",
   "cropConfirm": "Use photo",
-  "cropRotate": "Rotate"
+  "cropRotate": "Rotate",
+  "showMore": "More",
+  "showLess": "Show less"
 }

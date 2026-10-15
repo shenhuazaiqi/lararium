@@ -30,6 +30,7 @@ class _MemorialScreenState extends ConsumerState<MemorialScreen> {
   String? _pendingAct; // 已选中、待发送
   String? _sentAct; // 本会话已发送
   bool _pickerShown = false;
+  bool _showAllActs = false; // 「更多」展开：显示全部 12 种缅怀方式
   RealtimeChannel? _realtimeChannel;
 
   @override
@@ -182,19 +183,36 @@ class _MemorialScreenState extends ConsumerState<MemorialScreen> {
                             child: _styleChip(theme, l10n, colors),
                           ),
                           const SizedBox(height: 16),
-                          // 动作栏（按主题包过滤）
-                          Row(
-                            children: [
-                              for (var i = 0;
-                                  i < theme.acts.length;
-                                  i++) ...[
-                                if (i > 0) const SizedBox(width: 8),
-                                Expanded(
-                                  child: _actButton(theme.acts[i], p, l10n,
-                                      theme, colors),
-                                ),
+                          // 动作栏：主题包精选 3 种；「更多」展开全部 12 种
+                          for (final row in _actRows(theme, p, l10n, colors)) ...[
+                            Row(
+                              children: [
+                                for (var i = 0; i < row.length; i++) ...[
+                                  if (i > 0) const SizedBox(width: 8),
+                                  Expanded(
+                                    child: _actButton(row[i], p, l10n,
+                                        theme, colors),
+                                  ),
+                                ],
                               ],
-                            ],
+                            ),
+                            const SizedBox(height: 8),
+                          ],
+                          Center(
+                            child: TextButton.icon(
+                              onPressed: () => setState(
+                                  () => _showAllActs = !_showAllActs),
+                              icon: Icon(
+                                  _showAllActs
+                                      ? Icons.expand_less
+                                      : Icons.expand_more,
+                                  size: 18),
+                              label: Text(
+                                  _showAllActs
+                                      ? l10n.showLess
+                                      : l10n.showMore,
+                                  style: const TextStyle(fontSize: 12.5)),
+                            ),
                           ),
                           const SizedBox(height: 14),
                           FxStage(
@@ -245,7 +263,31 @@ class _MemorialScreenState extends ConsumerState<MemorialScreen> {
   }
 
   String _fxOf(MemorialThemeDef theme, String actKey) =>
-      theme.acts.firstWhere((a) => a.key == actKey, orElse: () => theme.acts.first).fx;
+      allTributeActions
+          .firstWhere((a) => a.key == actKey,
+              orElse: () => theme.acts.first)
+          .fx;
+
+  /// 动作按钮按行分组（每行 3 个）：
+  /// 收起 = 主题包精选；展开 = 主题精选在前 + 其余全部
+  List<List<TributeActionDef>> _actRows(
+      MemorialThemeDef theme,
+      Person p,
+      AppLocalizations l10n,
+      LarariumColors colors) {
+    final visible = _showAllActs
+        ? [
+            ...theme.acts,
+            ...allTributeActions.where(
+                (a) => theme.acts.every((t) => t.key != a.key)),
+          ]
+        : theme.acts;
+    final rows = <List<TributeActionDef>>[];
+    for (var i = 0; i < visible.length; i += 3) {
+      rows.add(visible.skip(i).take(3).toList());
+    }
+    return rows;
+  }
 
   // ---------- hero ----------
 

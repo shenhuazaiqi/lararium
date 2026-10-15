@@ -301,5 +301,7 @@
   "proPurchased": "ありがとうございます！Lararium Pro が有効になりました。",
   "cropTitle": "写真をトリミング",
   "cropConfirm": "写真を使用",
-  "cropRotate": "回転"
+  "cropRotate": "回転",
+  "showMore": "もっと見る",
+  "showLess": "折りたたむ"
 }

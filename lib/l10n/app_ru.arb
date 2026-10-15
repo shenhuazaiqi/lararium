@@ -301,5 +301,7 @@
   "proPurchased": "Спасибо! Lararium Pro активен.",
   "cropTitle": "Обрезать фото",
   "cropConfirm": "Использовать фото",
-  "cropRotate": "Повернуть"
+  "cropRotate": "Повернуть",
+  "showMore": "Ещё",
+  "showLess": "Свернуть"
 }
