@@ -43,6 +43,15 @@
         margin:0 0 10px;padding-left:2px}
   .tribute,.msg{background:var(--card);border:1px solid var(--line);border-radius:14px;
         padding:13px 16px;margin-bottom:10px}
+  .album{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  .album img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:12px;display:block}
+  .ev{display:flex;gap:14px;padding:9px 2px;border-bottom:1px solid rgba(0,0,0,.06)}
+  .ev:last-child{border-bottom:0}
+  .ev .d{flex:none;width:92px;font-size:12.5px;font-weight:600;color:var(--ink2)}
+  .ev .t{font-size:14px;color:var(--ink)}
+  .bio{background:var(--card);border:1px solid var(--line);border-radius:14px;
+        padding:14px 16px;font-size:14.5px;line-height:1.65;color:var(--ink2);
+        white-space:pre-wrap}
   .tribute{display:flex;align-items:center;gap:12px}
   .tribute .ico{font-size:19px;width:34px;height:34px;border-radius:50%;background:#F7F5F1;
         display:grid;place-items:center;flex:none}
@@ -71,6 +80,18 @@
       <div class="loving">In Loving Memory</div>
       <div class="epitaph" id="epitaph" style="display:none"></div>
       <div class="counts" id="counts"></div>
+    </div>
+    <div class="sect" id="bioSect" style="display:none">
+      <h2 id="bioTitle">Bio</h2>
+      <div class="bio" id="bio"></div>
+    </div>
+    <div class="sect" id="albumSect" style="display:none">
+      <h2 id="albumTitle">Album</h2>
+      <div class="album" id="album"></div>
+    </div>
+    <div class="sect" id="evSect" style="display:none">
+      <h2 id="evTitle">Life events</h2>
+      <div id="events"></div>
     </div>
     <div class="sect">
       <h2>Tributes</h2>
@@ -179,6 +200,31 @@ async function load() {
     ).join('');
 
     // 祝福明细：谁送了什么（只读）
+    // 简介
+    if (m.bio) {
+      document.getElementById('bio').textContent = m.bio;
+      document.getElementById('bioSect').style.display = 'block';
+    }
+    // 相册（公开对象 URL）
+    const album = m.album || [];
+    if (album.length) {
+      document.getElementById('album').innerHTML = album.map((a) =>
+        `<img loading="lazy"
+             src="${SUPABASE_URL}/storage/v1/object/person-album/${encodeURIComponent(a.path)}"
+             alt="${esc(a.caption || '')}">`
+      ).join('');
+      document.getElementById('albumSect').style.display = 'block';
+      document.getElementById('albumTitle').textContent = 'Album';
+    }
+    // 大事记
+    const evs = m.events || [];
+    if (evs.length) {
+      document.getElementById('events').innerHTML = evs.map((e) =>
+        `<div class="ev"><div class="d">${fmtDate(e.date)}</div>
+         <div class="t">${esc(e.title)}${e.place ? ' · ' + esc(e.place) : ''}</div></div>`
+      ).join('');
+      document.getElementById('evSect').style.display = 'block';
+    }
     const tr = m.tributes || [];
     document.getElementById('tributes').innerHTML = tr.length ? tr.map((a) => {
       const k = kindOf(a.kind, a.item);
