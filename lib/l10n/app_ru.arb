@@ -308,5 +308,6 @@
   "timeline": "Вехи",
   "addPhoto": "Добавить фото",
   "addEvent": "Добавить веху",
-  "eventTitle": "Название"
+  "eventTitle": "Название",
+  "tributesSection": "Дань памяти"
 }

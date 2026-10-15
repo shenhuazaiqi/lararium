@@ -14,6 +14,7 @@ import '../../core/fuzzy_date.dart';
 import '../../core/cloud_config.dart';
 import '../../core/theme.dart';
 import '../../data/db/app_database.dart';
+import '../../data/db/tables.dart' show newId;
 import '../../data/providers.dart';
 import 'fx_stage.dart';
 import 'memorial_quota.dart';
@@ -85,6 +86,47 @@ class _MemorialScreenState extends ConsumerState<MemorialScreen> {
   void dispose() {
     _realtimeChannel?.unsubscribe();
     super.dispose();
+  }
+
+  /// 云端留言展示行（纯只读：头像/名字/内容，无点赞）
+  Widget _messageRowCloud(
+      (String, String) m, LarariumColors colors) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          CircleAvatar(
+            radius: 17,
+            backgroundColor: colors.brandSoft,
+            child: Text(
+              m.$1.isEmpty ? '?' : m.$1[0].toUpperCase(),
+              style: TextStyle(
+                  fontSize: 12,
+                  color: colors.brand,
+                  fontWeight: FontWeight.w600),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(m.$1,
+                    style: TextStyle(
+                        fontSize: 13.5,
+                        fontWeight: FontWeight.w600,
+                        color: colors.ink)),
+                const SizedBox(height: 3),
+                Text(m.$2,
+                    style: TextStyle(
+                        fontSize: 14, height: 1.5, color: colors.ink2)),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   /// 本地计数（离线回退用）
@@ -216,10 +258,15 @@ class _MemorialScreenState extends ConsumerState<MemorialScreen> {
                       offset: const Offset(0, -22),
                       child: _albumStrip(p, l10n, colors),
                     ),
-                    // 大事记（自动 + 自定义合并）
+                    // 大事记（自动 + 自定义合并，云端同源）
                     Transform.translate(
                       offset: const Offset(0, -10),
                       child: _timelineCard(p, l10n, colors),
+                    ),
+                    // 祝福明细（云端 memorial_acts，与分享页同源）
+                    Transform.translate(
+                      offset: const Offset(0, -10),
+                      child: _tributesCard(p, l10n, colors),
                     ),
                     Padding(
                       padding: const EdgeInsets.fromLTRB(20, 2, 20, 0),
@@ -414,12 +461,115 @@ class _MemorialScreenState extends ConsumerState<MemorialScreen> {
     );
   }
 
+  /// 祝福明细卡片：云端 memorial_acts 明细（谁送了什么），与分享页同源
+  Widget _tributesCard(
+      Person p, AppLocalizations l10n, LarariumColors colors) {
+    final cloud = ref.watch(cloudMemorialDataProvider(p.id)).value;
+    final tr = (cloud?['tributes'] ?? const []).cast<Map<String, dynamic>>();
+    if (cloud == null || tr.isEmpty) return const SizedBox.shrink();
+    IconData iconFor(String kind) => switch (kind) {
+          'flower' || 'garland' => Icons.local_florist,
+          'marigold' => Icons.filter_vintage,
+          'candle' || 'diya' => Icons.light_mode_outlined,
+          'incense' => Icons.air,
+          'prayer' => Icons.self_improvement,
+          'bow' => Icons.south,
+          'stone' => Icons.landscape,
+          'ofrenda' => Icons.card_giftcard,
+          'donation' => Icons.favorite_outline,
+          _ => Icons.local_florist,
+        };
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: colors.surface,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: colors.line),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(l10n.tributesSection,
+                style: TextStyle(
+                    fontSize: 11,
+                    letterSpacing: 1,
+                    fontWeight: FontWeight.w700,
+                    color: colors.ink3)),
+            const SizedBox(height: 8),
+            for (final a in tr)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: 34,
+                      height: 34,
+                      decoration: BoxDecoration(
+                        color: colors.brandSoft,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(iconFor(a['kind'] as String? ?? ''),
+                          size: 17, color: colors.brand),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(a['actor_name'] as String? ?? '',
+                              style: TextStyle(
+                                  fontSize: 13.5,
+                                  fontWeight: FontWeight.w600,
+                                  color: colors.ink)),
+                          Text(actLabel(l10n, a['kind'] as String? ?? ''),
+                              style: TextStyle(
+                                  fontSize: 12.5, color: colors.ink2)),
+                        ],
+                      ),
+                    ),
+                    Text(
+                        (a['created_at'] as String? ?? '')
+                            .substring(0, 10),
+                        style: TextStyle(
+                            fontSize: 11.5, color: colors.ink3)),
+                  ],
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
   /// 大事记卡片：自动事件（出生/逝世）+ 自定义大事记，按日期排序，
   /// 竖向时间轴样式（圆点 + 连接线）
   Widget _timelineCard(
       Person p, AppLocalizations l10n, LarariumColors colors) {
-    final eventsAsync = ref.watch(eventsByPersonProvider(p.id));
-    final custom = eventsAsync.value ?? const <PersonEvent>[];
+    // 自定义大事记读云端（与分享页同源，含完整日期）；离线回退本地
+    final cloud = ref.watch(cloudMemorialDataProvider(p.id)).value;
+    final customRows = (cloud?['events'] ?? const [])
+        .map((e) => (
+              DateTime.tryParse(e['date_from'] as String? ?? '') ??
+                  DateTime(1970),
+              e['description'] as String? ?? '',
+              e['date_from'] as String? ?? '',
+            ))
+        .toList();
+    if (cloud == null) {
+      final localEvents =
+          ref.watch(eventsByPersonProvider(p.id)).value ?? const <PersonEvent>[];
+      for (final e in localEvents) {
+        customRows.add((
+          e.eventDate,
+          e.title,
+          FuzzyDate.encode(e.eventDate, e.datePrecision),
+        ));
+      }
+    }
     final rows = <(DateTime, String, String)>[
       if (p.birthDate != null)
         (
@@ -433,12 +583,7 @@ class _MemorialScreenState extends ConsumerState<MemorialScreen> {
           l10n.timelineDeath,
           FuzzyDate.encode(p.deathDate!, p.deathPrecision),
         ),
-      for (final e in custom)
-        (
-          e.eventDate,
-          e.title,
-          FuzzyDate.encode(e.eventDate, e.datePrecision),
-        ),
+      ...customRows,
     ]..sort((a, b) => a.$1.compareTo(b.$1));
 
     if (rows.isEmpty) return const SizedBox.shrink();
@@ -1003,8 +1148,17 @@ class _MemorialScreenState extends ConsumerState<MemorialScreen> {
 
   Widget _messages(Person p, AppLocalizations l10n, LarariumColors colors,
       String localeTag) {
-    final msgsAsync = ref.watch(messagesProvider(p.id));
-    final msgs = msgsAsync.value ?? const <MemorialMessage>[];
+    // 留言读云端（与分享页同源）；离线/未登录回退本地
+    final cloud = ref.watch(cloudMemorialDataProvider(p.id)).value;
+    final local = ref.watch(messagesProvider(p.id)).value ?? const <MemorialMessage>[];
+    final msgs = <(String, String)>[
+      if (cloud != null)
+        for (final m in cloud['messages'] ?? const [])
+          (m['author'] as String? ?? '', m['body'] as String? ?? '')
+      else
+        for (final m in local) (m.authorName, m.body),
+    ];
+    final useCloud = cloud != null;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1035,7 +1189,10 @@ class _MemorialScreenState extends ConsumerState<MemorialScreen> {
                   children: [
                     for (var i = 0; i < msgs.length; i++) ...[
                       if (i > 0) Divider(color: colors.line, height: 1),
-                      _messageRow(msgs[i], l10n, colors),
+                      if (useCloud)
+                        _messageRowCloud(msgs[i], colors)
+                      else
+                        _messageRow(msgs[i] as MemorialMessage, l10n, colors),
                     ],
                   ],
                 ),
@@ -1194,7 +1351,9 @@ class _MemorialScreenState extends ConsumerState<MemorialScreen> {
     await MemorialQuota.consume(prefs, p.id, 'message');
     final db = ref.read(databaseProvider);
     final treeId = ref.read(defaultTreeProvider).value?.id;
+    final msgId = newId();
     await db.into(db.memorialMessages).insert(MemorialMessagesCompanion.insert(
+          id: Value(msgId),
           treeId: treeId ?? '',
           personId: p.id,
           authorName: author, // 未登录占位；已登录用账号名
@@ -1203,6 +1362,26 @@ class _MemorialScreenState extends ConsumerState<MemorialScreen> {
     await (db.update(db.persons)..where((t) => t.id.equals(p.id))).write(
       PersonsCompanion(lastMemorialAt: Value(DateTime.now())),
     );
+    // 云端双写：新留言即时进入分享页（memorial_messages，id 与本地一致）
+    try {
+      final client = Supabase.instance.client;
+      final uid = client.auth.currentUser?.id;
+      await client.from('memorial_messages').upsert({
+        'id': msgId,
+        'person_id': p.id,
+        'tree_id': p.treeId,
+        if (uid != null) 'author_user_id': uid,
+        'author_name': author,
+        'body': text,
+        'status': 'visible',
+        'created_at': DateTime.now().toUtc().toIso8601String(),
+      }, onConflict: 'id');
+      if (mounted) {
+        ref.invalidate(cloudMemorialDataProvider(p.id));
+      }
+    } catch (_) {
+      // 离线静默：sync 引擎稍后会推送
+    }
     controller.clear();
   }
 }

@@ -179,6 +179,38 @@ final memorialCountsProvider =
   };
 });
 
+/// 云端纪念数据（留言/自定义大事记/祝福明细）：
+/// App 纪念页与分享页共用同一线上数据源（登录用户按 RLS 读取）
+final cloudMemorialDataProvider =
+    FutureProvider.family<Map<String, List<Map<String, dynamic>>>, String>(
+        (ref, personId) async {
+  final client = Supabase.instance.client;
+  final messages = await client
+      .from('memorial_messages')
+      .select('author_name,body,created_at')
+      .eq('person_id', personId)
+      .eq('status', 'visible')
+      .order('created_at');
+  final events = await client
+      .from('events')
+      .select('description,date_from,place_text')
+      .eq('person_id', personId)
+      .eq('type', 'custom')
+      .filter('deleted_at', 'is', null)
+      .order('date_from');
+  final tributes = await client
+      .from('memorial_acts')
+      .select('actor_name,kind,created_at')
+      .eq('person_id', personId)
+      .order('created_at', ascending: false)
+      .limit(50);
+  return {
+    'messages': List<Map<String, dynamic>>.from(messages),
+    'events': List<Map<String, dynamic>>.from(events),
+    'tributes': List<Map<String, dynamic>>.from(tributes),
+  };
+});
+
 /// 人物自定义大事记（实时流）
 final eventsByPersonProvider =
     StreamProvider.family<List<PersonEvent>, String>((ref, personId) {
