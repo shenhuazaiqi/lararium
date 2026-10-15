@@ -4,7 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>In Loving Memory</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,300..600,0..1,0&display=block" rel="stylesheet">
 <style>
+  .msr{font-family:'Material Symbols Rounded';font-weight:normal;font-style:normal;
+       font-variation-settings:'FILL' 0,'wght' 500,'GRAD' 0,'opsz' 24;
+       font-size:20px;line-height:1;display:inline-block;letter-spacing:normal;
+       text-transform:none;white-space:nowrap;direction:ltr;-webkit-font-smoothing:antialiased}
   :root{
     --ink:#1A1917; --ink2:#5C574F; --ink3:#8B857C;
     --paper:#F7F5F1; --card:#FFFFFF; --line:#E6E1D9;
@@ -56,7 +63,7 @@
 <body>
   <div id="page" style="display:none">
     <div class="hero">
-      <div class="arch">🕯️</div>
+      <div class="arch"><span class="msr" style="font-size:30px;color:#F2D9A6">light_mode</span></div>
       <h1 id="name">…</h1>
       <div class="dates" id="dates"></div>
     </div>
@@ -80,7 +87,7 @@
   </div>
   <div id="loading" class="loading">Loading…</div>
   <div id="notpublic" class="notpublic" style="display:none">
-    <div class="flame">🕯️</div>
+    <div class="flame"><span class="msr" style="font-size:34px;color:#B4AEA4">light_mode</span></div>
     <h1>This memorial page is not public.</h1>
   </div>
 
@@ -111,18 +118,18 @@ function fmtDate(d) {
 }
 
 const KIND = {
-  flower:   {ico:'🌸', label:'offered flowers'},
-  marigold: {ico:'🌼', label:'offered marigolds'},
-  garland:  {ico:'💐', label:'placed a garland'},
-  candle:   {ico:'🕯️', label:'lit a candle'},
-  diya:     {ico:'🪔', label:'lit a diya'},
-  ofrenda:  {ico:'🍊', label:'added to the ofrenda'},
-  stone:    {ico:'🪨', label:'placed a stone'},
-  incense:  {ico:'🪵', label:'burned incense'},
-  prayer:   {ico:'🙏', label:'said a prayer'},
-  bow:      {ico:'🙇', label:'bowed in respect'},
-  donation: {ico:'💝', label:'made a donation'},
-  memory:   {ico:'💭', label:'shared a memory'},
+  flower:   {ico:'local_florist',  label:'offered flowers'},
+  marigold: {ico:'filter_vintage', label:'offered marigolds'},
+  garland:  {ico:'local_florist',  label:'placed a garland'},
+  candle:   {ico:'light_mode',     label:'lit a candle'},
+  diya:     {ico:'light_mode',     label:'lit a diya'},
+  ofrenda:  {ico:'card_giftcard',  label:'added to the ofrenda'},
+  stone:    {ico:'landscape',      label:'placed a stone'},
+  incense:  {ico:'air',            label:'burned incense'},
+  prayer:   {ico:'self_improvement', label:'said a prayer'},
+  bow:      {ico:'south',          label:'bowed in respect'},
+  donation: {ico:'favorite',       label:'made a donation'},
+  memory:   {ico:'photo_library',  label:'shared a memory'},
 };
 const kindOf = (k, item) => {
   const key = item || k; // item_code 更精确（如 bow 存为 prayer/item=bow 时）
@@ -152,20 +159,20 @@ async function load() {
 
     const c = m.counts || {};
     const items = [
-      ['🌸', c.flower ?? 0, 'Flowers'],
-      ['🕯️', c.candle ?? 0, 'Candles'],
-      ['🪵', c.incense ?? 0, 'Incense'],
-      ['🙏', c.prayer ?? 0, 'Prayers'],
+      ['local_florist', c.flower ?? 0, 'Flowers'],
+      ['light_mode', c.candle ?? 0, 'Candles'],
+      ['air', c.incense ?? 0, 'Incense'],
+      ['self_improvement', c.prayer ?? 0, 'Prayers'],
     ];
     document.getElementById('counts').innerHTML = items.map(([ico, n, l]) =>
-      `<div class="count"><div class="n">${ico} ${n}</div><div class="l">${l}</div></div>`
+      `<div class="count"><div class="n"><span class="msr" style="font-size:16px;vertical-align:-3px">${ico}</span> ${n}</div><div class="l">${l}</div></div>`
     ).join('');
 
     // 祝福明细：谁送了什么（只读）
     const tr = m.tributes || [];
     document.getElementById('tributes').innerHTML = tr.length ? tr.map((a) => {
       const k = kindOf(a.kind, a.item);
-      return `<div class="tribute"><div class="ico">${k.ico}</div>
+      return `<div class="tribute"><div class="ico"><span class="msr">${k.ico}</span></div>
         <div style="flex:1;min-width:0"><div class="who">${esc(a.who)}</div>
         <div class="what">${k.label}</div></div>
         <div class="when">${fmtDate(a.at)}</div></div>`;
