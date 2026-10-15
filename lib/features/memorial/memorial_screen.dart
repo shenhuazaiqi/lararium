@@ -1154,7 +1154,7 @@ class _MemorialScreenState extends ConsumerState<MemorialScreen> {
     final msgs = <(String, String)>[
       if (cloud != null)
         for (final m in cloud['messages'] ?? const [])
-          (m['author'] as String? ?? '', m['body'] as String? ?? '')
+          (m['author_name'] as String? ?? '', m['body'] as String? ?? '')
       else
         for (final m in local) (m.authorName, m.body),
     ];
