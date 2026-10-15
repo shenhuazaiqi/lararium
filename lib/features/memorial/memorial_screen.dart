@@ -33,7 +33,6 @@ class MemorialScreen extends ConsumerStatefulWidget {
 class _MemorialScreenState extends ConsumerState<MemorialScreen> {
   String? _pendingAct; // 已选中、待发送
   String? _sentAct; // 本会话已发送
-  bool _pickerShown = false;
   bool _showAllActs = false; // 「更多」展开：显示全部 12 种缅怀方式
   RealtimeChannel? _realtimeChannel;
 
@@ -126,14 +125,8 @@ class _MemorialScreenState extends ConsumerState<MemorialScreen> {
         final theme = themeByKey(themeKey);
         final localeTag = locale.toString();
 
-        // 首次进入：未选过主题 → 弹一次确认层（规划文档 5.4.3-C 关键 UX）
-        if (p.memorialTheme == null && !_pickerShown) {
-          _pickerShown = true;
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted) _openThemePicker();
-          });
-        }
-
+        // 未显式选过主题时静默使用地区推荐主题（resolveRegionTheme），
+        // 不再自动弹层打断；切换入口保留在页内主题圆标。
         return Scaffold(
           backgroundColor: colors.bg,
           body: Column(
