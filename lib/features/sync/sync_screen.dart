@@ -50,6 +50,13 @@ class _SyncScreenState extends ConsumerState<SyncScreen> {
           .read(inviteServiceProvider)
           .createInvite(treeId);
       if (mounted) setState(() => _inviteCodeValue = code);
+    } on Exception catch (e) {
+      if (!mounted) return;
+      final isOwner = !e.toString().contains('NOT_OWNER');
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(isOwner
+              ? AppLocalizations.of(context).syncError
+              : AppLocalizations.of(context).inviteOwnerOnly)));
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(

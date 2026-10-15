@@ -309,5 +309,6 @@
   "addPhoto": "Aggiungi foto",
   "addEvent": "Aggiungi evento",
   "eventTitle": "Titolo",
-  "tributesSection": "Omaggi"
+  "tributesSection": "Omaggi",
+  "inviteOwnerOnly": "Solo il proprietario dell'albero può inviare inviti."
 }

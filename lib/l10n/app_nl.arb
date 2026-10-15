@@ -309,5 +309,6 @@
   "addPhoto": "Foto's toevoegen",
   "addEvent": "Gebeurtenis toevoegen",
   "eventTitle": "Titel",
-  "tributesSection": "Eerbetonen"
+  "tributesSection": "Eerbetonen",
+  "inviteOwnerOnly": "Alleen de boomeigenaar kan uitnodigingen versturen."
 }

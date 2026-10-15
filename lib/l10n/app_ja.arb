@@ -309,5 +309,6 @@
   "addPhoto": "写真を追加",
   "addEvent": "年譜を追加",
   "eventTitle": "タイトル",
-  "tributesSection": "供物"
+  "tributesSection": "供物",
+  "inviteOwnerOnly": "木のオーナーのみ招待を送れます。"
 }

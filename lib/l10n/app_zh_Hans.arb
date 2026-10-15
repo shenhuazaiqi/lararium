@@ -309,5 +309,6 @@
   "addPhoto": "添加照片",
   "addEvent": "添加大事记",
   "eventTitle": "大事记标题",
-  "tributesSection": "祝福明细"
+  "tributesSection": "祝福明细",
+  "inviteOwnerOnly": "只有树的创建者才能发送邀请。"
 }

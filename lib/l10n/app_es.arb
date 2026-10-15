@@ -309,5 +309,6 @@
   "addPhoto": "Añadir fotos",
   "addEvent": "Añadir hito",
   "eventTitle": "Título",
-  "tributesSection": "Homenajes"
+  "tributesSection": "Homenajes",
+  "inviteOwnerOnly": "Solo el propietario del árbol puede enviar invitaciones."
 }

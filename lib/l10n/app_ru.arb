@@ -309,5 +309,6 @@
   "addPhoto": "Добавить фото",
   "addEvent": "Добавить веху",
   "eventTitle": "Название",
-  "tributesSection": "Дань памяти"
+  "tributesSection": "Дань памяти",
+  "inviteOwnerOnly": "Только владелец дерева может отправлять приглашения."
 }

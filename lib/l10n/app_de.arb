@@ -309,5 +309,6 @@
   "addPhoto": "Fotos hinzufügen",
   "addEvent": "Ereignis hinzufügen",
   "eventTitle": "Ereignistitel",
-  "tributesSection": "Geste der Anteilnahme"
+  "tributesSection": "Geste der Anteilnahme",
+  "inviteOwnerOnly": "Nur der Baum-Besitzer kann Einladungen senden."
 }

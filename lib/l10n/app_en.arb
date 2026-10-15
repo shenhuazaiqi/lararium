@@ -467,5 +467,6 @@
   "addPhoto": "Add photos",
   "addEvent": "Add event",
   "eventTitle": "Event title",
-  "tributesSection": "Tributes"
+  "tributesSection": "Tributes",
+  "inviteOwnerOnly": "Only the tree owner can send invites."
 }
