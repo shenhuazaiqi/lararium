@@ -125,6 +125,13 @@ class _MemorialScreenState extends ConsumerState<MemorialScreen> {
         final theme = themeByKey(themeKey);
         final localeTag = locale.toString();
 
+        // 默认选中第一个缅怀方式：舞台直接有动效、发送按钮可用
+        if (_pendingAct == null &&
+            _sentAct == null &&
+            theme.acts.isNotEmpty) {
+          _pendingAct = theme.acts.first.key;
+        }
+
         // 未显式选过主题时静默使用地区推荐主题（resolveRegionTheme），
         // 不再自动弹层打断；切换入口保留在页内主题圆标。
         return Scaffold(
