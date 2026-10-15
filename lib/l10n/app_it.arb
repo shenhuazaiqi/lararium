@@ -40,7 +40,7 @@
   "fDied": "Deceduto/a",
   "fPlace": "Luogo",
   "fOccupation": "Professione",
-  "fNote": "Nota",
+  "fNote": "Biografia",
   "hasPassedAway": "Questa persona è venuta a mancare",
   "saveChanges": "Salva modifiche",
   "cancel": "Annulla",
@@ -303,5 +303,10 @@
   "cropConfirm": "Usa foto",
   "cropRotate": "Ruota",
   "showMore": "Altro",
-  "showLess": "Mostra meno"
+  "showLess": "Mostra meno",
+  "album": "Album",
+  "timeline": "Eventi",
+  "addPhoto": "Aggiungi foto",
+  "addEvent": "Aggiungi evento",
+  "eventTitle": "Titolo"
 }

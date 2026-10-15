@@ -11,13 +11,21 @@ part 'app_database.g.dart';
 
 /// 本地 SQLite 是唯一数据源（规划文档 6.1 核心原则），云只是副本。
 @DriftDatabase(
-  tables: [Trees, Persons, Families, FamilyChildren, MemorialMessages],
+  tables: [
+    Trees,
+    Persons,
+    Families,
+    FamilyChildren,
+    MemorialMessages,
+    PersonMedias,
+    PersonEventsTable,
+  ],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -28,6 +36,10 @@ class AppDatabase extends _$AppDatabase {
           }
           if (from < 3) {
             await m.addColumn(persons, persons.avatarPath);
+          }
+          if (from < 4) {
+            await m.createTable(personMedias);
+            await m.createTable(personEventsTable);
           }
         },
       );

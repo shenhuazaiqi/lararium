@@ -40,7 +40,7 @@
   "fDied": "没年月日",
   "fPlace": "場所",
   "fOccupation": "職業",
-  "fNote": "メモ",
+  "fNote": "略歴",
   "hasPassedAway": "この方は他界されています",
   "saveChanges": "変更を保存",
   "cancel": "キャンセル",
@@ -303,5 +303,10 @@
   "cropConfirm": "写真を使用",
   "cropRotate": "回転",
   "showMore": "もっと見る",
-  "showLess": "折りたたむ"
+  "showLess": "折りたたむ",
+  "album": "アルバム",
+  "timeline": "年譜",
+  "addPhoto": "写真を追加",
+  "addEvent": "年譜を追加",
+  "eventTitle": "タイトル"
 }

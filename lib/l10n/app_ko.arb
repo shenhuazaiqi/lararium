@@ -40,7 +40,7 @@
   "fDied": "사망",
   "fPlace": "장소",
   "fOccupation": "직업",
-  "fNote": "메모",
+  "fNote": "소개",
   "hasPassedAway": "이 분은 별세하셨습니다",
   "saveChanges": "변경 저장",
   "cancel": "취소",
@@ -303,5 +303,10 @@
   "cropConfirm": "사진 사용",
   "cropRotate": "회전",
   "showMore": "더보기",
-  "showLess": "접기"
+  "showLess": "접기",
+  "album": "앨범",
+  "timeline": "주요 행사",
+  "addPhoto": "사진 추가",
+  "addEvent": "행사 추가",
+  "eventTitle": "제목"
 }

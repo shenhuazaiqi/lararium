@@ -4,12 +4,18 @@ import 'package:drift/drift.dart' show Value;
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../core/cloud_config.dart';
 import '../../core/fuzzy_date.dart';
 import '../../core/theme.dart';
 import '../../data/db/app_database.dart';
+import '../../data/db/tables.dart' show newId;
 import '../../data/providers.dart';
 import 'avatar_crop_screen.dart';
 import 'photo_avatar.dart';
@@ -34,6 +40,10 @@ class _EditPersonScreenState extends ConsumerState<EditPersonScreen> {
   final _burial = TextEditingController();
   final _occ = TextEditingController();
   final _note = TextEditingController();
+  final _eventTitle = TextEditingController();
+  final _eventDate = TextEditingController();
+  bool _uploadingPhotos = false;
+  bool _showEventForm = false;
   String _gender = 'unknown';
   bool _dead = false;
   bool _loaded = false;
@@ -48,6 +58,8 @@ class _EditPersonScreenState extends ConsumerState<EditPersonScreen> {
     _burial.dispose();
     _occ.dispose();
     _note.dispose();
+    _eventTitle.dispose();
+    _eventDate.dispose();
     super.dispose();
   }
 
@@ -232,6 +244,12 @@ class _EditPersonScreenState extends ConsumerState<EditPersonScreen> {
                 ]),
                 const SizedBox(height: 14),
                 _card(colors, [_field(l10n.fNote, _note, maxLines: 3)]),
+                const SizedBox(height: 14),
+                // 相册
+                _albumCard(l10n, colors),
+                const SizedBox(height: 14),
+                // 大事记（自定义）
+                _eventsCard(l10n, colors),
                 const SizedBox(height: 22),
                 FilledButton(
                   style: FilledButton.styleFrom(
@@ -326,6 +344,288 @@ class _EditPersonScreenState extends ConsumerState<EditPersonScreen> {
         },
       ),
     );
+  }
+
+  // ---------- 相册 ----------
+
+  Widget _albumCard(AppLocalizations l10n, LarariumColors colors) {
+    final mediaAsync = ref.watch(mediaByPersonProvider(widget.personId));
+    final media = mediaAsync.value ?? const <PersonMedia>[];
+    return _card(colors, [
+      Padding(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Text(l10n.album,
+                    style: TextStyle(
+                        fontSize: 13, color: colors.ink3)),
+                const Spacer(),
+                if (_uploadingPhotos)
+                  const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2)),
+              ],
+            ),
+            const SizedBox(height: 10),
+            if (media.isEmpty && !_uploadingPhotos)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 6),
+                child: Text(l10n.writeMessage,
+                    style: TextStyle(fontSize: 13, color: colors.ink3)),
+              ),
+            if (media.isNotEmpty)
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  for (final m in media)
+                    Stack(
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: _albumImage(m, size: 86),
+                        ),
+                        Positioned(
+                          top: 2,
+                          right: 2,
+                          child: GestureDetector(
+                            onTap: () => _deleteAlbumPhoto(m),
+                            child: Container(
+                              width: 20,
+                              height: 20,
+                              decoration: BoxDecoration(
+                                color: Colors.black.withOpacity(0.55),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(Icons.close,
+                                  size: 13, color: Colors.white),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                ],
+              ),
+            const SizedBox(height: 10),
+            SizedBox(
+              width: double.infinity,
+              height: 40,
+              child: OutlinedButton.icon(
+                onPressed: _uploadingPhotos ? null : _addAlbumPhotos,
+                icon: const Icon(Icons.add_photo_alternate_outlined, size: 18),
+                label: Text(l10n.addPhoto, style: const TextStyle(fontSize: 13.5)),
+              ),
+            ),
+          ],
+        ),
+      ),
+    ]);
+  }
+
+  /// 相册图：本地副本优先，缺失时走 Storage 公开对象 URL
+  Widget _albumImage(PersonMedia m, {required double size}) {
+    Widget img;
+    if (m.localPath != null && File(m.localPath!).existsSync()) {
+      img = Image.file(File(m.localPath!),
+          width: size, height: size, fit: BoxFit.cover, gaplessPlayback: true);
+    } else if (m.storagePath != null) {
+      final url =
+          '${CloudConfig.supabaseUrl}/storage/v1/object/person-album/${m.storagePath!}';
+      img = Image.network(url,
+          width: size, height: size, fit: BoxFit.cover, errorBuilder:
+              (context, error, stack) => Container(
+                  width: size,
+                  height: size,
+                  color: colors_bg(context),
+                  child: const Icon(Icons.image_outlined)));
+    } else {
+      img = Container(width: size, height: size, color: colors_bg(context));
+    }
+    return SizedBox(width: size, height: size, child: img);
+  }
+
+  Color colors_bg(BuildContext context) =>
+      Theme.of(context).colorScheme.surfaceContainerHighest;
+
+  Future<void> _addAlbumPhotos() async {
+    final picked = await FilePicker.platform
+        .pickFiles(type: FileType.image, allowMultiple: true, withData: false);
+    if (picked == null || picked.files.isEmpty) return;
+    final treeId = ref.read(effectiveTreeIdProvider);
+    if (treeId == null) return;
+    setState(() => _uploadingPhotos = true);
+    final db = ref.read(databaseProvider);
+    final client = Supabase.instance.client;
+    try {
+      final docDir = await getApplicationDocumentsDirectory();
+      for (final f in picked.files) {
+        if (f.path == null) continue;
+        final mediaId = newId();
+        final path = 'tree_$treeId/person_${widget.personId}/$mediaId.jpg';
+        final raw = await File(f.path!).readAsBytes();
+        final compressed = await FlutterImageCompress.compressWithList(raw,
+            minWidth: 1280, minHeight: 1280, quality: 82,
+            format: CompressFormat.jpeg);
+        final localPath = p.join(docDir.path, 'album_$mediaId.jpg');
+        await File(localPath).writeAsBytes(compressed);
+        await client.storage.from('person-album').uploadBinary(
+              path,
+              compressed,
+              fileOptions: const FileOptions(
+                  upsert: true, contentType: 'image/jpeg'),
+            );
+        await (db.into(db.personMedias)).insert(PersonMediasCompanion.insert(
+          id: Value(mediaId),
+          treeId: treeId,
+          personId: widget.personId,
+          storagePath: Value(path),
+          localPath: Value(localPath),
+        ));
+      }
+    } catch (_) {
+      if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(l10n.errShare)));
+      }
+    } finally {
+      if (mounted) setState(() => _uploadingPhotos = false);
+    }
+  }
+
+  Future<void> _deleteAlbumPhoto(PersonMedia m) async {
+    final db = ref.read(databaseProvider);
+    await (db.update(db.personMedias)..where((x) => x.id.equals(m.id))).write(
+      PersonMediasCompanion(
+          deletedAt: Value(DateTime.now()),
+          updatedAt: Value(DateTime.now())),
+    );
+    try {
+      final client = Supabase.instance.client;
+      if (m.storagePath != null) {
+        await client.storage.from('person-album').remove([m.storagePath!]);
+      }
+      await client.from('media').delete().eq('id', m.id);
+    } catch (_) {}
+  }
+
+  // ---------- 大事记（自定义） ----------
+
+  Widget _eventsCard(AppLocalizations l10n, LarariumColors colors) {
+    final eventsAsync = ref.watch(eventsByPersonProvider(widget.personId));
+    final events = eventsAsync.value ?? const <PersonEvent>[];
+    final sorted = [...events]..sort((a, b) => a.eventDate.compareTo(b.eventDate));
+    return _card(colors, [
+      Padding(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(l10n.timeline,
+                style: TextStyle(fontSize: 13, color: colors.ink3)),
+            const SizedBox(height: 10),
+            if (sorted.isEmpty)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                child: Text(l10n.writeMessage,
+                    style: TextStyle(fontSize: 13, color: colors.ink3)),
+              ),
+            for (final e in sorted)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(
+                      width: 86,
+                      child: Text(
+                          FuzzyDate.encode(e.eventDate, e.datePrecision),
+                          style: TextStyle(
+                              fontSize: 12.5,
+                              fontWeight: FontWeight.w600,
+                              color: colors.brand)),
+                    ),
+                    Expanded(
+                      child: Text(e.title,
+                          style: TextStyle(
+                              fontSize: 14, color: colors.ink)),
+                    ),
+                    GestureDetector(
+                      onTap: () => _deleteEvent(e),
+                      child: Icon(Icons.close,
+                          size: 16, color: colors.ink3),
+                    ),
+                  ],
+                ),
+              ),
+            if (_showEventForm) ...[
+              Divider(color: colors.line, height: 1),
+              const SizedBox(height: 8),
+              _field(l10n.eventTitle, _eventTitle),
+              _field(l10n.fBorn, _eventDate, hint: '1994 or 1994-11-04'),
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  onPressed: _addEvent,
+                  child: Text(l10n.saveChanges),
+                ),
+              ),
+            ],
+            const SizedBox(height: 4),
+            SizedBox(
+              width: double.infinity,
+              height: 40,
+              child: OutlinedButton.icon(
+                onPressed: () =>
+                    setState(() => _showEventForm = !_showEventForm),
+                icon: const Icon(Icons.add_circle_outline, size: 18),
+                label: Text(l10n.addEvent,
+                    style: const TextStyle(fontSize: 13.5)),
+              ),
+            ),
+          ],
+        ),
+      ),
+    ]);
+  }
+
+  Future<void> _addEvent() async {
+    final title = _eventTitle.text.trim();
+    final d = FuzzyDate.tryParse(_eventDate.text.trim());
+    if (title.isEmpty || d == null) return;
+    final treeId = ref.read(effectiveTreeIdProvider);
+    if (treeId == null) return;
+    final db = ref.read(databaseProvider);
+    await (db.into(db.personEventsTable)).insert(PersonEventsTableCompanion.insert(
+      id: Value(newId()),
+      treeId: treeId,
+      personId: widget.personId,
+      title: title,
+      eventDate: d.date,
+      datePrecision: Value(d.precision),
+    ));
+    _eventTitle.clear();
+    _eventDate.clear();
+    setState(() => _showEventForm = false);
+  }
+
+  Future<void> _deleteEvent(PersonEvent e) async {
+    final db = ref.read(databaseProvider);
+    await (db.update(db.personEventsTable)..where((x) => x.id.equals(e.id))).write(
+      PersonEventsTableCompanion(
+          deletedAt: Value(DateTime.now()),
+          updatedAt: Value(DateTime.now())),
+    );
+    try {
+      await Supabase.instance.client
+          .from('events')
+          .delete()
+          .eq('id', e.id);
+    } catch (_) {}
   }
 
   // drift Value 包装的简写

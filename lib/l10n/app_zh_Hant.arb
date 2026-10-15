@@ -40,7 +40,7 @@
   "fDied": "逝世",
   "fPlace": "地點",
   "fOccupation": "職業",
-  "fNote": "備註",
+  "fNote": "簡介",
   "hasPassedAway": "這位親人已經離世",
   "saveChanges": "儲存變更",
   "cancel": "取消",
@@ -303,5 +303,10 @@
   "cropConfirm": "使用照片",
   "cropRotate": "旋轉",
   "showMore": "更多",
-  "showLess": "收起"
+  "showLess": "收起",
+  "album": "相冊",
+  "timeline": "大事記",
+  "addPhoto": "新增照片",
+  "addEvent": "新增大事記",
+  "eventTitle": "大事記標題"
 }

@@ -179,6 +179,48 @@ class SyncService {
         }
     ]);
     pushed += profiles.length;
+
+    // ---------- 推送：media（人物相册）+ events（自定义大事记） ----------
+    final mediaRows = await (_db.select(_db.personMedias)
+          ..where((m) => m.treeId.equals(treeId) & m.deletedAt.isNull()))
+        .get();
+    if (mediaRows.isNotEmpty) {
+      try {
+        await _client.from('media').upsert([
+          for (final m in mediaRows)
+            {
+              'id': m.id,
+              'tree_id': m.treeId,
+              'person_id': m.personId,
+              'kind': m.kind,
+              'storage_path': m.storagePath,
+              'caption': m.caption,
+              'is_primary': m.isPrimary,
+            }
+        ]);
+      } catch (_) {}
+    }
+    final eventRows = await (_db.select(_db.personEventsTable)
+          ..where((e) => e.treeId.equals(treeId) & e.deletedAt.isNull()))
+        .get();
+    if (eventRows.isNotEmpty) {
+      try {
+        await _client.from('events').upsert([
+          for (final e in eventRows)
+            {
+              'id': e.id,
+              'tree_id': e.treeId,
+              'person_id': e.personId,
+              'type': 'custom',
+              'description': e.title,
+              'date_from': e.eventDate.toIso8601String().substring(0, 10),
+              'date_precision': e.datePrecision,
+              'place_text': e.placeText,
+              'sort_order': e.sortOrder,
+            }
+        ]);
+      } catch (_) {}
+    }
     final msgs = await (_db.select(_db.memorialMessages)
           ..where((m) => m.treeId.equals(treeId)))
         .get();

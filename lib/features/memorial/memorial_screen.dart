@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
@@ -8,6 +10,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/format.dart';
+import '../../core/fuzzy_date.dart';
+import '../../core/cloud_config.dart';
 import '../../core/theme.dart';
 import '../../data/db/app_database.dart';
 import '../../data/providers.dart';
@@ -174,6 +178,50 @@ class _MemorialScreenState extends ConsumerState<MemorialScreen> {
                         ),
                       ),
                     ),
+                    // 简介（原备注字段，语义升级）
+                    if (p.note?.isNotEmpty ?? false)
+                      Transform.translate(
+                        offset: const Offset(0, -22),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          child: Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(14),
+                            decoration: BoxDecoration(
+                              color: colors.surface,
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(color: colors.line),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(l10n.fNote,
+                                    style: TextStyle(
+                                        fontSize: 11,
+                                        letterSpacing: 1,
+                                        fontWeight: FontWeight.w700,
+                                        color: colors.ink3)),
+                                const SizedBox(height: 6),
+                                Text(p.note!,
+                                    style: TextStyle(
+                                        fontSize: 13.5,
+                                        height: 1.6,
+                                        color: colors.ink2)),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    // 相册（横滑）
+                    Transform.translate(
+                      offset: Offset(0, p.note?.isNotEmpty ?? false ? -10 : -22),
+                      child: _albumStrip(p, l10n, colors),
+                    ),
+                    // 大事记（自动 + 自定义合并）
+                    Transform.translate(
+                      offset: const Offset(0, -10),
+                      child: _timelineCard(p, l10n, colors),
+                    ),
                     Padding(
                       padding: const EdgeInsets.fromLTRB(20, 2, 20, 0),
                       child: Column(
@@ -290,6 +338,136 @@ class _MemorialScreenState extends ConsumerState<MemorialScreen> {
   }
 
   // ---------- hero ----------
+
+  /// 相册横滑条（本地副本优先；缺失时走公开对象 URL）
+  Widget _albumStrip(Person p, AppLocalizations l10n, LarariumColors colors) {
+    final mediaAsync = ref.watch(mediaByPersonProvider(p.id));
+    final media = mediaAsync.value ?? const <PersonMedia>[];
+    if (media.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 0, 0, 0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(l10n.album,
+              style: TextStyle(
+                  fontSize: 11,
+                  letterSpacing: 1,
+                  fontWeight: FontWeight.w700,
+                  color: colors.ink3)),
+          const SizedBox(height: 10),
+          SizedBox(
+            height: 116,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: media.length,
+              separatorBuilder: (_, __) => const SizedBox(width: 10),
+              itemBuilder: (context, i) {
+                final m = media[i];
+                Widget img;
+                if (m.localPath != null && File(m.localPath!).existsSync()) {
+                  img = Image.file(File(m.localPath!),
+                      width: 116, height: 116, fit: BoxFit.cover,
+                      gaplessPlayback: true);
+                } else if (m.storagePath != null) {
+                  img = Image.network(
+                    '${CloudConfig.supabaseUrl}/storage/v1/object/person-album/${m.storagePath!}',
+                    width: 116, height: 116, fit: BoxFit.cover,
+                    errorBuilder: (context, error, stack) => Container(
+                        width: 116,
+                        height: 116,
+                        color: colors.surface2,
+                        child: const Icon(Icons.image_outlined)),
+                  );
+                } else {
+                  img = Container(
+                      width: 116, height: 116, color: colors.surface2);
+                }
+                return ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: SizedBox(width: 116, height: 116, child: img));
+              },
+            ),
+          ),
+          const SizedBox(height: 4),
+        ],
+      ),
+    );
+  }
+
+  /// 大事记卡片：自动事件（出生/逝世）+ 自定义大事记，按年份合并排序
+  Widget _timelineCard(
+      Person p, AppLocalizations l10n, LarariumColors colors) {
+    final eventsAsync = ref.watch(eventsByPersonProvider(p.id));
+    final custom = eventsAsync.value ?? const <PersonEvent>[];
+    final rows = <(DateTime, String, String)>[
+      if (p.birthDate != null)
+        (
+          p.birthDate!,
+          l10n.timelineBirth,
+          FuzzyDate.encode(p.birthDate!, p.birthPrecision),
+        ),
+      if (p.deathDate != null)
+        (
+          p.deathDate!,
+          l10n.timelineDeath,
+          FuzzyDate.encode(p.deathDate!, p.deathPrecision),
+        ),
+      for (final e in custom)
+        (
+          e.eventDate,
+          e.title,
+          FuzzyDate.encode(e.eventDate, e.datePrecision),
+        ),
+    ]..sort((a, b) => a.$1.compareTo(b.$1));
+
+    if (rows.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: colors.surface,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: colors.line),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(l10n.timeline,
+                style: TextStyle(
+                    fontSize: 11,
+                    letterSpacing: 1,
+                    fontWeight: FontWeight.w700,
+                    color: colors.ink3)),
+            const SizedBox(height: 8),
+            for (final (date, title, whn) in rows)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(
+                        width: 92,
+                        child: Text(whn,
+                            style: TextStyle(
+                                fontSize: 12.5,
+                                fontWeight: FontWeight.w600,
+                                color: colors.brand))),
+                    Expanded(
+                      child: Text(title,
+                          style: TextStyle(
+                              fontSize: 13.5, color: colors.ink)),
+                    ),
+                  ],
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
 
   Widget _hero(Person p, String localeTag, LarariumColors colors) {
     final born = p.birthDate == null

@@ -40,7 +40,7 @@
   "fDied": "Overleden",
   "fPlace": "Plaats",
   "fOccupation": "Beroep",
-  "fNote": "Notitie",
+  "fNote": "Biografie",
   "hasPassedAway": "Deze persoon is overleden",
   "saveChanges": "Wijzigingen opslaan",
   "cancel": "Annuleren",
@@ -303,5 +303,10 @@
   "cropConfirm": "Foto gebruiken",
   "cropRotate": "Draaien",
   "showMore": "Meer",
-  "showLess": "Minder weergeven"
+  "showLess": "Minder weergeven",
+  "album": "Album",
+  "timeline": "Levensgebeurtenissen",
+  "addPhoto": "Foto's toevoegen",
+  "addEvent": "Gebeurtenis toevoegen",
+  "eventTitle": "Titel"
 }

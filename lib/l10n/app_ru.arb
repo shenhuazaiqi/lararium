@@ -40,7 +40,7 @@
   "fDied": "Умер",
   "fPlace": "Место",
   "fOccupation": "Профессия",
-  "fNote": "Заметка",
+  "fNote": "Биография",
   "hasPassedAway": "Этот человек уже ушёл из жизни",
   "saveChanges": "Сохранить",
   "cancel": "Отмена",
@@ -303,5 +303,10 @@
   "cropConfirm": "Использовать фото",
   "cropRotate": "Повернуть",
   "showMore": "Ещё",
-  "showLess": "Свернуть"
+  "showLess": "Свернуть",
+  "album": "Альбом",
+  "timeline": "Вехи",
+  "addPhoto": "Добавить фото",
+  "addEvent": "Добавить веху",
+  "eventTitle": "Название"
 }

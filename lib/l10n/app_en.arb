@@ -54,7 +54,7 @@
   "fDied": "Died",
   "fPlace": "Place",
   "fOccupation": "Occupation",
-  "fNote": "Note",
+  "fNote": "Bio",
   "hasPassedAway": "This person has passed away",
   "saveChanges": "Save changes",
   "cancel": "Cancel",
@@ -461,5 +461,10 @@
   "cropConfirm": "Use photo",
   "cropRotate": "Rotate",
   "showMore": "More",
-  "showLess": "Show less"
+  "showLess": "Show less",
+  "album": "Album",
+  "timeline": "Life events",
+  "addPhoto": "Add photos",
+  "addEvent": "Add event",
+  "eventTitle": "Event title"
 }

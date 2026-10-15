@@ -2992,6 +2992,1093 @@ class MemorialMessagesCompanion extends UpdateCompanion<MemorialMessage> {
   }
 }
 
+class $PersonMediasTable extends PersonMedias
+    with TableInfo<$PersonMediasTable, PersonMedia> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $PersonMediasTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      clientDefault: newId);
+  static const VerificationMeta _treeIdMeta = const VerificationMeta('treeId');
+  @override
+  late final GeneratedColumn<String> treeId = GeneratedColumn<String>(
+      'tree_id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _personIdMeta =
+      const VerificationMeta('personId');
+  @override
+  late final GeneratedColumn<String> personId = GeneratedColumn<String>(
+      'person_id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _kindMeta = const VerificationMeta('kind');
+  @override
+  late final GeneratedColumn<String> kind = GeneratedColumn<String>(
+      'kind', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultValue: const Constant('photo'));
+  static const VerificationMeta _storagePathMeta =
+      const VerificationMeta('storagePath');
+  @override
+  late final GeneratedColumn<String> storagePath = GeneratedColumn<String>(
+      'storage_path', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _localPathMeta =
+      const VerificationMeta('localPath');
+  @override
+  late final GeneratedColumn<String> localPath = GeneratedColumn<String>(
+      'local_path', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _captionMeta =
+      const VerificationMeta('caption');
+  @override
+  late final GeneratedColumn<String> caption = GeneratedColumn<String>(
+      'caption', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _isPrimaryMeta =
+      const VerificationMeta('isPrimary');
+  @override
+  late final GeneratedColumn<bool> isPrimary = GeneratedColumn<bool>(
+      'is_primary', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("is_primary" IN (0, 1))'),
+      defaultValue: const Constant(false));
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+      'created_at', aliasedName, false,
+      type: DriftSqlType.dateTime,
+      requiredDuringInsert: false,
+      defaultValue: currentDateAndTime);
+  static const VerificationMeta _updatedAtMeta =
+      const VerificationMeta('updatedAt');
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+      'updated_at', aliasedName, false,
+      type: DriftSqlType.dateTime,
+      requiredDuringInsert: false,
+      defaultValue: currentDateAndTime);
+  static const VerificationMeta _deletedAtMeta =
+      const VerificationMeta('deletedAt');
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+      'deleted_at', aliasedName, true,
+      type: DriftSqlType.dateTime, requiredDuringInsert: false);
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        treeId,
+        personId,
+        kind,
+        storagePath,
+        localPath,
+        caption,
+        isPrimary,
+        createdAt,
+        updatedAt,
+        deletedAt
+      ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'person_medias';
+  @override
+  VerificationContext validateIntegrity(Insertable<PersonMedia> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('tree_id')) {
+      context.handle(_treeIdMeta,
+          treeId.isAcceptableOrUnknown(data['tree_id']!, _treeIdMeta));
+    } else if (isInserting) {
+      context.missing(_treeIdMeta);
+    }
+    if (data.containsKey('person_id')) {
+      context.handle(_personIdMeta,
+          personId.isAcceptableOrUnknown(data['person_id']!, _personIdMeta));
+    } else if (isInserting) {
+      context.missing(_personIdMeta);
+    }
+    if (data.containsKey('kind')) {
+      context.handle(
+          _kindMeta, kind.isAcceptableOrUnknown(data['kind']!, _kindMeta));
+    }
+    if (data.containsKey('storage_path')) {
+      context.handle(
+          _storagePathMeta,
+          storagePath.isAcceptableOrUnknown(
+              data['storage_path']!, _storagePathMeta));
+    }
+    if (data.containsKey('local_path')) {
+      context.handle(_localPathMeta,
+          localPath.isAcceptableOrUnknown(data['local_path']!, _localPathMeta));
+    }
+    if (data.containsKey('caption')) {
+      context.handle(_captionMeta,
+          caption.isAcceptableOrUnknown(data['caption']!, _captionMeta));
+    }
+    if (data.containsKey('is_primary')) {
+      context.handle(_isPrimaryMeta,
+          isPrimary.isAcceptableOrUnknown(data['is_primary']!, _isPrimaryMeta));
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(_updatedAtMeta,
+          updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(_deletedAtMeta,
+          deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  PersonMedia map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return PersonMedia(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      treeId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}tree_id'])!,
+      personId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}person_id'])!,
+      kind: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}kind'])!,
+      storagePath: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}storage_path']),
+      localPath: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}local_path']),
+      caption: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}caption']),
+      isPrimary: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}is_primary'])!,
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+      updatedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}updated_at'])!,
+      deletedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}deleted_at']),
+    );
+  }
+
+  @override
+  $PersonMediasTable createAlias(String alias) {
+    return $PersonMediasTable(attachedDatabase, alias);
+  }
+}
+
+class PersonMedia extends DataClass implements Insertable<PersonMedia> {
+  final String id;
+  final String treeId;
+  final String personId;
+  final String kind;
+  final String? storagePath;
+  final String? localPath;
+  final String? caption;
+  final bool isPrimary;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final DateTime? deletedAt;
+  const PersonMedia(
+      {required this.id,
+      required this.treeId,
+      required this.personId,
+      required this.kind,
+      this.storagePath,
+      this.localPath,
+      this.caption,
+      required this.isPrimary,
+      required this.createdAt,
+      required this.updatedAt,
+      this.deletedAt});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['tree_id'] = Variable<String>(treeId);
+    map['person_id'] = Variable<String>(personId);
+    map['kind'] = Variable<String>(kind);
+    if (!nullToAbsent || storagePath != null) {
+      map['storage_path'] = Variable<String>(storagePath);
+    }
+    if (!nullToAbsent || localPath != null) {
+      map['local_path'] = Variable<String>(localPath);
+    }
+    if (!nullToAbsent || caption != null) {
+      map['caption'] = Variable<String>(caption);
+    }
+    map['is_primary'] = Variable<bool>(isPrimary);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
+    return map;
+  }
+
+  PersonMediasCompanion toCompanion(bool nullToAbsent) {
+    return PersonMediasCompanion(
+      id: Value(id),
+      treeId: Value(treeId),
+      personId: Value(personId),
+      kind: Value(kind),
+      storagePath: storagePath == null && nullToAbsent
+          ? const Value.absent()
+          : Value(storagePath),
+      localPath: localPath == null && nullToAbsent
+          ? const Value.absent()
+          : Value(localPath),
+      caption: caption == null && nullToAbsent
+          ? const Value.absent()
+          : Value(caption),
+      isPrimary: Value(isPrimary),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+    );
+  }
+
+  factory PersonMedia.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return PersonMedia(
+      id: serializer.fromJson<String>(json['id']),
+      treeId: serializer.fromJson<String>(json['treeId']),
+      personId: serializer.fromJson<String>(json['personId']),
+      kind: serializer.fromJson<String>(json['kind']),
+      storagePath: serializer.fromJson<String?>(json['storagePath']),
+      localPath: serializer.fromJson<String?>(json['localPath']),
+      caption: serializer.fromJson<String?>(json['caption']),
+      isPrimary: serializer.fromJson<bool>(json['isPrimary']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'treeId': serializer.toJson<String>(treeId),
+      'personId': serializer.toJson<String>(personId),
+      'kind': serializer.toJson<String>(kind),
+      'storagePath': serializer.toJson<String?>(storagePath),
+      'localPath': serializer.toJson<String?>(localPath),
+      'caption': serializer.toJson<String?>(caption),
+      'isPrimary': serializer.toJson<bool>(isPrimary),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+    };
+  }
+
+  PersonMedia copyWith(
+          {String? id,
+          String? treeId,
+          String? personId,
+          String? kind,
+          Value<String?> storagePath = const Value.absent(),
+          Value<String?> localPath = const Value.absent(),
+          Value<String?> caption = const Value.absent(),
+          bool? isPrimary,
+          DateTime? createdAt,
+          DateTime? updatedAt,
+          Value<DateTime?> deletedAt = const Value.absent()}) =>
+      PersonMedia(
+        id: id ?? this.id,
+        treeId: treeId ?? this.treeId,
+        personId: personId ?? this.personId,
+        kind: kind ?? this.kind,
+        storagePath: storagePath.present ? storagePath.value : this.storagePath,
+        localPath: localPath.present ? localPath.value : this.localPath,
+        caption: caption.present ? caption.value : this.caption,
+        isPrimary: isPrimary ?? this.isPrimary,
+        createdAt: createdAt ?? this.createdAt,
+        updatedAt: updatedAt ?? this.updatedAt,
+        deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+      );
+  PersonMedia copyWithCompanion(PersonMediasCompanion data) {
+    return PersonMedia(
+      id: data.id.present ? data.id.value : this.id,
+      treeId: data.treeId.present ? data.treeId.value : this.treeId,
+      personId: data.personId.present ? data.personId.value : this.personId,
+      kind: data.kind.present ? data.kind.value : this.kind,
+      storagePath:
+          data.storagePath.present ? data.storagePath.value : this.storagePath,
+      localPath: data.localPath.present ? data.localPath.value : this.localPath,
+      caption: data.caption.present ? data.caption.value : this.caption,
+      isPrimary: data.isPrimary.present ? data.isPrimary.value : this.isPrimary,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PersonMedia(')
+          ..write('id: $id, ')
+          ..write('treeId: $treeId, ')
+          ..write('personId: $personId, ')
+          ..write('kind: $kind, ')
+          ..write('storagePath: $storagePath, ')
+          ..write('localPath: $localPath, ')
+          ..write('caption: $caption, ')
+          ..write('isPrimary: $isPrimary, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, treeId, personId, kind, storagePath,
+      localPath, caption, isPrimary, createdAt, updatedAt, deletedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is PersonMedia &&
+          other.id == this.id &&
+          other.treeId == this.treeId &&
+          other.personId == this.personId &&
+          other.kind == this.kind &&
+          other.storagePath == this.storagePath &&
+          other.localPath == this.localPath &&
+          other.caption == this.caption &&
+          other.isPrimary == this.isPrimary &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt);
+}
+
+class PersonMediasCompanion extends UpdateCompanion<PersonMedia> {
+  final Value<String> id;
+  final Value<String> treeId;
+  final Value<String> personId;
+  final Value<String> kind;
+  final Value<String?> storagePath;
+  final Value<String?> localPath;
+  final Value<String?> caption;
+  final Value<bool> isPrimary;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<DateTime?> deletedAt;
+  final Value<int> rowid;
+  const PersonMediasCompanion({
+    this.id = const Value.absent(),
+    this.treeId = const Value.absent(),
+    this.personId = const Value.absent(),
+    this.kind = const Value.absent(),
+    this.storagePath = const Value.absent(),
+    this.localPath = const Value.absent(),
+    this.caption = const Value.absent(),
+    this.isPrimary = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  PersonMediasCompanion.insert({
+    this.id = const Value.absent(),
+    required String treeId,
+    required String personId,
+    this.kind = const Value.absent(),
+    this.storagePath = const Value.absent(),
+    this.localPath = const Value.absent(),
+    this.caption = const Value.absent(),
+    this.isPrimary = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  })  : treeId = Value(treeId),
+        personId = Value(personId);
+  static Insertable<PersonMedia> custom({
+    Expression<String>? id,
+    Expression<String>? treeId,
+    Expression<String>? personId,
+    Expression<String>? kind,
+    Expression<String>? storagePath,
+    Expression<String>? localPath,
+    Expression<String>? caption,
+    Expression<bool>? isPrimary,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<DateTime>? deletedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (treeId != null) 'tree_id': treeId,
+      if (personId != null) 'person_id': personId,
+      if (kind != null) 'kind': kind,
+      if (storagePath != null) 'storage_path': storagePath,
+      if (localPath != null) 'local_path': localPath,
+      if (caption != null) 'caption': caption,
+      if (isPrimary != null) 'is_primary': isPrimary,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  PersonMediasCompanion copyWith(
+      {Value<String>? id,
+      Value<String>? treeId,
+      Value<String>? personId,
+      Value<String>? kind,
+      Value<String?>? storagePath,
+      Value<String?>? localPath,
+      Value<String?>? caption,
+      Value<bool>? isPrimary,
+      Value<DateTime>? createdAt,
+      Value<DateTime>? updatedAt,
+      Value<DateTime?>? deletedAt,
+      Value<int>? rowid}) {
+    return PersonMediasCompanion(
+      id: id ?? this.id,
+      treeId: treeId ?? this.treeId,
+      personId: personId ?? this.personId,
+      kind: kind ?? this.kind,
+      storagePath: storagePath ?? this.storagePath,
+      localPath: localPath ?? this.localPath,
+      caption: caption ?? this.caption,
+      isPrimary: isPrimary ?? this.isPrimary,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (treeId.present) {
+      map['tree_id'] = Variable<String>(treeId.value);
+    }
+    if (personId.present) {
+      map['person_id'] = Variable<String>(personId.value);
+    }
+    if (kind.present) {
+      map['kind'] = Variable<String>(kind.value);
+    }
+    if (storagePath.present) {
+      map['storage_path'] = Variable<String>(storagePath.value);
+    }
+    if (localPath.present) {
+      map['local_path'] = Variable<String>(localPath.value);
+    }
+    if (caption.present) {
+      map['caption'] = Variable<String>(caption.value);
+    }
+    if (isPrimary.present) {
+      map['is_primary'] = Variable<bool>(isPrimary.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PersonMediasCompanion(')
+          ..write('id: $id, ')
+          ..write('treeId: $treeId, ')
+          ..write('personId: $personId, ')
+          ..write('kind: $kind, ')
+          ..write('storagePath: $storagePath, ')
+          ..write('localPath: $localPath, ')
+          ..write('caption: $caption, ')
+          ..write('isPrimary: $isPrimary, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $PersonEventsTableTable extends PersonEventsTable
+    with TableInfo<$PersonEventsTableTable, PersonEvent> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $PersonEventsTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      clientDefault: newId);
+  static const VerificationMeta _treeIdMeta = const VerificationMeta('treeId');
+  @override
+  late final GeneratedColumn<String> treeId = GeneratedColumn<String>(
+      'tree_id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _personIdMeta =
+      const VerificationMeta('personId');
+  @override
+  late final GeneratedColumn<String> personId = GeneratedColumn<String>(
+      'person_id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _titleMeta = const VerificationMeta('title');
+  @override
+  late final GeneratedColumn<String> title = GeneratedColumn<String>(
+      'title', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _eventDateMeta =
+      const VerificationMeta('eventDate');
+  @override
+  late final GeneratedColumn<DateTime> eventDate = GeneratedColumn<DateTime>(
+      'event_date', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _datePrecisionMeta =
+      const VerificationMeta('datePrecision');
+  @override
+  late final GeneratedColumn<String> datePrecision = GeneratedColumn<String>(
+      'date_precision', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultValue: const Constant('day'));
+  static const VerificationMeta _placeTextMeta =
+      const VerificationMeta('placeText');
+  @override
+  late final GeneratedColumn<String> placeText = GeneratedColumn<String>(
+      'place_text', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _sortOrderMeta =
+      const VerificationMeta('sortOrder');
+  @override
+  late final GeneratedColumn<int> sortOrder = GeneratedColumn<int>(
+      'sort_order', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(0));
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+      'created_at', aliasedName, false,
+      type: DriftSqlType.dateTime,
+      requiredDuringInsert: false,
+      defaultValue: currentDateAndTime);
+  static const VerificationMeta _updatedAtMeta =
+      const VerificationMeta('updatedAt');
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+      'updated_at', aliasedName, false,
+      type: DriftSqlType.dateTime,
+      requiredDuringInsert: false,
+      defaultValue: currentDateAndTime);
+  static const VerificationMeta _deletedAtMeta =
+      const VerificationMeta('deletedAt');
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+      'deleted_at', aliasedName, true,
+      type: DriftSqlType.dateTime, requiredDuringInsert: false);
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        treeId,
+        personId,
+        title,
+        eventDate,
+        datePrecision,
+        placeText,
+        sortOrder,
+        createdAt,
+        updatedAt,
+        deletedAt
+      ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'person_events_table';
+  @override
+  VerificationContext validateIntegrity(Insertable<PersonEvent> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('tree_id')) {
+      context.handle(_treeIdMeta,
+          treeId.isAcceptableOrUnknown(data['tree_id']!, _treeIdMeta));
+    } else if (isInserting) {
+      context.missing(_treeIdMeta);
+    }
+    if (data.containsKey('person_id')) {
+      context.handle(_personIdMeta,
+          personId.isAcceptableOrUnknown(data['person_id']!, _personIdMeta));
+    } else if (isInserting) {
+      context.missing(_personIdMeta);
+    }
+    if (data.containsKey('title')) {
+      context.handle(
+          _titleMeta, title.isAcceptableOrUnknown(data['title']!, _titleMeta));
+    } else if (isInserting) {
+      context.missing(_titleMeta);
+    }
+    if (data.containsKey('event_date')) {
+      context.handle(_eventDateMeta,
+          eventDate.isAcceptableOrUnknown(data['event_date']!, _eventDateMeta));
+    } else if (isInserting) {
+      context.missing(_eventDateMeta);
+    }
+    if (data.containsKey('date_precision')) {
+      context.handle(
+          _datePrecisionMeta,
+          datePrecision.isAcceptableOrUnknown(
+              data['date_precision']!, _datePrecisionMeta));
+    }
+    if (data.containsKey('place_text')) {
+      context.handle(_placeTextMeta,
+          placeText.isAcceptableOrUnknown(data['place_text']!, _placeTextMeta));
+    }
+    if (data.containsKey('sort_order')) {
+      context.handle(_sortOrderMeta,
+          sortOrder.isAcceptableOrUnknown(data['sort_order']!, _sortOrderMeta));
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(_updatedAtMeta,
+          updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(_deletedAtMeta,
+          deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  PersonEvent map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return PersonEvent(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      treeId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}tree_id'])!,
+      personId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}person_id'])!,
+      title: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}title'])!,
+      eventDate: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}event_date'])!,
+      datePrecision: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}date_precision'])!,
+      placeText: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}place_text']),
+      sortOrder: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}sort_order'])!,
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+      updatedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}updated_at'])!,
+      deletedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}deleted_at']),
+    );
+  }
+
+  @override
+  $PersonEventsTableTable createAlias(String alias) {
+    return $PersonEventsTableTable(attachedDatabase, alias);
+  }
+}
+
+class PersonEvent extends DataClass implements Insertable<PersonEvent> {
+  final String id;
+  final String treeId;
+  final String personId;
+  final String title;
+  final DateTime eventDate;
+  final String datePrecision;
+  final String? placeText;
+  final int sortOrder;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final DateTime? deletedAt;
+  const PersonEvent(
+      {required this.id,
+      required this.treeId,
+      required this.personId,
+      required this.title,
+      required this.eventDate,
+      required this.datePrecision,
+      this.placeText,
+      required this.sortOrder,
+      required this.createdAt,
+      required this.updatedAt,
+      this.deletedAt});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['tree_id'] = Variable<String>(treeId);
+    map['person_id'] = Variable<String>(personId);
+    map['title'] = Variable<String>(title);
+    map['event_date'] = Variable<DateTime>(eventDate);
+    map['date_precision'] = Variable<String>(datePrecision);
+    if (!nullToAbsent || placeText != null) {
+      map['place_text'] = Variable<String>(placeText);
+    }
+    map['sort_order'] = Variable<int>(sortOrder);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
+    return map;
+  }
+
+  PersonEventsTableCompanion toCompanion(bool nullToAbsent) {
+    return PersonEventsTableCompanion(
+      id: Value(id),
+      treeId: Value(treeId),
+      personId: Value(personId),
+      title: Value(title),
+      eventDate: Value(eventDate),
+      datePrecision: Value(datePrecision),
+      placeText: placeText == null && nullToAbsent
+          ? const Value.absent()
+          : Value(placeText),
+      sortOrder: Value(sortOrder),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+    );
+  }
+
+  factory PersonEvent.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return PersonEvent(
+      id: serializer.fromJson<String>(json['id']),
+      treeId: serializer.fromJson<String>(json['treeId']),
+      personId: serializer.fromJson<String>(json['personId']),
+      title: serializer.fromJson<String>(json['title']),
+      eventDate: serializer.fromJson<DateTime>(json['eventDate']),
+      datePrecision: serializer.fromJson<String>(json['datePrecision']),
+      placeText: serializer.fromJson<String?>(json['placeText']),
+      sortOrder: serializer.fromJson<int>(json['sortOrder']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'treeId': serializer.toJson<String>(treeId),
+      'personId': serializer.toJson<String>(personId),
+      'title': serializer.toJson<String>(title),
+      'eventDate': serializer.toJson<DateTime>(eventDate),
+      'datePrecision': serializer.toJson<String>(datePrecision),
+      'placeText': serializer.toJson<String?>(placeText),
+      'sortOrder': serializer.toJson<int>(sortOrder),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+    };
+  }
+
+  PersonEvent copyWith(
+          {String? id,
+          String? treeId,
+          String? personId,
+          String? title,
+          DateTime? eventDate,
+          String? datePrecision,
+          Value<String?> placeText = const Value.absent(),
+          int? sortOrder,
+          DateTime? createdAt,
+          DateTime? updatedAt,
+          Value<DateTime?> deletedAt = const Value.absent()}) =>
+      PersonEvent(
+        id: id ?? this.id,
+        treeId: treeId ?? this.treeId,
+        personId: personId ?? this.personId,
+        title: title ?? this.title,
+        eventDate: eventDate ?? this.eventDate,
+        datePrecision: datePrecision ?? this.datePrecision,
+        placeText: placeText.present ? placeText.value : this.placeText,
+        sortOrder: sortOrder ?? this.sortOrder,
+        createdAt: createdAt ?? this.createdAt,
+        updatedAt: updatedAt ?? this.updatedAt,
+        deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+      );
+  PersonEvent copyWithCompanion(PersonEventsTableCompanion data) {
+    return PersonEvent(
+      id: data.id.present ? data.id.value : this.id,
+      treeId: data.treeId.present ? data.treeId.value : this.treeId,
+      personId: data.personId.present ? data.personId.value : this.personId,
+      title: data.title.present ? data.title.value : this.title,
+      eventDate: data.eventDate.present ? data.eventDate.value : this.eventDate,
+      datePrecision: data.datePrecision.present
+          ? data.datePrecision.value
+          : this.datePrecision,
+      placeText: data.placeText.present ? data.placeText.value : this.placeText,
+      sortOrder: data.sortOrder.present ? data.sortOrder.value : this.sortOrder,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PersonEvent(')
+          ..write('id: $id, ')
+          ..write('treeId: $treeId, ')
+          ..write('personId: $personId, ')
+          ..write('title: $title, ')
+          ..write('eventDate: $eventDate, ')
+          ..write('datePrecision: $datePrecision, ')
+          ..write('placeText: $placeText, ')
+          ..write('sortOrder: $sortOrder, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, treeId, personId, title, eventDate,
+      datePrecision, placeText, sortOrder, createdAt, updatedAt, deletedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is PersonEvent &&
+          other.id == this.id &&
+          other.treeId == this.treeId &&
+          other.personId == this.personId &&
+          other.title == this.title &&
+          other.eventDate == this.eventDate &&
+          other.datePrecision == this.datePrecision &&
+          other.placeText == this.placeText &&
+          other.sortOrder == this.sortOrder &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt);
+}
+
+class PersonEventsTableCompanion extends UpdateCompanion<PersonEvent> {
+  final Value<String> id;
+  final Value<String> treeId;
+  final Value<String> personId;
+  final Value<String> title;
+  final Value<DateTime> eventDate;
+  final Value<String> datePrecision;
+  final Value<String?> placeText;
+  final Value<int> sortOrder;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<DateTime?> deletedAt;
+  final Value<int> rowid;
+  const PersonEventsTableCompanion({
+    this.id = const Value.absent(),
+    this.treeId = const Value.absent(),
+    this.personId = const Value.absent(),
+    this.title = const Value.absent(),
+    this.eventDate = const Value.absent(),
+    this.datePrecision = const Value.absent(),
+    this.placeText = const Value.absent(),
+    this.sortOrder = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  PersonEventsTableCompanion.insert({
+    this.id = const Value.absent(),
+    required String treeId,
+    required String personId,
+    required String title,
+    required DateTime eventDate,
+    this.datePrecision = const Value.absent(),
+    this.placeText = const Value.absent(),
+    this.sortOrder = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  })  : treeId = Value(treeId),
+        personId = Value(personId),
+        title = Value(title),
+        eventDate = Value(eventDate);
+  static Insertable<PersonEvent> custom({
+    Expression<String>? id,
+    Expression<String>? treeId,
+    Expression<String>? personId,
+    Expression<String>? title,
+    Expression<DateTime>? eventDate,
+    Expression<String>? datePrecision,
+    Expression<String>? placeText,
+    Expression<int>? sortOrder,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<DateTime>? deletedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (treeId != null) 'tree_id': treeId,
+      if (personId != null) 'person_id': personId,
+      if (title != null) 'title': title,
+      if (eventDate != null) 'event_date': eventDate,
+      if (datePrecision != null) 'date_precision': datePrecision,
+      if (placeText != null) 'place_text': placeText,
+      if (sortOrder != null) 'sort_order': sortOrder,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  PersonEventsTableCompanion copyWith(
+      {Value<String>? id,
+      Value<String>? treeId,
+      Value<String>? personId,
+      Value<String>? title,
+      Value<DateTime>? eventDate,
+      Value<String>? datePrecision,
+      Value<String?>? placeText,
+      Value<int>? sortOrder,
+      Value<DateTime>? createdAt,
+      Value<DateTime>? updatedAt,
+      Value<DateTime?>? deletedAt,
+      Value<int>? rowid}) {
+    return PersonEventsTableCompanion(
+      id: id ?? this.id,
+      treeId: treeId ?? this.treeId,
+      personId: personId ?? this.personId,
+      title: title ?? this.title,
+      eventDate: eventDate ?? this.eventDate,
+      datePrecision: datePrecision ?? this.datePrecision,
+      placeText: placeText ?? this.placeText,
+      sortOrder: sortOrder ?? this.sortOrder,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (treeId.present) {
+      map['tree_id'] = Variable<String>(treeId.value);
+    }
+    if (personId.present) {
+      map['person_id'] = Variable<String>(personId.value);
+    }
+    if (title.present) {
+      map['title'] = Variable<String>(title.value);
+    }
+    if (eventDate.present) {
+      map['event_date'] = Variable<DateTime>(eventDate.value);
+    }
+    if (datePrecision.present) {
+      map['date_precision'] = Variable<String>(datePrecision.value);
+    }
+    if (placeText.present) {
+      map['place_text'] = Variable<String>(placeText.value);
+    }
+    if (sortOrder.present) {
+      map['sort_order'] = Variable<int>(sortOrder.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PersonEventsTableCompanion(')
+          ..write('id: $id, ')
+          ..write('treeId: $treeId, ')
+          ..write('personId: $personId, ')
+          ..write('title: $title, ')
+          ..write('eventDate: $eventDate, ')
+          ..write('datePrecision: $datePrecision, ')
+          ..write('placeText: $placeText, ')
+          ..write('sortOrder: $sortOrder, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -3001,12 +4088,22 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $FamilyChildrenTable familyChildren = $FamilyChildrenTable(this);
   late final $MemorialMessagesTable memorialMessages =
       $MemorialMessagesTable(this);
+  late final $PersonMediasTable personMedias = $PersonMediasTable(this);
+  late final $PersonEventsTableTable personEventsTable =
+      $PersonEventsTableTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
-  List<DatabaseSchemaEntity> get allSchemaEntities =>
-      [trees, persons, families, familyChildren, memorialMessages];
+  List<DatabaseSchemaEntity> get allSchemaEntities => [
+        trees,
+        persons,
+        families,
+        familyChildren,
+        memorialMessages,
+        personMedias,
+        personEventsTable
+      ];
 }
 
 typedef $$TreesTableCreateCompanionBuilder = TreesCompanion Function({
@@ -4389,6 +5486,535 @@ typedef $$MemorialMessagesTableProcessedTableManager = ProcessedTableManager<
     ),
     MemorialMessage,
     PrefetchHooks Function()>;
+typedef $$PersonMediasTableCreateCompanionBuilder = PersonMediasCompanion
+    Function({
+  Value<String> id,
+  required String treeId,
+  required String personId,
+  Value<String> kind,
+  Value<String?> storagePath,
+  Value<String?> localPath,
+  Value<String?> caption,
+  Value<bool> isPrimary,
+  Value<DateTime> createdAt,
+  Value<DateTime> updatedAt,
+  Value<DateTime?> deletedAt,
+  Value<int> rowid,
+});
+typedef $$PersonMediasTableUpdateCompanionBuilder = PersonMediasCompanion
+    Function({
+  Value<String> id,
+  Value<String> treeId,
+  Value<String> personId,
+  Value<String> kind,
+  Value<String?> storagePath,
+  Value<String?> localPath,
+  Value<String?> caption,
+  Value<bool> isPrimary,
+  Value<DateTime> createdAt,
+  Value<DateTime> updatedAt,
+  Value<DateTime?> deletedAt,
+  Value<int> rowid,
+});
+
+class $$PersonMediasTableFilterComposer
+    extends Composer<_$AppDatabase, $PersonMediasTable> {
+  $$PersonMediasTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get treeId => $composableBuilder(
+      column: $table.treeId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get personId => $composableBuilder(
+      column: $table.personId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get kind => $composableBuilder(
+      column: $table.kind, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get storagePath => $composableBuilder(
+      column: $table.storagePath, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get localPath => $composableBuilder(
+      column: $table.localPath, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get caption => $composableBuilder(
+      column: $table.caption, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get isPrimary => $composableBuilder(
+      column: $table.isPrimary, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+      column: $table.deletedAt, builder: (column) => ColumnFilters(column));
+}
+
+class $$PersonMediasTableOrderingComposer
+    extends Composer<_$AppDatabase, $PersonMediasTable> {
+  $$PersonMediasTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get treeId => $composableBuilder(
+      column: $table.treeId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get personId => $composableBuilder(
+      column: $table.personId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get kind => $composableBuilder(
+      column: $table.kind, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get storagePath => $composableBuilder(
+      column: $table.storagePath, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get localPath => $composableBuilder(
+      column: $table.localPath, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get caption => $composableBuilder(
+      column: $table.caption, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get isPrimary => $composableBuilder(
+      column: $table.isPrimary, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+      column: $table.deletedAt, builder: (column) => ColumnOrderings(column));
+}
+
+class $$PersonMediasTableAnnotationComposer
+    extends Composer<_$AppDatabase, $PersonMediasTable> {
+  $$PersonMediasTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get treeId =>
+      $composableBuilder(column: $table.treeId, builder: (column) => column);
+
+  GeneratedColumn<String> get personId =>
+      $composableBuilder(column: $table.personId, builder: (column) => column);
+
+  GeneratedColumn<String> get kind =>
+      $composableBuilder(column: $table.kind, builder: (column) => column);
+
+  GeneratedColumn<String> get storagePath => $composableBuilder(
+      column: $table.storagePath, builder: (column) => column);
+
+  GeneratedColumn<String> get localPath =>
+      $composableBuilder(column: $table.localPath, builder: (column) => column);
+
+  GeneratedColumn<String> get caption =>
+      $composableBuilder(column: $table.caption, builder: (column) => column);
+
+  GeneratedColumn<bool> get isPrimary =>
+      $composableBuilder(column: $table.isPrimary, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+}
+
+class $$PersonMediasTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $PersonMediasTable,
+    PersonMedia,
+    $$PersonMediasTableFilterComposer,
+    $$PersonMediasTableOrderingComposer,
+    $$PersonMediasTableAnnotationComposer,
+    $$PersonMediasTableCreateCompanionBuilder,
+    $$PersonMediasTableUpdateCompanionBuilder,
+    (
+      PersonMedia,
+      BaseReferences<_$AppDatabase, $PersonMediasTable, PersonMedia>
+    ),
+    PersonMedia,
+    PrefetchHooks Function()> {
+  $$PersonMediasTableTableManager(_$AppDatabase db, $PersonMediasTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$PersonMediasTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$PersonMediasTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$PersonMediasTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<String> treeId = const Value.absent(),
+            Value<String> personId = const Value.absent(),
+            Value<String> kind = const Value.absent(),
+            Value<String?> storagePath = const Value.absent(),
+            Value<String?> localPath = const Value.absent(),
+            Value<String?> caption = const Value.absent(),
+            Value<bool> isPrimary = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+            Value<DateTime> updatedAt = const Value.absent(),
+            Value<DateTime?> deletedAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              PersonMediasCompanion(
+            id: id,
+            treeId: treeId,
+            personId: personId,
+            kind: kind,
+            storagePath: storagePath,
+            localPath: localPath,
+            caption: caption,
+            isPrimary: isPrimary,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            deletedAt: deletedAt,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            required String treeId,
+            required String personId,
+            Value<String> kind = const Value.absent(),
+            Value<String?> storagePath = const Value.absent(),
+            Value<String?> localPath = const Value.absent(),
+            Value<String?> caption = const Value.absent(),
+            Value<bool> isPrimary = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+            Value<DateTime> updatedAt = const Value.absent(),
+            Value<DateTime?> deletedAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              PersonMediasCompanion.insert(
+            id: id,
+            treeId: treeId,
+            personId: personId,
+            kind: kind,
+            storagePath: storagePath,
+            localPath: localPath,
+            caption: caption,
+            isPrimary: isPrimary,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            deletedAt: deletedAt,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$PersonMediasTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $PersonMediasTable,
+    PersonMedia,
+    $$PersonMediasTableFilterComposer,
+    $$PersonMediasTableOrderingComposer,
+    $$PersonMediasTableAnnotationComposer,
+    $$PersonMediasTableCreateCompanionBuilder,
+    $$PersonMediasTableUpdateCompanionBuilder,
+    (
+      PersonMedia,
+      BaseReferences<_$AppDatabase, $PersonMediasTable, PersonMedia>
+    ),
+    PersonMedia,
+    PrefetchHooks Function()>;
+typedef $$PersonEventsTableTableCreateCompanionBuilder
+    = PersonEventsTableCompanion Function({
+  Value<String> id,
+  required String treeId,
+  required String personId,
+  required String title,
+  required DateTime eventDate,
+  Value<String> datePrecision,
+  Value<String?> placeText,
+  Value<int> sortOrder,
+  Value<DateTime> createdAt,
+  Value<DateTime> updatedAt,
+  Value<DateTime?> deletedAt,
+  Value<int> rowid,
+});
+typedef $$PersonEventsTableTableUpdateCompanionBuilder
+    = PersonEventsTableCompanion Function({
+  Value<String> id,
+  Value<String> treeId,
+  Value<String> personId,
+  Value<String> title,
+  Value<DateTime> eventDate,
+  Value<String> datePrecision,
+  Value<String?> placeText,
+  Value<int> sortOrder,
+  Value<DateTime> createdAt,
+  Value<DateTime> updatedAt,
+  Value<DateTime?> deletedAt,
+  Value<int> rowid,
+});
+
+class $$PersonEventsTableTableFilterComposer
+    extends Composer<_$AppDatabase, $PersonEventsTableTable> {
+  $$PersonEventsTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get treeId => $composableBuilder(
+      column: $table.treeId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get personId => $composableBuilder(
+      column: $table.personId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get title => $composableBuilder(
+      column: $table.title, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get eventDate => $composableBuilder(
+      column: $table.eventDate, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get datePrecision => $composableBuilder(
+      column: $table.datePrecision, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get placeText => $composableBuilder(
+      column: $table.placeText, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get sortOrder => $composableBuilder(
+      column: $table.sortOrder, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+      column: $table.deletedAt, builder: (column) => ColumnFilters(column));
+}
+
+class $$PersonEventsTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $PersonEventsTableTable> {
+  $$PersonEventsTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get treeId => $composableBuilder(
+      column: $table.treeId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get personId => $composableBuilder(
+      column: $table.personId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get title => $composableBuilder(
+      column: $table.title, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get eventDate => $composableBuilder(
+      column: $table.eventDate, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get datePrecision => $composableBuilder(
+      column: $table.datePrecision,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get placeText => $composableBuilder(
+      column: $table.placeText, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get sortOrder => $composableBuilder(
+      column: $table.sortOrder, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+      column: $table.deletedAt, builder: (column) => ColumnOrderings(column));
+}
+
+class $$PersonEventsTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $PersonEventsTableTable> {
+  $$PersonEventsTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get treeId =>
+      $composableBuilder(column: $table.treeId, builder: (column) => column);
+
+  GeneratedColumn<String> get personId =>
+      $composableBuilder(column: $table.personId, builder: (column) => column);
+
+  GeneratedColumn<String> get title =>
+      $composableBuilder(column: $table.title, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get eventDate =>
+      $composableBuilder(column: $table.eventDate, builder: (column) => column);
+
+  GeneratedColumn<String> get datePrecision => $composableBuilder(
+      column: $table.datePrecision, builder: (column) => column);
+
+  GeneratedColumn<String> get placeText =>
+      $composableBuilder(column: $table.placeText, builder: (column) => column);
+
+  GeneratedColumn<int> get sortOrder =>
+      $composableBuilder(column: $table.sortOrder, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+}
+
+class $$PersonEventsTableTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $PersonEventsTableTable,
+    PersonEvent,
+    $$PersonEventsTableTableFilterComposer,
+    $$PersonEventsTableTableOrderingComposer,
+    $$PersonEventsTableTableAnnotationComposer,
+    $$PersonEventsTableTableCreateCompanionBuilder,
+    $$PersonEventsTableTableUpdateCompanionBuilder,
+    (
+      PersonEvent,
+      BaseReferences<_$AppDatabase, $PersonEventsTableTable, PersonEvent>
+    ),
+    PersonEvent,
+    PrefetchHooks Function()> {
+  $$PersonEventsTableTableTableManager(
+      _$AppDatabase db, $PersonEventsTableTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$PersonEventsTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$PersonEventsTableTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$PersonEventsTableTableAnnotationComposer(
+                  $db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<String> treeId = const Value.absent(),
+            Value<String> personId = const Value.absent(),
+            Value<String> title = const Value.absent(),
+            Value<DateTime> eventDate = const Value.absent(),
+            Value<String> datePrecision = const Value.absent(),
+            Value<String?> placeText = const Value.absent(),
+            Value<int> sortOrder = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+            Value<DateTime> updatedAt = const Value.absent(),
+            Value<DateTime?> deletedAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              PersonEventsTableCompanion(
+            id: id,
+            treeId: treeId,
+            personId: personId,
+            title: title,
+            eventDate: eventDate,
+            datePrecision: datePrecision,
+            placeText: placeText,
+            sortOrder: sortOrder,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            deletedAt: deletedAt,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            required String treeId,
+            required String personId,
+            required String title,
+            required DateTime eventDate,
+            Value<String> datePrecision = const Value.absent(),
+            Value<String?> placeText = const Value.absent(),
+            Value<int> sortOrder = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+            Value<DateTime> updatedAt = const Value.absent(),
+            Value<DateTime?> deletedAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              PersonEventsTableCompanion.insert(
+            id: id,
+            treeId: treeId,
+            personId: personId,
+            title: title,
+            eventDate: eventDate,
+            datePrecision: datePrecision,
+            placeText: placeText,
+            sortOrder: sortOrder,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            deletedAt: deletedAt,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$PersonEventsTableTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $PersonEventsTableTable,
+    PersonEvent,
+    $$PersonEventsTableTableFilterComposer,
+    $$PersonEventsTableTableOrderingComposer,
+    $$PersonEventsTableTableAnnotationComposer,
+    $$PersonEventsTableTableCreateCompanionBuilder,
+    $$PersonEventsTableTableUpdateCompanionBuilder,
+    (
+      PersonEvent,
+      BaseReferences<_$AppDatabase, $PersonEventsTableTable, PersonEvent>
+    ),
+    PersonEvent,
+    PrefetchHooks Function()>;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -4403,4 +6029,8 @@ class $AppDatabaseManager {
       $$FamilyChildrenTableTableManager(_db, _db.familyChildren);
   $$MemorialMessagesTableTableManager get memorialMessages =>
       $$MemorialMessagesTableTableManager(_db, _db.memorialMessages);
+  $$PersonMediasTableTableManager get personMedias =>
+      $$PersonMediasTableTableManager(_db, _db.personMedias);
+  $$PersonEventsTableTableTableManager get personEventsTable =>
+      $$PersonEventsTableTableTableManager(_db, _db.personEventsTable);
 }

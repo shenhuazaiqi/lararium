@@ -128,6 +128,52 @@ class MemorialMessages extends Table {
   Set<Column> get primaryKey => {id};
 }
 
+/// 人物相册（schema v4）：照片存 Supabase Storage person-album 桶，
+/// 路径约定 tree_<treeId>/person_<personId>/<mediaId>.jpg。云端同构 media 表。
+@DataClassName('PersonMedia')
+class PersonMedias extends Table {
+  TextColumn get id => text().clientDefault(newId)();
+  TextColumn get treeId => text()();
+  TextColumn get personId => text()();
+  // photo | document | audio | video
+  TextColumn get kind => text().withDefault(const Constant('photo'))();
+  TextColumn get storagePath => text().nullable()();
+  TextColumn get localPath => text().nullable()();
+  TextColumn get caption => text().nullable()();
+  BoolColumn get isPrimary => boolean().withDefault(const Constant(false))();
+  DateTimeColumn get createdAt =>
+      dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get updatedAt =>
+      dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get deletedAt => dateTime().nullable()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+/// 人物自定义大事记（schema v4）：与家庭关系自动推导的时间轴合并展示。
+/// 云端同构 events 表（type='custom'，description=标题）。
+@DataClassName('PersonEvent')
+class PersonEventsTable extends Table {
+  TextColumn get id => text().clientDefault(newId)();
+  TextColumn get treeId => text()();
+  TextColumn get personId => text()();
+  TextColumn get title => text()();
+  DateTimeColumn get eventDate => dateTime()();
+  // day | month | year
+  TextColumn get datePrecision => text().withDefault(const Constant('day'))();
+  TextColumn get placeText => text().nullable()();
+  IntColumn get sortOrder => integer().withDefault(const Constant(0))();
+  DateTimeColumn get createdAt =>
+      dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get updatedAt =>
+      dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get deletedAt => dateTime().nullable()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
 const _uuid = Uuid();
 
 String newId() => _uuid.v4();

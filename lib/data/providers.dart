@@ -147,3 +147,23 @@ final memorialDefaultThemeProvider = StateProvider<String?>((ref) => null);
 /// 头像版本号：上传新头像后自增，所有头像展示处（树画笔/PhotoAvatar）
 /// 监听变化并强制重新拉取（存储路径固定不变，无法靠路径判断内容更新）。
 final avatarEpochProvider = StateProvider<int>((ref) => 0);
+
+/// 人物相册（实时流；编辑页/纪念页共用）
+final mediaByPersonProvider = StreamProvider.family<List<PersonMedia>, String>(
+    (ref, personId) {
+  final db = ref.watch(databaseProvider);
+  return (db.select(db.personMedias)
+        ..where((m) =>
+            m.personId.equals(personId) & m.deletedAt.isNull()))
+      .watch();
+});
+
+/// 人物自定义大事记（实时流）
+final eventsByPersonProvider =
+    StreamProvider.family<List<PersonEvent>, String>((ref, personId) {
+  final db = ref.watch(databaseProvider);
+  return (db.select(db.personEventsTable)
+        ..where((e) =>
+            e.personId.equals(personId) & e.deletedAt.isNull()))
+      .watch();
+});
