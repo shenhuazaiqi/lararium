@@ -1,4 +1,5 @@
 import 'package:drift/drift.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart' hide Family;
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -156,6 +157,26 @@ final mediaByPersonProvider = StreamProvider.family<List<PersonMedia>, String>(
         ..where((m) =>
             m.personId.equals(personId) & m.deletedAt.isNull()))
       .watch();
+});
+
+/// 云端缅怀计数（memorial_profiles）：App 徽标与分享页共用同一数据源
+final memorialCountsProvider =
+    FutureProvider.family<Map<String, int>, String>((ref, personId) async {
+  final client = Supabase.instance.client;
+  final row = await client
+      .from('memorial_profiles')
+      .select(
+          'flower_count,candle_count,incense_count,prayer_count,message_count')
+      .eq('person_id', personId)
+      .maybeSingle();
+  if (row == null) return const {};
+  return {
+    'flower': (row['flower_count'] as int?) ?? 0,
+    'candle': (row['candle_count'] as int?) ?? 0,
+    'incense': (row['incense_count'] as int?) ?? 0,
+    'prayer': (row['prayer_count'] as int?) ?? 0,
+    'message': (row['message_count'] as int?) ?? 0,
+  };
 });
 
 /// 人物自定义大事记（实时流）

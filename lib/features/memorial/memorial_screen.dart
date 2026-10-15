@@ -87,7 +87,8 @@ class _MemorialScreenState extends ConsumerState<MemorialScreen> {
     super.dispose();
   }
 
-  int _countFor(Person p, String actKey) => switch (actKey) {
+  /// 本地计数（离线回退用）
+  int _localCountFor(Person p, String actKey) => switch (actKey) {
         'flower' || 'marigold' || 'garland' => p.flowerCount,
         'candle' || 'diya' || 'ofrenda' || 'stone' => p.candleCount,
         'incense' => p.incenseCount,
@@ -95,6 +96,29 @@ class _MemorialScreenState extends ConsumerState<MemorialScreen> {
         'memory' => p.messageCount,
         _ => 0,
       };
+
+  /// 徽标计数：云端 memorial_profiles（与分享页同源）；
+  /// 未登录/离线/无记录时回退本地计数
+  int _countFor(Person p, WidgetRef ref, String actKey) {
+    final key = switch (actKey) {
+      'flower' || 'marigold' || 'garland' => 'flower',
+      'candle' || 'diya' || 'ofrenda' || 'stone' => 'candle',
+      'incense' => 'incense',
+      'prayer' || 'bow' || 'donation' => 'prayer',
+      'memory' => 'message',
+      _ => '',
+    };
+    final cloud = ref.watch(memorialCountsProvider(p.id)).value?[key];
+    final local = switch (actKey) {
+      'flower' || 'marigold' || 'garland' => p.flowerCount,
+      'candle' || 'diya' || 'ofrenda' || 'stone' => p.candleCount,
+      'incense' => p.incenseCount,
+      'prayer' || 'bow' || 'donation' => p.prayerCount,
+      'memory' => p.messageCount,
+      _ => 0,
+    };
+    return cloud ?? local;
+  }
 
   String? _dbCountField(String actKey) => switch (actKey) {
         'flower' || 'marigold' || 'garland' => 'flower',
@@ -734,7 +758,7 @@ class _MemorialScreenState extends ConsumerState<MemorialScreen> {
                         color: selected ? theme.accent : colors.surface2,
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: Text('${_countFor(p, act.key)}',
+                      child: Text('${_countFor(p, ref, act.key)}',
                           style: TextStyle(
                               fontSize: 9,
                               fontWeight: FontWeight.w700,
@@ -940,7 +964,7 @@ class _MemorialScreenState extends ConsumerState<MemorialScreen> {
     final field = _dbCountField(act);
     final p = ref.read(personProvider(widget.personId)).value;
     if (p != null && field != null) {
-      final next = _countFor(p, act) + 1;
+      final next = _localCountFor(p, act) + 1;
       await (db.update(db.persons)..where((t) => t.id.equals(p.id))).write(
         PersonsCompanion(
           flowerCount: Value(field == 'flower' ? next : p.flowerCount),
